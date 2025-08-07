@@ -755,7 +755,9 @@
                     <li><a href="#" class="active" data-section="menu">Menú</a></li>
                     <li><a href="#" data-section="orders">Pedidos</a></li>
                     <li><a href="#" data-section="profile">Perfil</a></li>
-                    <li><a href="#" data-section="admin">Administración</a></li>
+                    <li id="adminNavItem" style="display: none;">
+                        <a href="#" data-section="admin">Administración</a>
+                    </li>
                 </ul>
             </nav>
             <div class="cart-icon" id="cartIcon">
@@ -1024,6 +1026,7 @@
         let orders = [];
         let customers = [];
         let currentUser = null;
+        let currentUserRole = 'customer'; // Nuevo: control de rol
         let taxRate = 10.5;
         
         // Referencias DOM
@@ -1056,15 +1059,27 @@
         const taxRateValue = document.getElementById('taxRateValue');
         const settingsForm = document.getElementById('settingsForm');
         const profileContainer = document.getElementById('profileContainer');
+        const adminNavItem = document.getElementById('adminNavItem'); // Nuevo: referencia al nav de admin
         
-        // Observador de autenticación
+        // Observador de autenticación - MODIFICADO
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
-                // Usuario autenticado
-                userInfoContainer.style.display = 'flex';
-                userPhoto.src = user.photoURL || 'https://via.placeholder.com/30';
-                userName.textContent = user.displayName || user.email;
+                // Obtener datos del cliente incluyendo el rol
+                db.collection("customers").doc(user.uid).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        currentUserRole = userData.isAdmin ? 'admin' : 'customer';
+                        // Actualizar la UI según el rol
+                        updateUIForRole();
+                    }
+                })
+                .catch(error => {
+                    console.error("Error obteniendo datos de usuario: ", error);
+                    currentUserRole = 'customer';
+                    updateUIForRole();
+                });
                 
                 // Guardar/actualizar información del cliente en Firebase
                 saveCustomerData(user);
@@ -1085,6 +1100,7 @@
                 // Usuario no autenticado
                 userInfoContainer.style.display = 'none';
                 authSection.style.display = 'block';
+                currentUserRole = 'customer';
                 
                 // Ocultar todas las secciones excepto autenticación
                 sections.forEach(section => {
@@ -1095,26 +1111,99 @@
             }
         });
         
-        // Guardar datos del cliente en Firebase
+        // Función para actualizar la UI según el rol - NUEVA
+        function updateUIForRole() {
+            if (adminNavItem) {
+                if (currentUserRole === 'admin') {
+                    adminNavItem.style.display = 'list-item';
+                } else {
+                    adminNavItem.style.display = 'none';
+                    // Si está en la sección de admin, redirigir
+                    if (document.getElementById('adminSection').style.display === 'block') {
+                        showSection('menu');
+                    }
+                }
+            }
+        }
+        
+        // Guardar datos del cliente en Firebase - MODIFICADO
         function saveCustomerData(user) {
-            const customerData = {
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName || "Cliente",
-                photoURL: user.photoURL || "",
-                lastLogin: new Date().toISOString(),
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
+            // Primero obtener el documento actual para preservar el campo isAdmin si existe
+            const customerRef = db.collection("customers").doc(user.uid);
             
-            // Actualizar o crear el documento del cliente
-            db.collection("customers").doc(user.uid).set(customerData, { merge: true })
-            .then(() => {
-                console.log("Datos del cliente guardados correctamente");
-            })
-            .catch(error => {
-                console.error("Error guardando datos del cliente: ", error);
+            customerRef.get().then(doc => {
+                const currentData = doc.exists ? doc.data() : {};
+                
+                const customerData = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || "Cliente",
+                    photoURL: user.photoURL || "",
+                    lastLogin: new Date().toISOString(),
+                    createdAt: doc.exists ? currentData.createdAt : firebase.firestore.FieldValue.serverTimestamp(),
+                    // Preservar el campo isAdmin si ya existe
+                    ...(currentData.isAdmin !== undefined && { isAdmin: currentData.isAdmin })
+                };
+                
+                // Actualizar o crear el documento del cliente
+                customerRef.set(customerData, { merge: true })
+                .then(() => {
+                    console.log("Datos del cliente guardados correctamente");
+                })
+                .catch(error => {
+                    console.error("Error guardando datos del cliente: ", error);
+                });
+            }).catch(error => {
+                console.error("Error obteniendo datos del cliente: ", error);
             });
         }
+        
+        // ===================================================================
+        // CÓDIGO TEMPORAL PARA ASIGNAR ADMINISTRADOR - ¡ELIMINAR DESPUÉS DE USAR!
+        // ===================================================================
+        // Este código creará un usuario administrador la primera vez que se cargue
+        // Reemplaza con tu correo y contraseña reales
+        const adminEmail = arcanoslunch74@gmail.com;  // CAMBIAR POR TU CORREO
+        const adminPassword = 1ç13524;     // CAMBIAR POR TU CONTRASEÑA
+        
+        auth.signInWithEmailAndPassword(adminEmail, adminPassword)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                // Marcar como administrador
+                db.collection("customers").doc(user.uid).set({
+                    isAdmin: true
+                }, { merge: true }).then(() => {
+                    console.log("Administrador asignado correctamente");
+                    // Cerrar sesión para que el usuario inicie normalmente
+                    auth.signOut();
+                });
+            })
+            .catch((error) => {
+                // Si el usuario no existe, lo creamos
+                if (error.code === 'auth/user-not-found') {
+                    auth.createUserWithEmailAndPassword(adminEmail, adminPassword)
+                        .then((userCredential) => {
+                            const user = userCredential.user;
+                            db.collection("customers").doc(user.uid).set({
+                                isAdmin: true,
+                                email: adminEmail,
+                                displayName: "Administrador",
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true }).then(() => {
+                                console.log("Administrador creado correctamente");
+                                auth.signOut();
+                            });
+                        })
+                        .catch(createError => {
+                            console.error("Error creando administrador:", createError);
+                        });
+                } else {
+                    console.error("Error asignando administrador:", error);
+                }
+            });
+        // ===================================================================
+        // FIN DEL CÓDIGO TEMPORAL - ¡ELIMINAR ESTE BLOQUE DESPUÉS DE USAR!
+        // ===================================================================
         
         // Iniciar sesión con Google
         googleLoginBtn.addEventListener('click', () => {
@@ -1183,8 +1272,14 @@
                 });
         }
         
-        // Cargar todos los pedidos para el panel de administración
+        // Cargar todos los pedidos para el panel de administración - MODIFICADO
         function loadAdminOrders() {
+            // Verificar permisos de administrador
+            if (currentUserRole !== 'admin') {
+                console.error("Acceso no autorizado a funciones de administrador");
+                return;
+            }
+            
             db.collection("orders")
                 .orderBy("date", "desc")
                 .get()
@@ -1203,8 +1298,14 @@
                 });
         }
         
-        // Cargar clientes
+        // Cargar clientes - MODIFICADO
         function loadCustomers() {
+            // Verificar permisos de administrador
+            if (currentUserRole !== 'admin') {
+                console.error("Acceso no autorizado a funciones de administrador");
+                return;
+            }
+            
             db.collection("customers")
                 .get()
                 .then(querySnapshot => {
@@ -1682,8 +1783,14 @@
             });
         }
         
-        // Mostrar sección
+        // Mostrar sección - MODIFICADO
         function showSection(sectionId) {
+            // Verificar acceso a administración
+            if (sectionId === 'admin' && currentUserRole !== 'admin') {
+                showNotification('Acceso denegado: se requieren privilegios de administrador');
+                sectionId = 'menu'; // Redirigir al menú
+            }
+            
             sections.forEach(section => {
                 section.style.display = section.id === `${sectionId}Section` ? 'block' : 'none';
             });
