@@ -1167,7 +1167,7 @@
         const authMessage = document.getElementById('authMessage');
         const confirmPasswordField = document.getElementById('confirmPasswordField');
         
-        // Observador de autenticación
+        // Observador de autenticación - CORREGIDO PARA ADMIN
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
@@ -1177,7 +1177,31 @@
                     if (doc.exists) {
                         const userData = doc.data();
                         currentUserRole = userData.isAdmin ? 'admin' : 'customer';
+                        console.log("Rol de usuario:", currentUserRole);
+                        
                         // Actualizar la UI según el rol
+                        updateUIForRole();
+                        
+                        // Mostrar elementos de usuario
+                        logoutBtn.style.display = 'flex';
+                        cartIcon.style.display = 'block';
+                        
+                        // Ocultar sección de autenticación
+                        authSection.style.display = 'none';
+                        
+                        // Mostrar secciones según la ruta
+                        showSection('menu');
+                        
+                        // Cargar datos
+                        loadProducts();
+                        loadOrders();
+                        loadAdminOrders();
+                        loadCustomers();
+                        renderProfile();
+                    } else {
+                        // Si no existe documento, crear uno
+                        saveCustomerData(user);
+                        currentUserRole = 'customer';
                         updateUIForRole();
                     }
                 })
@@ -1186,32 +1210,13 @@
                     currentUserRole = 'customer';
                     updateUIForRole();
                 });
-                
-                // Guardar/actualizar información del cliente en Firebase
-                saveCustomerData(user);
-                
-                // Mostrar elementos de usuario
-                logoutBtn.style.display = 'flex';
-                cartIcon.style.display = 'block';
-                
-                // Ocultar sección de autenticación
-                authSection.style.display = 'none';
-                
-                // Mostrar secciones según la ruta
-                showSection('menu');
-                
-                // Cargar datos
-                loadProducts();
-                loadOrders();
-                loadAdminOrders();
-                loadCustomers();
-                renderProfile();
             } else {
                 // Usuario no autenticado
                 logoutBtn.style.display = 'none';
                 cartIcon.style.display = 'none';
                 authSection.style.display = 'block';
                 currentUserRole = 'customer';
+                adminNavItem.style.display = 'none';
                 
                 // Ocultar todas las secciones excepto autenticación
                 sections.forEach(section => {
@@ -1226,11 +1231,12 @@
             }
         });
         
-        // Función para actualizar la UI según el rol
+        // Función para actualizar la UI según el rol - CORREGIDA
         function updateUIForRole() {
             if (adminNavItem) {
                 if (currentUserRole === 'admin') {
                     adminNavItem.style.display = 'list-item';
+                    console.log("Mostrando panel de administración");
                 } else {
                     adminNavItem.style.display = 'none';
                     // Si está en la sección de admin, redirigir
@@ -1257,7 +1263,9 @@
                     lastLogin: new Date().toISOString(),
                     createdAt: doc.exists ? currentData.createdAt : firebase.firestore.FieldValue.serverTimestamp(),
                     // Preservar el campo isAdmin si ya existe
-                    ...(currentData.isAdmin !== undefined && { isAdmin: currentData.isAdmin })
+                    ...(currentData.isAdmin !== undefined && { isAdmin: currentData.isAdmin }),
+                    // Por defecto no es admin
+                    isAdmin: currentData.isAdmin || false
                 };
                 
                 // Actualizar o crear el documento del cliente
@@ -1683,6 +1691,7 @@
                         <p><strong>Email:</strong> ${currentUser.email}</p>
                         <p><strong>Último acceso:</strong> ${customer?.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'N/A'}</p>
                         <p><strong>Miembro desde:</strong> ${customer?.createdAt ? new Date(customer.createdAt.toDate()).toLocaleDateString() : 'N/A'}</p>
+                        <p><strong>Rol:</strong> ${currentUserRole === 'admin' ? 'Administrador' : 'Cliente'}</p>
                         <button class="edit-btn">Editar información</button>
                     </div>
                     
@@ -1988,7 +1997,7 @@
             });
         }
         
-        // Mostrar sección
+        // Mostrar sección - CORREGIDA PARA ADMIN
         function showSection(sectionId) {
             // Verificar acceso a administración
             if (sectionId === 'admin' && currentUserRole !== 'admin') {
@@ -1997,12 +2006,20 @@
             }
             
             sections.forEach(section => {
-                section.style.display = section.id === `${sectionId}Section` ? 'block' : 'none';
+                if (section.id === `${sectionId}Section`) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
             });
             
             // Actualizar navegación activa
             navLinks.forEach(link => {
-                link.classList.toggle('active', link.dataset.section === sectionId);
+                if (link.dataset.section === sectionId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
             });
             
             // Cargar datos específicos de la sección
