@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empanadas Deliciosas | Sistema de Pedidos</title>
+    <title>Arcanos Lunch | Sistema de Pedidos</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #ff6b35;
-            --secondary: #2a9d8f;
-            --dark: #264653;
+            --primary: #FF6B35;
+            --primary-dark: #E55A2A;
+            --secondary: #2A9D8F;
+            --dark: #121212;
             --light: #f8f9fa;
             --gray: #6c757d;
             --danger: #e76f51;
@@ -34,7 +35,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding-top: 80px; /* Espacio para el header fijo */
+            padding-top: 80px;
         }
         
         .container {
@@ -46,39 +47,46 @@
         
         /* Header Styles */
         header {
-            background: linear-gradient(135deg, var(--dark), var(--secondary));
+            background-color: var(--dark);
             color: white;
             padding: 1rem 0;
             box-shadow: var(--shadow);
-            position: fixed; /* Cambiado a fixed */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 1000; /* Mayor z-index */
+            z-index: 1000;
+            border-bottom: 3px solid var(--primary);
         }
         
-        .header-container {
-            display: flex;
-            justify-content: space-between;
+        .header-grid {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
             align-items: center;
-            flex-wrap: wrap;
-            position: relative; /* Para posicionar el botón de logout */
+            gap: 20px;
         }
         
-        .logo {
+        .brand-section {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: flex-end;
+            gap: 15px;
         }
         
-        .logo i {
-            font-size: 2rem;
-            color: var(--primary);
-        }
-        
-        .logo h1 {
+        .brand {
             font-family: 'Montserrat', sans-serif;
             font-size: 1.8rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .nav-social-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
         
         nav ul {
@@ -86,24 +94,93 @@
             list-style: none;
             gap: 1.5rem;
             flex-wrap: wrap;
+            justify-content: center;
         }
         
         nav a {
             color: white;
             text-decoration: none;
             font-weight: 500;
-            padding: 0.5rem;
-            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         nav a:hover, nav a.active {
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-icons a {
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logout-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .logout-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
         }
         
         .cart-icon {
             position: relative;
             cursor: pointer;
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .cart-icon:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        .cart-icon.animate {
+            animation: cartPulse 0.8s;
+        }
+        
+        @keyframes cartPulse {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(0.9); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         
         .cart-count {
@@ -113,35 +190,14 @@
             background-color: var(--primary);
             color: white;
             font-size: 0.75rem;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-        
-        /* Botón de cerrar sesión */
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: none; /* Oculto por defecto */
-            align-items: center;
-            gap: 5px;
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         /* Main Content Styles */
@@ -183,15 +239,17 @@
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: transform 0.3s ease;
+            border: 1px solid #eee;
         }
         
         .product-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         
         .product-image {
             height: 200px;
-            background-color: var(--light);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -200,7 +258,8 @@
         
         .product-image i {
             font-size: 4rem;
-            color: var(--gray);
+            color: white;
+            opacity: 0.8;
         }
         
         .product-info {
@@ -245,10 +304,11 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
         .add-to-cart:hover {
-            background-color: #e55a2a;
+            background-color: var(--primary-dark);
             transform: scale(1.1);
         }
         
@@ -277,7 +337,7 @@
         }
         
         .modal-header {
-            background: linear-gradient(135deg, var(--dark), var(--secondary));
+            background: linear-gradient(135deg, var(--dark), var(--primary-dark));
             color: white;
             padding: 1.5rem;
             display: flex;
@@ -379,7 +439,7 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
             text-align: center;
@@ -387,11 +447,13 @@
             transition: all 0.3s ease;
             margin-top: 1rem;
             width: 100%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
         .btn:hover {
-            background-color: #e55a2a;
+            background-color: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
         }
         
         .btn-secondary {
@@ -400,89 +462,6 @@
         
         .btn-secondary:hover {
             background-color: #238f83;
-        }
-        
-        .btn-google {
-            background-color: var(--google);
-        }
-        
-        .btn-apple {
-            background-color: var(--apple);
-        }
-        
-        /* Admin Panel */
-        .admin-panel {
-            background-color: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-        }
-        
-        .admin-controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        
-        .admin-btn {
-            flex: 1;
-            min-width: 150px;
-            padding: 1rem;
-            background-color: var(--light);
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .admin-btn.active {
-            background-color: var(--secondary);
-            color: white;
-            border-color: var(--secondary);
-        }
-        
-        .admin-section {
-            display: none;
-        }
-        
-        .admin-section.active {
-            display: block;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        .form-row {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .form-row .form-group {
-            flex: 1;
         }
         
         /* Auth Panel */
@@ -571,26 +550,79 @@
             text-decoration: underline;
         }
         
-        /* User Info */
-        .user-info {
+        /* Admin Panel */
+        .admin-panel {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .admin-controls {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 30px;
-            margin-left: auto;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
         }
         
-        .user-info img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
+        .admin-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 1rem;
+            background-color: var(--light);
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
         
-        .user-info span {
-            font-size: 0.9rem;
+        .admin-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
         }
         
         /* Orders Table */
@@ -665,7 +697,7 @@
             height: 100px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--secondary);
+            border: 3px solid var(--primary);
         }
         
         .profile-info h2 {
@@ -700,7 +732,7 @@
         }
         
         .detail-card h3 i {
-            color: var(--secondary);
+            color: var(--primary);
         }
         
         .detail-card p {
@@ -710,53 +742,40 @@
         .detail-card .edit-btn {
             background: none;
             border: none;
-            color: var(--secondary);
+            color: var(--primary);
             cursor: pointer;
             font-weight: 600;
             margin-top: 1rem;
         }
         
-        /* Footer */
-        footer {
-            background-color: var(--dark);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-        }
-        
-        .footer-content {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .social-icons a {
-            color: white;
-            font-size: 1.5rem;
-        }
-        
         /* Responsive */
         @media (max-width: 768px) {
             body {
-                padding-top: 140px; /* Más espacio para el header en móvil */
+                padding-top: 140px;
             }
             
-            .header-container {
-                flex-direction: column;
-                gap: 1rem;
-                padding-bottom: 1rem;
+            .header-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .brand-section {
+                justify-content: center;
+                order: 2;
+            }
+            
+            .nav-social-container {
+                order: 3;
+            }
+            
+            .user-section {
+                justify-content: center;
+                order: 1;
             }
             
             nav ul {
                 gap: 0.5rem;
-                justify-content: center;
             }
             
             .products-grid {
@@ -767,27 +786,21 @@
                 flex-direction: column;
                 gap: 0;
             }
-            
-            .user-info {
-                margin: 0 auto;
+        }
+        
+        @media (max-width: 480px) {
+            .brand {
+                font-size: 1.5rem;
             }
             
-            .orders-table {
-                display: block;
-                overflow-x: auto;
-            }
-            
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
+            nav a {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
             }
             
             .logout-btn {
-                position: static;
-                transform: none;
-                margin: 0 auto;
-                width: 100%;
-                max-width: 200px;
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -800,33 +813,38 @@
     
     <!-- Header -->
     <header>
-        <div class="container header-container">
-            <div class="logo">
-                <i class="fas fa-pastafarianism"></i>
-                <h1>Empanadas Deliciosas</h1>
+        <div class="container header-grid">
+            <div class="user-section">
+                <button class="logout-btn" id="logoutBtn" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
             </div>
-            <nav>
-                <ul>
-                    <li><a href="#" class="active" data-section="menu">Menú</a></li>
-                    <li><a href="#" data-section="orders">Pedidos</a></li>
-                    <li><a href="#" data-section="profile">Perfil</a></li>
-                    <li id="adminNavItem" style="display: none;">
-                        <a href="#" data-section="admin">Administración</a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="cart-icon" id="cartIcon">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count">0</span>
+            
+            <div class="nav-social-container">
+                <nav>
+                    <ul>
+                        <li><a href="#" class="active" data-section="menu"><i class="fas fa-utensils"></i> Menú</a></li>
+                        <li><a href="#" data-section="orders"><i class="fas fa-list"></i> Pedidos</a></li>
+                        <li><a href="#" data-section="profile"><i class="fas fa-user"></i> Perfil</a></li>
+                        <li id="adminNavItem" style="display: none;">
+                            <a href="#" data-section="admin"><i class="fas fa-cog"></i> Admin</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
             </div>
-            <div id="userInfoContainer" class="user-info" style="display: none;">
-                <img id="userPhoto" src="" alt="Foto de perfil">
-                <span id="userName"></span>
+            
+            <div class="brand-section">
+                <h1 class="brand">Arcanos Lunch</h1>
+                <div class="cart-icon" id="cartIcon" style="display: none;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0</span>
+                </div>
             </div>
-            <!-- Botón de cerrar sesión en posición fija -->
-            <button class="logout-btn" id="logoutBtn">
-                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-            </button>
         </div>
     </header>
     
@@ -837,7 +855,7 @@
             <div class="auth-panel">
                 <div class="auth-logo">
                     <i class="fas fa-drumstick-bite"></i>
-                    <h2>Empanadas Deliciosas</h2>
+                    <h2>Arcanos Lunch</h2>
                     <p id="authMessage">Inicia sesión para continuar</p>
                 </div>
                 
@@ -866,11 +884,11 @@
                 </div>
                 
                 <div class="auth-options">
-                    <button class="auth-btn btn-google" id="googleLogin">
+                    <button class="auth-btn btn-google" id="googleLogin" style="background-color: #4285F4;">
                         <i class="fab fa-google"></i>
                         Iniciar con Google
                     </button>
-                    <button class="auth-btn btn-apple" id="appleLogin">
+                    <button class="auth-btn btn-apple" id="appleLogin" style="background-color: #000000;">
                         <i class="fab fa-apple"></i>
                         Iniciar con Apple
                     </button>
@@ -880,7 +898,7 @@
         
         <!-- Menu Section -->
         <section id="menuSection" style="display: none;">
-            <h2 class="section-title">Nuestras Deliciosas Empanadas</h2>
+            <h2 class="section-title">Nuestro Menú</h2>
             
             <div class="products-grid" id="productsContainer">
                 <!-- Productos cargados dinámicamente -->
@@ -1021,7 +1039,7 @@
                         <form id="settingsForm">
                             <div class="form-group">
                                 <label for="storeName">Nombre del Negocio</label>
-                                <input type="text" id="storeName" value="Empanadas Deliciosas" required>
+                                <input type="text" id="storeName" value="Arcanos Lunch" required>
                             </div>
                             <div class="form-group">
                                 <label for="currency">Moneda</label>
@@ -1074,7 +1092,7 @@
     <!-- Footer -->
     <footer>
         <div class="container footer-content">
-            <p>&copy; 2023 Empanadas Deliciosas. Todos los derechos reservados.</p>
+            <p>&copy; 2023 Arcanos Lunch. Todos los derechos reservados.</p>
             <p>Sistema de pedidos desarrollado con ❤️</p>
             <div class="social-icons">
                 <a href="#"><i class="fab fa-facebook"></i></a>
@@ -1133,9 +1151,6 @@
         const authSection = document.getElementById('authSection');
         const googleLoginBtn = document.getElementById('googleLogin');
         const appleLoginBtn = document.getElementById('appleLogin');
-        const userInfoContainer = document.getElementById('userInfoContainer');
-        const userPhoto = document.getElementById('userPhoto');
-        const userName = document.getElementById('userName');
         const logoutBtn = document.getElementById('logoutBtn');
         const taxRateValue = document.getElementById('taxRateValue');
         const settingsForm = document.getElementById('settingsForm');
@@ -1176,10 +1191,8 @@
                 saveCustomerData(user);
                 
                 // Mostrar elementos de usuario
-                userInfoContainer.style.display = 'flex';
                 logoutBtn.style.display = 'flex';
-                userPhoto.src = user.photoURL || '';
-                userName.textContent = user.displayName || user.email;
+                cartIcon.style.display = 'block';
                 
                 // Ocultar sección de autenticación
                 authSection.style.display = 'none';
@@ -1195,8 +1208,8 @@
                 renderProfile();
             } else {
                 // Usuario no autenticado
-                userInfoContainer.style.display = 'none';
                 logoutBtn.style.display = 'none';
+                cartIcon.style.display = 'none';
                 authSection.style.display = 'block';
                 currentUserRole = 'customer';
                 
@@ -1541,6 +1554,7 @@
                 button.addEventListener('click', (e) => {
                     const productId = e.target.closest('.add-to-cart').dataset.id;
                     addToCart(productId);
+                    animateCart();
                 });
             });
         }
@@ -1564,7 +1578,7 @@
                 tr.innerHTML = `
                     <td>${order.id.substring(0, 8)}</td>
                     <td>${orderDate}</td>
-                    <td>${order.items.length} empanadas</td>
+                    <td>${order.items.length} productos</td>
                     <td>$${order.total.toFixed(2)}</td>
                     <td><span class="status status-${order.status}">${order.status}</span></td>
                 `;
@@ -1694,6 +1708,14 @@
                     </div>
                 </div>
             `;
+        }
+        
+        // Animación del carrito
+        function animateCart() {
+            cartIcon.classList.add('animate');
+            setTimeout(() => {
+                cartIcon.classList.remove('animate');
+            }, 800);
         }
         
         // Añadir al carrito
