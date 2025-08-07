@@ -488,6 +488,12 @@
             margin-top: 1rem;
         }
         
+        .auth-form {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 1.5rem;
+        }
+        
         .auth-options {
             display: flex;
             flex-direction: column;
@@ -518,6 +524,24 @@
         .auth-btn:hover {
             opacity: 0.9;
             transform: translateY(-2px);
+        }
+        
+        .auth-links {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .auth-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .auth-links a:hover {
+            text-decoration: underline;
         }
         
         /* User Info */
@@ -777,12 +801,36 @@
     <!-- Main Content -->
     <main class="container">
         <!-- Auth Section -->
-        <section id="authSection" style="display: none;">
+        <section id="authSection" style="display: block;">
             <div class="auth-panel">
                 <div class="auth-logo">
                     <i class="fas fa-drumstick-bite"></i>
                     <h2>Empanadas Deliciosas</h2>
-                    <p>Inicia sesión para continuar</p>
+                    <p id="authMessage">Inicia sesión para continuar</p>
+                </div>
+                
+                <form id="authForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="authEmail">Email</label>
+                        <input type="email" id="authEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="authPassword">Contraseña</label>
+                        <input type="password" id="authPassword" required>
+                    </div>
+                    <div id="confirmPasswordField" style="display: none;">
+                        <div class="form-group">
+                            <label for="authConfirmPassword">Confirmar Contraseña</label>
+                            <input type="password" id="authConfirmPassword">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" id="authSubmitBtn">Iniciar Sesión</button>
+                </form>
+                
+                <div class="auth-links">
+                    <a href="#" id="signUpLink">Registrarse</a> | 
+                    <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
+                    <a href="#" id="loginLink" style="display: none;">Volver a Iniciar Sesión</a>
                 </div>
                 
                 <div class="auth-options">
@@ -799,7 +847,7 @@
         </section>
         
         <!-- Menu Section -->
-        <section id="menuSection">
+        <section id="menuSection" style="display: none;">
             <h2 class="section-title">Nuestras Deliciosas Empanadas</h2>
             
             <div class="products-grid" id="productsContainer">
@@ -1026,8 +1074,9 @@
         let orders = [];
         let customers = [];
         let currentUser = null;
-        let currentUserRole = 'customer'; // Nuevo: control de rol
+        let currentUserRole = 'customer';
         let taxRate = 10.5;
+        let authMode = 'login'; // 'login', 'register', 'forgot'
         
         // Referencias DOM
         const productsContainer = document.getElementById('productsContainer');
@@ -1059,9 +1108,19 @@
         const taxRateValue = document.getElementById('taxRateValue');
         const settingsForm = document.getElementById('settingsForm');
         const profileContainer = document.getElementById('profileContainer');
-        const adminNavItem = document.getElementById('adminNavItem'); // Nuevo: referencia al nav de admin
+        const adminNavItem = document.getElementById('adminNavItem');
+        const authForm = document.getElementById('authForm');
+        const authEmail = document.getElementById('authEmail');
+        const authPassword = document.getElementById('authPassword');
+        const authConfirmPassword = document.getElementById('authConfirmPassword');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const signUpLink = document.getElementById('signUpLink');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const loginLink = document.getElementById('loginLink');
+        const authMessage = document.getElementById('authMessage');
+        const confirmPasswordField = document.getElementById('confirmPasswordField');
         
-        // Observador de autenticación - MODIFICADO
+        // Observador de autenticación
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
@@ -1108,10 +1167,14 @@
                         section.style.display = 'none';
                     }
                 });
+                
+                // Resetear formulario de autenticación
+                authForm.reset();
+                setAuthMode('login');
             }
         });
         
-        // Función para actualizar la UI según el rol - NUEVA
+        // Función para actualizar la UI según el rol
         function updateUIForRole() {
             if (adminNavItem) {
                 if (currentUserRole === 'admin') {
@@ -1126,7 +1189,7 @@
             }
         }
         
-        // Guardar datos del cliente en Firebase - MODIFICADO
+        // Guardar datos del cliente en Firebase
         function saveCustomerData(user) {
             // Primero obtener el documento actual para preservar el campo isAdmin si existe
             const customerRef = db.collection("customers").doc(user.uid);
@@ -1158,52 +1221,114 @@
             });
         }
         
-        // ===================================================================
-        // CÓDIGO TEMPORAL PARA ASIGNAR ADMINISTRADOR - ¡ELIMINAR DESPUÉS DE USAR!
-        // ===================================================================
-        // Este código creará un usuario administrador la primera vez que se cargue
-        // Reemplaza con tu correo y contraseña reales
-        const adminEmail = arcanoslunch74@gmail.com;  // CAMBIAR POR TU CORREO
-        const adminPassword = 1ç13524;     // CAMBIAR POR TU CONTRASEÑA
+        // Establecer modo de autenticación
+        function setAuthMode(mode) {
+            authMode = mode;
+            
+            switch(mode) {
+                case 'login':
+                    authMessage.textContent = "Inicia sesión para continuar";
+                    authSubmitBtn.textContent = "Iniciar Sesión";
+                    confirmPasswordField.style.display = 'none';
+                    signUpLink.style.display = 'inline';
+                    forgotPasswordLink.style.display = 'inline';
+                    loginLink.style.display = 'none';
+                    break;
+                    
+                case 'register':
+                    authMessage.textContent = "Crea una cuenta";
+                    authSubmitBtn.textContent = "Registrarse";
+                    confirmPasswordField.style.display = 'block';
+                    signUpLink.style.display = 'none';
+                    forgotPasswordLink.style.display = 'none';
+                    loginLink.style.display = 'inline';
+                    break;
+                    
+                case 'forgot':
+                    authMessage.textContent = "Recuperar contraseña";
+                    authSubmitBtn.textContent = "Enviar Correo";
+                    confirmPasswordField.style.display = 'none';
+                    signUpLink.style.display = 'none';
+                    forgotPasswordLink.style.display = 'none';
+                    loginLink.style.display = 'inline';
+                    break;
+            }
+        }
         
-        auth.signInWithEmailAndPassword(adminEmail, adminPassword)
+        // Manejar envío de formulario de autenticación
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = authEmail.value;
+            const password = authPassword.value;
+            const confirmPassword = authConfirmPassword.value;
+            
+            switch(authMode) {
+                case 'login':
+                    loginWithEmail(email, password);
+                    break;
+                    
+                case 'register':
+                    if (password !== confirmPassword) {
+                        showNotification("Las contraseñas no coinciden");
+                        return;
+                    }
+                    signUpWithEmail(email, password);
+                    break;
+                    
+                case 'forgot':
+                    resetPassword(email);
+                    break;
+            }
+        });
+        
+        // Iniciar sesión con correo/contraseña
+        function loginWithEmail(email, password) {
+            auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                showNotification("Sesión iniciada correctamente");
+            })
+            .catch(error => {
+                console.error("Error de autenticación: ", error);
+                showNotification(`Error al iniciar sesión: ${error.message}`);
+            });
+        }
+        
+        // Registrar nuevo usuario
+        function signUpWithEmail(email, password) {
+            auth.createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
+                // Usuario registrado correctamente
                 const user = userCredential.user;
-                // Marcar como administrador
+                
+                // Guardar datos adicionales del usuario
                 db.collection("customers").doc(user.uid).set({
-                    isAdmin: true
-                }, { merge: true }).then(() => {
-                    console.log("Administrador asignado correctamente");
-                    // Cerrar sesión para que el usuario inicie normalmente
-                    auth.signOut();
+                    email: email,
+                    displayName: "Cliente",
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    isAdmin: false
+                }, { merge: true })
+                .then(() => {
+                    showNotification("¡Cuenta creada correctamente!");
                 });
             })
-            .catch((error) => {
-                // Si el usuario no existe, lo creamos
-                if (error.code === 'auth/user-not-found') {
-                    auth.createUserWithEmailAndPassword(adminEmail, adminPassword)
-                        .then((userCredential) => {
-                            const user = userCredential.user;
-                            db.collection("customers").doc(user.uid).set({
-                                isAdmin: true,
-                                email: adminEmail,
-                                displayName: "Administrador",
-                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true }).then(() => {
-                                console.log("Administrador creado correctamente");
-                                auth.signOut();
-                            });
-                        })
-                        .catch(createError => {
-                            console.error("Error creando administrador:", createError);
-                        });
-                } else {
-                    console.error("Error asignando administrador:", error);
-                }
+            .catch(error => {
+                console.error("Error registrando usuario: ", error);
+                showNotification(`Error al registrar: ${error.message}`);
             });
-        // ===================================================================
-        // FIN DEL CÓDIGO TEMPORAL - ¡ELIMINAR ESTE BLOQUE DESPUÉS DE USAR!
-        // ===================================================================
+        }
+        
+        // Recuperar contraseña
+        function resetPassword(email) {
+            auth.sendPasswordResetEmail(email)
+            .then(() => {
+                showNotification("Correo de recuperación enviado. Revisa tu bandeja de entrada.");
+                setAuthMode('login');
+            })
+            .catch(error => {
+                console.error("Error enviando correo de recuperación: ", error);
+                showNotification(`Error: ${error.message}`);
+            });
+        }
         
         // Iniciar sesión con Google
         googleLoginBtn.addEventListener('click', () => {
@@ -1232,6 +1357,22 @@
             });
         });
         
+        // Enlaces de autenticación
+        signUpLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            setAuthMode('register');
+        });
+        
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            setAuthMode('forgot');
+        });
+        
+        loginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            setAuthMode('login');
+        });
+        
         // Cargar productos desde Firebase
         function loadProducts() {
             db.collection("products").get().then(querySnapshot => {
@@ -1248,6 +1389,8 @@
                 console.error("Error cargando productos: ", error);
             });
         }
+        
+        // ... (resto de las funciones se mantienen igual que antes) ...
         
         // Cargar pedidos del usuario
         function loadOrders() {
@@ -1272,7 +1415,7 @@
                 });
         }
         
-        // Cargar todos los pedidos para el panel de administración - MODIFICADO
+        // Cargar todos los pedidos para el panel de administración
         function loadAdminOrders() {
             // Verificar permisos de administrador
             if (currentUserRole !== 'admin') {
@@ -1298,7 +1441,7 @@
                 });
         }
         
-        // Cargar clientes - MODIFICADO
+        // Cargar clientes
         function loadCustomers() {
             // Verificar permisos de administrador
             if (currentUserRole !== 'admin') {
@@ -1783,12 +1926,12 @@
             });
         }
         
-        // Mostrar sección - MODIFICADO
+        // Mostrar sección
         function showSection(sectionId) {
             // Verificar acceso a administración
             if (sectionId === 'admin' && currentUserRole !== 'admin') {
                 showNotification('Acceso denegado: se requieren privilegios de administrador');
-                sectionId = 'menu'; // Redirigir al menú
+                sectionId = 'menu';
             }
             
             sections.forEach(section => {
@@ -1920,6 +2063,8 @@
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
+            // Establecer modo de autenticación inicial
+            setAuthMode('login');
         });
     </script>
 </body>
