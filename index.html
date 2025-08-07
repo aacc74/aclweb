@@ -791,8 +791,9 @@
             <div id="userInfoContainer" class="user-info" style="display: none;">
                 <img id="userPhoto" src="" alt="Foto de perfil">
                 <span id="userName"></span>
+                <!-- Botón de cerrar sesión visible -->
                 <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </button>
             </div>
         </div>
@@ -1354,6 +1355,9 @@
                 cart = [];
                 updateCartCount();
                 showNotification('Sesión cerrada correctamente');
+            }).catch(error => {
+                console.error("Error cerrando sesión: ", error);
+                showNotification(`Error al cerrar sesión: ${error.message}`);
             });
         });
         
@@ -1389,8 +1393,6 @@
                 console.error("Error cargando productos: ", error);
             });
         }
-        
-        // ... (resto de las funciones se mantienen igual que antes) ...
         
         // Cargar pedidos del usuario
         function loadOrders() {
