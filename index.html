@@ -1167,10 +1167,16 @@
         const authMessage = document.getElementById('authMessage');
         const confirmPasswordField = document.getElementById('confirmPasswordField');
         
-        // Observador de autenticación - CORREGIDO PARA ADMIN
+        // Observador de autenticación - CORREGIDO
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
+                // Ocultar sección de autenticación y mostrar menú inmediatamente
+                logoutBtn.style.display = 'flex';
+                cartIcon.style.display = 'block';
+                authSection.style.display = 'none';
+                showSection('menu');
+                
                 // Obtener datos del cliente incluyendo el rol
                 db.collection("customers").doc(user.uid).get()
                 .then(doc => {
@@ -1182,22 +1188,6 @@
                         // Actualizar la UI según el rol
                         updateUIForRole();
                         
-                        // Mostrar elementos de usuario
-                        logoutBtn.style.display = 'flex';
-                        cartIcon.style.display = 'block';
-                        
-                        // Ocultar sección de autenticación
-                        authSection.style.display = 'none';
-                        
-                        // Mostrar secciones según la ruta
-                        showSection('menu');
-                        
-                        // Cargar datos
-                        loadProducts();
-                        loadOrders();
-                        loadAdminOrders();
-                        loadCustomers();
-                        renderProfile();
                     } else {
                         // Si no existe documento, crear uno
                         saveCustomerData(user);
@@ -1210,6 +1200,13 @@
                     currentUserRole = 'customer';
                     updateUIForRole();
                 });
+                
+                // Cargar datos
+                loadProducts();
+                loadOrders();
+                loadAdminOrders();
+                loadCustomers();
+                renderProfile();
             } else {
                 // Usuario no autenticado
                 logoutBtn.style.display = 'none';
@@ -1231,7 +1228,7 @@
             }
         });
         
-        // Función para actualizar la UI según el rol - CORREGIDA
+        // Función para actualizar la UI según el rol
         function updateUIForRole() {
             if (adminNavItem) {
                 if (currentUserRole === 'admin') {
@@ -1997,7 +1994,7 @@
             });
         }
         
-        // Mostrar sección - CORREGIDA PARA ADMIN
+        // Mostrar sección
         function showSection(sectionId) {
             // Verificar acceso a administración
             if (sectionId === 'admin' && currentUserRole !== 'admin') {
