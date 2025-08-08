@@ -36,6 +36,7 @@
             display: flex;
             flex-direction: column;
             padding-top: 80px;
+            padding-bottom: 70px; /* Espacio para la barra inferior */
         }
         
         .container {
@@ -748,10 +749,67 @@
             margin-top: 1rem;
         }
         
+        /* Magic Navigation v3 */
+        .magic-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--dark);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .magic-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .magic-nav-item i {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .magic-nav-item.active {
+            color: white;
+            background: var(--primary);
+            transform: translateY(-10px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+        
+        .magic-nav-item.active i {
+            transform: scale(1.2);
+        }
+        
+        .magic-nav-item.active::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             body {
                 padding-top: 140px;
+                padding-bottom: 70px; /* Espacio para la barra inferior */
             }
             
             .header-grid {
@@ -786,6 +844,22 @@
                 flex-direction: column;
                 gap: 0;
             }
+            
+            /* Ocultar navegación superior en móviles */
+            nav ul {
+                display: none;
+            }
+            
+            .social-icons {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            /* Ocultar navegación mágica en escritorio */
+            .magic-nav {
+                display: none;
+            }
         }
         
         @media (max-width: 480px) {
@@ -801,6 +875,15 @@
             .logout-btn {
                 padding: 0.5rem 1rem;
                 font-size: 0.9rem;
+            }
+            
+            .magic-nav-item {
+                font-size: 0.65rem;
+                padding: 8px 10px;
+            }
+            
+            .magic-nav-item i {
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -1102,6 +1185,30 @@
         </div>
     </footer>
     
+    <!-- Magic Navigation Menu v3 -->
+    <nav class="magic-nav">
+        <a href="#" class="magic-nav-item active" data-section="menu">
+            <i class="fas fa-utensils"></i>
+            <span>Menú</span>
+        </a>
+        <a href="#" class="magic-nav-item" data-section="orders">
+            <i class="fas fa-list"></i>
+            <span>Pedidos</span>
+        </a>
+        <a href="#" class="magic-nav-item" data-section="profile">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+        <a href="#" class="magic-nav-item" data-section="admin" id="adminMobileNavItem" style="display: none;">
+            <i class="fas fa-cog"></i>
+            <span>Admin</span>
+        </a>
+        <a href="#" class="magic-nav-item" id="mobileCartIcon" style="display: none;">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Carrito</span>
+        </a>
+    </nav>
+    
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
@@ -1166,14 +1273,18 @@
         const loginLink = document.getElementById('loginLink');
         const authMessage = document.getElementById('authMessage');
         const confirmPasswordField = document.getElementById('confirmPasswordField');
+        const magicNavItems = document.querySelectorAll('.magic-nav-item');
+        const adminMobileNavItem = document.getElementById('adminMobileNavItem');
+        const mobileCartIcon = document.getElementById('mobileCartIcon');
         
-        // Observador de autenticación - CORREGIDO
+        // Observador de autenticación
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
                 // Ocultar sección de autenticación y mostrar menú inmediatamente
                 logoutBtn.style.display = 'flex';
                 cartIcon.style.display = 'block';
+                mobileCartIcon.style.display = 'flex';
                 authSection.style.display = 'none';
                 showSection('menu');
                 
@@ -1211,9 +1322,11 @@
                 // Usuario no autenticado
                 logoutBtn.style.display = 'none';
                 cartIcon.style.display = 'none';
+                mobileCartIcon.style.display = 'none';
                 authSection.style.display = 'block';
                 currentUserRole = 'customer';
                 adminNavItem.style.display = 'none';
+                adminMobileNavItem.style.display = 'none';
                 
                 // Ocultar todas las secciones excepto autenticación
                 sections.forEach(section => {
@@ -1233,9 +1346,11 @@
             if (adminNavItem) {
                 if (currentUserRole === 'admin') {
                     adminNavItem.style.display = 'list-item';
+                    adminMobileNavItem.style.display = 'flex';
                     console.log("Mostrando panel de administración");
                 } else {
                     adminNavItem.style.display = 'none';
+                    adminMobileNavItem.style.display = 'none';
                     // Si está en la sección de admin, redirigir
                     if (document.getElementById('adminSection').style.display === 'block') {
                         showSection('menu');
@@ -2019,6 +2134,15 @@
                 }
             });
             
+            // Actualizar navegación mágica activa
+            magicNavItems.forEach(item => {
+                if (item.dataset.section === sectionId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
             // Cargar datos específicos de la sección
             if (sectionId === 'profile') {
                 renderProfile();
@@ -2038,7 +2162,7 @@
             notification.textContent = message;
             notification.style.cssText = `
                 position: fixed;
-                bottom: 20px;
+                bottom: 70px;
                 right: 20px;
                 background-color: var(--success);
                 color: white;
@@ -2076,8 +2200,23 @@
                 });
             });
             
+            // Navegación mágica
+            magicNavItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (item.id !== 'mobileCartIcon') {
+                        showSection(item.dataset.section);
+                    }
+                });
+            });
+            
             // Carrito
             cartIcon.addEventListener('click', () => {
+                renderCart();
+                cartModal.style.display = 'flex';
+            });
+            
+            mobileCartIcon.addEventListener('click', () => {
                 renderCart();
                 cartModal.style.display = 'flex';
             });
