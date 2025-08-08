@@ -170,6 +170,81 @@
             border-radius: 2px;
         }
         
+        /* Nuevo: Barra de categorías */
+        .categories-bar {
+            position: sticky;
+            top: 80px; /* Debajo del header */
+            background: white;
+            z-index: 800;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        .categories-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--dark);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .categories-toggle i {
+            transition: transform 0.3s ease;
+        }
+        
+        .categories-toggle.active i {
+            transform: rotate(180deg);
+        }
+        
+        .categories-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .categories-container.active {
+            max-height: 500px;
+        }
+        
+        .category-btn {
+            background: var(--light);
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 12px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .category-btn:hover, .category-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .category-btn i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        .category-btn:hover i, .category-btn.active i {
+            color: white;
+        }
+        
         /* Products Grid */
         .products-grid {
             display: grid;
@@ -185,6 +260,7 @@
             box-shadow: var(--shadow);
             transition: transform 0.3s ease;
             border: 1px solid #eee;
+            position: relative;
         }
         
         .product-card:hover {
@@ -192,19 +268,38 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2;
+        }
+        
         .product-image {
             height: 200px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: #f8f9fa;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            overflow: hidden;
         }
         
-        .product-image i {
-            font-size: 4rem;
-            color: white;
-            opacity: 0.8;
+        .product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
         }
         
         .product-info {
@@ -215,6 +310,8 @@
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
             color: var(--dark);
+            display: flex;
+            justify-content: space-between;
         }
         
         .product-description {
@@ -240,21 +337,21 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            gap: 8px;
         }
         
         .add-to-cart:hover {
             background-color: var(--primary-dark);
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
         
         /* Cart Modal */
@@ -693,7 +790,7 @@
             margin-top: 1rem;
         }
         
-        /* Magic Navigation v3 - Always Visible */
+        /* Magic Navigation Menu v3 - Always Visible */
         .magic-nav {
             position: fixed;
             bottom: 0;
@@ -780,6 +877,10 @@
             .logout-btn {
                 padding: 0.6rem;
             }
+
+            .categories-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
         }
         
         @media (max-width: 480px) {
@@ -789,6 +890,21 @@
             
             .logo {
                 font-size: 1.5rem;
+            }
+            
+            .categories-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .add-to-cart span {
+                display: none;
+            }
+            
+            .add-to-cart {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                padding: 0;
             }
         }
     </style>
@@ -813,6 +929,17 @@
     <!-- Brand Section -->
     <div class="container brand-section">
         <h1 class="brand">Arcanos Lunch</h1>
+    </div>
+    
+    <!-- Nuevo: Barra de categorías -->
+    <div class="categories-bar" id="categoriesBar">
+        <div class="categories-toggle" id="categoriesToggle">
+            <span>Explorar Categorías</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="categories-container" id="categoriesContainer">
+            <!-- Las categorías se cargarán dinámicamente -->
+        </div>
     </div>
     
     <!-- Main Content -->
@@ -938,11 +1065,19 @@
                             <div class="form-group">
                                 <label for="productCategory">Categoría</label>
                                 <select id="productCategory" required>
+                                    <option value="empanadas">Empanadas</option>
+                                    <option value="entradas">Entradas</option>
+                                    <option value="sopas">Sopas</option>
+                                    <option value="desayuno criollo">Desayuno Criollo</option>
+                                    <option value="cachapas">Cachapas</option>
+                                    <option value="arepas">Arepas</option>
+                                    <option value="tipico de venezuela">Tipico de Venezuela</option>
+                                    <option value="extras">Extras</option>
                                     <option value="carne">Carne</option>
-                                    <option value="pollo">Pollo</option>
-                                    <option value="queso">Queso</option>
-                                    <option value="vegetariana">Vegetariana</option>
-                                    <option value="dulce">Dulce</option>
+                                    <option value="aves">Aves</option>
+                                    <option value="ensaladas">Ensaladas</option>
+                                    <option value="bebidas">Bebidas</option>
+                                    <option value="postres">Postres</option>
                                 </select>
                             </div>
                             <button type="submit" class="btn">Agregar Producto</button>
@@ -1104,7 +1239,8 @@
         let currentUser = null;
         let currentUserRole = 'customer';
         let taxRate = 10.5;
-        let authMode = 'login'; // 'login', 'register', 'forgot'
+        let authMode = 'login';
+        let currentCategory = 'all';
         
         // Referencias DOM
         const mainHeader = document.getElementById('mainHeader');
@@ -1144,6 +1280,9 @@
         const magicNavItems = document.querySelectorAll('.magic-nav-item');
         const adminMobileNavItem = document.getElementById('adminMobileNavItem');
         const mobileCartIcon = document.getElementById('mobileCartIcon');
+        const categoriesBar = document.getElementById('categoriesBar');
+        const categoriesToggle = document.getElementById('categoriesToggle');
+        const categoriesContainer = document.getElementById('categoriesContainer');
         
         // Observador de autenticación
         auth.onAuthStateChanged(user => {
@@ -1160,23 +1299,20 @@
                     }, 100);
                 }, 300);
                 
-                // Ocultar sección de autenticación y mostrar menú inmediatamente
+                // Ocultar sección de autenticación y mostrar menú
                 authSection.style.display = 'none';
                 showSection('menu');
                 mobileCartIcon.style.display = 'flex';
+                categoriesBar.style.display = 'block'; // Mostrar barra de categorías
                 
-                // Obtener datos del cliente incluyendo el rol
+                // Obtener datos del cliente
                 db.collection("customers").doc(user.uid).get()
                 .then(doc => {
                     if (doc.exists) {
                         const userData = doc.data();
                         currentUserRole = userData.isAdmin ? 'admin' : 'customer';
-                        
-                        // Actualizar la UI según el rol
                         updateUIForRole();
-                        
                     } else {
-                        // Si no existe documento, crear uno
                         saveCustomerData(user);
                         currentUserRole = 'customer';
                         updateUIForRole();
@@ -1198,6 +1334,7 @@
                 // Ocultar header
                 mainHeader.classList.remove('visible', 'scrolled');
                 window.removeEventListener('scroll', handleHeaderScroll);
+                categoriesBar.style.display = 'none'; // Ocultar barra de categorías
                 
                 // Usuario no autenticado
                 authSection.style.display = 'block';
@@ -1234,7 +1371,6 @@
                     adminMobileNavItem.style.display = 'flex';
                 } else {
                     adminMobileNavItem.style.display = 'none';
-                    // Si está en la sección de admin, redirigir
                     if (document.getElementById('adminSection').style.display === 'block') {
                         showSection('menu');
                     }
@@ -1244,12 +1380,9 @@
         
         // Guardar datos del cliente en Firebase
         function saveCustomerData(user) {
-            // Primero obtener el documento actual para preservar el campo isAdmin si existe
             const customerRef = db.collection("customers").doc(user.uid);
-            
             customerRef.get().then(doc => {
                 const currentData = doc.exists ? doc.data() : {};
-                
                 const customerData = {
                     uid: user.uid,
                     email: user.email,
@@ -1257,13 +1390,9 @@
                     photoURL: user.photoURL || "",
                     lastLogin: new Date().toISOString(),
                     createdAt: doc.exists ? currentData.createdAt : firebase.firestore.FieldValue.serverTimestamp(),
-                    // Preservar el campo isAdmin si ya existe
                     ...(currentData.isAdmin !== undefined && { isAdmin: currentData.isAdmin }),
-                    // Por defecto no es admin
                     isAdmin: currentData.isAdmin || false
                 };
-                
-                // Actualizar o crear el documento del cliente
                 customerRef.set(customerData, { merge: true })
                 .then(() => {
                     console.log("Datos del cliente guardados correctamente");
@@ -1279,7 +1408,6 @@
         // Establecer modo de autenticación
         function setAuthMode(mode) {
             authMode = mode;
-            
             switch(mode) {
                 case 'login':
                     authMessage.textContent = "Inicia sesión para continuar";
@@ -1289,7 +1417,6 @@
                     forgotPasswordLink.style.display = 'inline';
                     loginLink.style.display = 'none';
                     break;
-                    
                 case 'register':
                     authMessage.textContent = "Crea una cuenta";
                     authSubmitBtn.textContent = "Registrarse";
@@ -1298,7 +1425,6 @@
                     forgotPasswordLink.style.display = 'none';
                     loginLink.style.display = 'inline';
                     break;
-                    
                 case 'forgot':
                     authMessage.textContent = "Recuperar contraseña";
                     authSubmitBtn.textContent = "Enviar Correo";
@@ -1318,30 +1444,22 @@
             const confirmPassword = authConfirmPassword.value;
             
             switch(authMode) {
-                case 'login':
-                    loginWithEmail(email, password);
-                    break;
-                    
-                case 'register':
+                case 'login': loginWithEmail(email, password); break;
+                case 'register': 
                     if (password !== confirmPassword) {
                         showNotification("Las contraseñas no coinciden");
                         return;
                     }
-                    signUpWithEmail(email, password);
+                    signUpWithEmail(email, password); 
                     break;
-                    
-                case 'forgot':
-                    resetPassword(email);
-                    break;
+                case 'forgot': resetPassword(email); break;
             }
         });
         
         // Iniciar sesión con correo/contraseña
         function loginWithEmail(email, password) {
             auth.signInWithEmailAndPassword(email, password)
-            .then(() => {
-                showNotification("Sesión iniciada correctamente");
-            })
+            .then(() => showNotification("Sesión iniciada correctamente"))
             .catch(error => {
                 console.error("Error de autenticación: ", error);
                 showNotification(`Error al iniciar sesión: ${error.message}`);
@@ -1352,19 +1470,14 @@
         function signUpWithEmail(email, password) {
             auth.createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
-                // Usuario registrado correctamente
                 const user = userCredential.user;
-                
-                // Guardar datos adicionales del usuario
                 db.collection("customers").doc(user.uid).set({
                     email: email,
                     displayName: "Cliente",
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     isAdmin: false
                 }, { merge: true })
-                .then(() => {
-                    showNotification("¡Cuenta creada correctamente!");
-                });
+                .then(() => showNotification("¡Cuenta creada correctamente!"));
             })
             .catch(error => {
                 console.error("Error registrando usuario: ", error);
@@ -1405,20 +1518,13 @@
         
         // Cerrar sesión
         logoutBtn.addEventListener('click', () => {
-            // Animación de salida
             mainHeader.classList.remove('scrolled');
             mainHeader.style.transition = 'transform 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
             mainHeader.style.transform = 'translateY(-100%)';
             
-            // Cerrar sesión después de la animación
             setTimeout(() => {
-                auth.signOut().then(() => {
-                    showNotification('Sesión cerrada correctamente');
-                }).catch(error => {
-                    showNotification(`Error al cerrar sesión: ${error.message}`);
-                });
-                
-                // Restaurar transición
+                auth.signOut().then(() => showNotification('Sesión cerrada correctamente'))
+                .catch(error => showNotification(`Error al cerrar sesión: ${error.message}`));
                 mainHeader.style.transition = '';
             }, 400);
         });
@@ -1428,115 +1534,120 @@
             db.collection("products").get().then(querySnapshot => {
                 products = [];
                 querySnapshot.forEach(doc => {
-                    products.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
+                    products.push({ id: doc.id, ...doc.data() });
                 });
                 renderProducts();
                 renderCurrentProducts();
+                renderCategoryFilters();
             }).catch(error => {
                 console.error("Error cargando productos: ", error);
             });
         }
         
-        // Cargar pedidos del usuario
-        function loadOrders() {
-            if (!currentUser) return;
+        // Renderizar los botones de categorías
+        function renderCategoryFilters() {
+            // Obtener categorías únicas
+            const categories = [...new Set(products.map(product => product.category))];
             
-            db.collection("orders")
-                .where("userId", "==", currentUser.uid)
-                .orderBy("date", "desc")
-                .get()
-                .then(querySnapshot => {
-                    orders = [];
-                    querySnapshot.forEach(doc => {
-                        orders.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
+            // Limpiar contenedor
+            categoriesContainer.innerHTML = '';
+            
+            // Crear botones de categoría
+            categories.forEach(category => {
+                const button = document.createElement('div');
+                button.className = `category-btn ${currentCategory === category ? 'active' : ''}`;
+                button.dataset.category = category;
+                
+                // Asignar íconos según categoría
+                let iconClass = 'fas fa-utensils'; // Icono por defecto
+                switch(category) {
+                    case 'empanadas': iconClass = 'fas fa-pizza-slice'; break;
+                    case 'entradas': iconClass = 'fas fa-appetizer'; break;
+                    case 'sopas': iconClass = 'fas fa-bowl-food'; break;
+                    case 'desayuno criollo': iconClass = 'fas fa-egg'; break;
+                    case 'cachapas': iconClass = 'fas fa-bread-slice'; break;
+                    case 'arepas': iconClass = 'fas fa-cookie'; break;
+                    case 'tipico de venezuela': iconClass = 'fas fa-flag'; break;
+                    case 'extras': iconClass = 'fas fa-plus-circle'; break;
+                    case 'carne': iconClass = 'fas fa-drumstick-bite'; break;
+                    case 'aves': iconClass = 'fas fa-dove'; break;
+                    case 'ensaladas': iconClass = 'fas fa-leaf'; break;
+                    case 'bebidas': iconClass = 'fas fa-glass-martini-alt'; break;
+                    case 'postres': iconClass = 'fas fa-ice-cream'; break;
+                }
+                
+                button.innerHTML = `
+                    <i class="${iconClass}"></i>
+                    <span>${category}</span>
+                `;
+                button.addEventListener('click', () => {
+                    currentCategory = category;
+                    renderProducts();
+                    document.querySelectorAll('.category-btn').forEach(btn => {
+                        btn.classList.remove('active');
                     });
-                    renderOrders();
-                })
-                .catch(error => {
-                    console.error("Error cargando pedidos: ", error);
+                    button.classList.add('active');
                 });
+                categoriesContainer.appendChild(button);
+            });
+            
+            // Botón para mostrar todos los productos
+            const allButton = document.createElement('div');
+            allButton.className = `category-btn ${currentCategory === 'all' ? 'active' : ''}`;
+            allButton.dataset.category = 'all';
+            allButton.innerHTML = `
+                <i class="fas fa-utensils"></i>
+                <span>Todos los productos</span>
+            `;
+            allButton.addEventListener('click', () => {
+                currentCategory = 'all';
+                renderProducts();
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                allButton.classList.add('active');
+            });
+            categoriesContainer.insertBefore(allButton, categoriesContainer.firstChild);
         }
         
-        // Cargar todos los pedidos para el panel de administración
-        function loadAdminOrders() {
-            // Verificar permisos de administrador
-            if (currentUserRole !== 'admin') {
-                console.error("Acceso no autorizado a funciones de administrador");
-                return;
-            }
-            
-            db.collection("orders")
-                .orderBy("date", "desc")
-                .get()
-                .then(querySnapshot => {
-                    const adminOrders = [];
-                    querySnapshot.forEach(doc => {
-                        adminOrders.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    renderAdminOrders(adminOrders);
-                })
-                .catch(error => {
-                    console.error("Error cargando pedidos: ", error);
-                });
-        }
-        
-        // Cargar clientes
-        function loadCustomers() {
-            // Verificar permisos de administrador
-            if (currentUserRole !== 'admin') {
-                console.error("Acceso no autorizado a funciones de administrador");
-                return;
-            }
-            
-            db.collection("customers")
-                .get()
-                .then(querySnapshot => {
-                    customers = [];
-                    querySnapshot.forEach(doc => {
-                        customers.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    renderCustomers();
-                })
-                .catch(error => {
-                    console.error("Error cargando clientes: ", error);
-                });
-        }
+        // Toggle para mostrar/ocultar categorías
+        categoriesToggle.addEventListener('click', () => {
+            categoriesToggle.classList.toggle('active');
+            categoriesContainer.classList.toggle('active');
+        });
         
         // Renderizar productos
         function renderProducts() {
             productsContainer.innerHTML = '';
             
-            if (products.length === 0) {
-                productsContainer.innerHTML = '<p>No hay productos disponibles en este momento.</p>';
+            // Filtrar productos por categoría
+            let filteredProducts = products;
+            if (currentCategory !== 'all') {
+                filteredProducts = products.filter(product => product.category === currentCategory);
+            }
+            
+            if (filteredProducts.length === 0) {
+                productsContainer.innerHTML = '<p class="empty-message">No hay productos disponibles en esta categoría.</p>';
                 return;
             }
             
-            products.forEach(product => {
+            filteredProducts.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
                 productCard.innerHTML = `
+                    <div class="product-badge">${product.category}</div>
                     <div class="product-image">
-                        <i class="fas fa-drumstick-bite"></i>
+                        <img src="https://via.placeholder.com/300x200?text=${product.name.replace(/\s+/g, '+')}" alt="${product.name}">
                     </div>
                     <div class="product-info">
-                        <h3 class="product-title">${product.name}</h3>
+                        <h3 class="product-title">
+                            <span>${product.name}</span>
+                            <span class="product-price">$${product.price}</span>
+                        </h3>
                         <p class="product-description">${product.description}</p>
                         <div class="product-footer">
-                            <span class="product-price">$${product.price}</span>
                             <button class="add-to-cart" data-id="${product.id}">
-                                <i class="fas fa-plus"></i>
+                                <i class="fas fa-plus"></i> <span>Añadir</span>
                             </button>
                         </div>
                     </div>
@@ -1552,158 +1663,6 @@
                     animateCart();
                 });
             });
-        }
-        
-        // Renderizar pedidos
-        function renderOrders() {
-            ordersTableBody.innerHTML = '';
-            
-            if (orders.length === 0) {
-                ordersTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center;">No has realizado pedidos aún</td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            orders.forEach(order => {
-                const orderDate = new Date(order.date).toLocaleString();
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${order.id.substring(0, 8)}</td>
-                    <td>${orderDate}</td>
-                    <td>${order.items.length} productos</td>
-                    <td>$${order.total.toFixed(2)}</td>
-                    <td><span class="status status-${order.status}">${order.status}</span></td>
-                `;
-                ordersTableBody.appendChild(tr);
-            });
-        }
-        
-        // Renderizar pedidos en panel de administración
-        function renderAdminOrders(adminOrders) {
-            adminOrdersTableBody.innerHTML = '';
-            
-            if (adminOrders.length === 0) {
-                adminOrdersTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align: center;">No hay pedidos registrados</td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            adminOrders.forEach(order => {
-                const orderDate = new Date(order.date).toLocaleString();
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${order.id.substring(0, 8)}</td>
-                    <td>${order.userName || order.userEmail}</td>
-                    <td>${orderDate}</td>
-                    <td>$${order.total.toFixed(2)}</td>
-                    <td><span class="status status-${order.status}">${order.status}</span></td>
-                    <td>
-                        <select class="status-select" data-id="${order.id}">
-                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendiente</option>
-                            <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completado</option>
-                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
-                        </select>
-                    </td>
-                `;
-                adminOrdersTableBody.appendChild(tr);
-            });
-            
-            // Event listeners para cambiar estado
-            document.querySelectorAll('.status-select').forEach(select => {
-                select.addEventListener('change', (e) => {
-                    const orderId = e.target.closest('.status-select').dataset.id;
-                    const newStatus = e.target.value;
-                    updateOrderStatus(orderId, newStatus);
-                });
-            });
-        }
-        
-        // Renderizar clientes
-        function renderCustomers() {
-            customersTableBody.innerHTML = '';
-            
-            if (customers.length === 0) {
-                customersTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center;">No hay clientes registrados</td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            customers.forEach(customer => {
-                const lastLoginDate = customer.lastLogin ? new Date(customer.lastLogin).toLocaleDateString() : 'N/A';
-                
-                // Contar pedidos del cliente
-                const customerOrders = orders.filter(order => order.userId === customer.id);
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${customer.displayName}</td>
-                    <td>${customer.email}</td>
-                    <td>${customer.phone || 'N/A'}</td>
-                    <td>${customerOrders.length}</td>
-                    <td>${lastLoginDate}</td>
-                `;
-                customersTableBody.appendChild(tr);
-            });
-        }
-        
-        // Renderizar perfil de usuario
-        function renderProfile() {
-            if (!currentUser) return;
-            
-            // Buscar datos adicionales del cliente
-            const customer = customers.find(c => c.id === currentUser.uid);
-            
-            profileContainer.innerHTML = `
-                <div class="profile-header">
-                    <img src="${currentUser.photoURL || 'https://via.placeholder.com/100'}" 
-                         alt="Avatar" class="profile-avatar">
-                    <div class="profile-info">
-                        <h2>${currentUser.displayName || "Cliente"}</h2>
-                        <p>${currentUser.email}</p>
-                    </div>
-                </div>
-                
-                <div class="profile-details">
-                    <div class="detail-card">
-                        <h3><i class="fas fa-info-circle"></i> Información Personal</h3>
-                        <p><strong>Email:</strong> ${currentUser.email}</p>
-                        <p><strong>Último acceso:</strong> ${customer?.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'N/A'}</p>
-                        <p><strong>Miembro desde:</strong> ${customer?.createdAt ? new Date(customer.createdAt.toDate()).toLocaleDateString() : 'N/A'}</p>
-                        <p><strong>Rol:</strong> ${currentUserRole === 'admin' ? 'Administrador' : 'Cliente'}</p>
-                        <button class="edit-btn">Editar información</button>
-                    </div>
-                    
-                    <div class="detail-card">
-                        <h3><i class="fas fa-map-marker-alt"></i> Dirección de Envío</h3>
-                        <p><strong>Calle:</strong> ${customer?.address?.street || 'No especificada'}</p>
-                        <p><strong>Ciudad:</strong> ${customer?.address?.city || 'No especificada'}</p>
-                        <p><strong>Código Postal:</strong> ${customer?.address?.postalCode || 'N/A'}</p>
-                        <button class="edit-btn">Editar dirección</button>
-                    </div>
-                    
-                    <div class="detail-card">
-                        <h3><i class="fas fa-phone"></i> Contacto</h3>
-                        <p><strong>Teléfono:</strong> ${customer?.phone || 'No especificado'}</p>
-                        <button class="edit-btn">Actualizar teléfono</button>
-                    </div>
-                    
-                    <div class="detail-card">
-                        <h3><i class="fas fa-shopping-cart"></i> Estadísticas de Pedidos</h3>
-                        <p><strong>Pedidos realizados:</strong> ${orders.length}</p>
-                        <p><strong>Total gastado:</strong> $${orders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}</p>
-                        <p><strong>Último pedido:</strong> ${orders.length > 0 ? new Date(orders[0].date).toLocaleDateString() : 'N/A'}</p>
-                    </div>
-                </div>
-            `;
         }
         
         // Añadir al carrito
