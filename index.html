@@ -36,8 +36,9 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding-bottom: 70px; /* Espacio para la barra inferior */
+            padding-bottom: 70px;
             transition: margin-left 0.3s ease;
+            overflow-x: hidden;
         }
         
         .container {
@@ -47,7 +48,7 @@
             padding: 0 15px;
         }
         
-        /* Nuevo Header Animado */
+        /* Header Animado */
         #mainHeader {
             position: fixed;
             top: 0;
@@ -89,6 +90,7 @@
             font-size: 1.5rem;
             cursor: pointer;
             margin-right: 15px;
+            z-index: 1001;
         }
         
         .logo {
@@ -140,6 +142,7 @@
             display: flex;
             justify-content: center;
             padding: 1rem 0;
+            margin-top: 20px;
         }
         
         .brand {
@@ -155,7 +158,8 @@
         main {
             padding: 1rem 0;
             flex-grow: 1;
-            padding-top: 80px; /* Espacio para el header */
+            padding-top: 80px;
+            transition: all 0.3s ease;
         }
         
         /* Ajustar sección de autenticación */
@@ -182,7 +186,7 @@
             border-radius: 2px;
         }
         
-        /* NUEVO: Barra lateral de categorías */
+        /* Barra lateral de categorías */
         .sidebar {
             position: fixed;
             top: 0;
@@ -191,8 +195,8 @@
             height: 100%;
             background: white;
             z-index: 850;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            transition: left 0.3s ease;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
             padding-top: 70px;
             overflow-y: auto;
         }
@@ -225,7 +229,7 @@
         .categories-container {
             display: flex;
             flex-direction: column;
-            padding: 1rem;
+            padding: 1.5rem 1rem;
             gap: 10px;
         }
         
@@ -824,7 +828,7 @@
             margin-top: 1rem;
         }
         
-        /* Magic Navigation Menu v3 - Always Visible */
+        /* Magic Navigation Menu */
         .magic-nav {
             position: fixed;
             bottom: 0;
@@ -911,10 +915,6 @@
             .logout-btn {
                 padding: 0.6rem;
             }
-
-            .categories-container {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            }
         }
         
         @media (max-width: 480px) {
@@ -924,10 +924,6 @@
             
             .logo {
                 font-size: 1.5rem;
-            }
-            
-            .categories-container {
-                grid-template-columns: repeat(2, 1fr));
             }
             
             .add-to-cart span {
@@ -941,34 +937,31 @@
                 padding: 0;
             }
         }
-
-        /* Nuevos estilos para escritorio */
-        @media (min-width: 992px) {
-            .sidebar {
-                left: 0;
-            }
-            
-            .menu-toggle {
-                display: none;
-            }
-            
-            .close-sidebar {
-                display: none;
-            }
-            
-            main {
-                margin-left: var(--sidebar-width);
-            }
-            
-            #mainHeader {
-                left: var(--sidebar-width);
-                width: calc(100% - var(--sidebar-width));
-            }
-            
-            .magic-nav {
-                left: var(--sidebar-width);
-                width: calc(100% - var(--sidebar-width));
-            }
+        
+        /* Animación de pulse para el carrito */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse i {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        /* Notificación */
+        .notification {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transform: translateX(200%);
+            transition: transform 0.3s ease-in-out;
         }
     </style>
 </head>
@@ -978,7 +971,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
-    <!-- Nuevo Header Animado -->
+    <!-- Header Animado -->
     <header id="mainHeader">
         <div class="header-content">
             <button class="menu-toggle" id="menuToggle">
@@ -992,7 +985,7 @@
         </div>
     </header>
     
-    <!-- Nuevo: Barra lateral de categorías -->
+    <!-- Barra lateral de categorías -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3>Categorías</h3>
@@ -1262,7 +1255,7 @@
         </div>
     </div>
     
-    <!-- Magic Navigation Menu v3 - Always Visible -->
+    <!-- Magic Navigation Menu -->
     <nav class="magic-nav">
         <a href="#" class="magic-nav-item active" data-section="menu">
             <i class="fas fa-utensils"></i>
@@ -1658,6 +1651,7 @@
                         btn.classList.remove('active');
                     });
                     button.classList.add('active');
+                    closeSidebarFunc(); // Cerrar barra lateral al seleccionar categoría
                 });
                 categoriesContainer.appendChild(button);
             });
@@ -1677,6 +1671,7 @@
                     btn.classList.remove('active');
                 });
                 allButton.classList.add('active');
+                closeSidebarFunc(); // Cerrar barra lateral al seleccionar categoría
             });
             categoriesContainer.insertBefore(allButton, categoriesContainer.firstChild);
         }
@@ -2034,7 +2029,7 @@
             notification.textContent = message;
             notification.style.cssText = `
                 position: fixed;
-                bottom: 70px;
+                bottom: 100px;
                 right: 20px;
                 background-color: var(--success);
                 color: white;
@@ -2073,23 +2068,26 @@
             }, 500);
         }
         
+        // Función para abrir el menú lateral
+        function openSidebar() {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Función para cerrar el menú lateral
+        function closeSidebarFunc() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
         // Configurar event listeners
         function setupEventListeners() {
             // Toggle del menú lateral
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.add('open');
-                overlay.classList.add('active');
-            });
-            
-            closeSidebar.addEventListener('click', () => {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-            });
-            
-            overlay.addEventListener('click', () => {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-            });
+            menuToggle.addEventListener('click', openSidebar);
+            closeSidebar.addEventListener('click', closeSidebarFunc);
+            overlay.addEventListener('click', closeSidebarFunc);
             
             // Navegación mágica
             magicNavItems.forEach(item => {
