@@ -35,7 +35,6 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding-top: 80px;
             padding-bottom: 70px; /* Espacio para la barra inferior */
         }
         
@@ -46,32 +45,11 @@
             padding: 0 15px;
         }
         
-        /* Header Styles */
-        header {
-            background-color: var(--dark);
-            color: white;
-            padding: 1rem 0;
-            box-shadow: var(--shadow);
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            border-bottom: 3px solid var(--primary);
-        }
-        
-        .header-grid {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
-            gap: 20px;
-        }
-        
+        /* Brand Styles */
         .brand-section {
             display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 15px;
+            justify-content: center;
+            padding: 1rem 0;
         }
         
         .brand {
@@ -83,127 +61,9 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
-        .nav-social-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        nav a:hover, nav a.active {
-            background-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        .social-icons {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .social-icons a {
-            color: white;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-        }
-        
-        .social-icons a:hover {
-            color: var(--primary);
-            transform: translateY(-3px);
-        }
-        
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .logout-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .logout-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
-        }
-        
-        .cart-icon {
-            position: relative;
-            cursor: pointer;
-            color: white;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .cart-icon:hover {
-            color: var(--primary);
-            transform: scale(1.1);
-        }
-        
-        .cart-icon.animate {
-            animation: cartPulse 0.8s;
-        }
-        
-        @keyframes cartPulse {
-            0% { transform: scale(1); }
-            25% { transform: scale(1.2); }
-            50% { transform: scale(0.9); }
-            75% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        .cart-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: var(--primary);
-            color: white;
-            font-size: 0.75rem;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
         /* Main Content Styles */
         main {
-            padding: 2rem 0;
+            padding: 1rem 0;
             flex-grow: 1;
         }
         
@@ -749,7 +609,7 @@
             margin-top: 1rem;
         }
         
-        /* Magic Navigation v3 */
+        /* Magic Navigation v3 - Always Visible */
         .magic-nav {
             position: fixed;
             bottom: 0;
@@ -808,32 +668,7 @@
         /* Responsive */
         @media (max-width: 768px) {
             body {
-                padding-top: 140px;
-                padding-bottom: 70px; /* Espacio para la barra inferior */
-            }
-            
-            .header-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-                text-align: center;
-            }
-            
-            .brand-section {
-                justify-content: center;
-                order: 2;
-            }
-            
-            .nav-social-container {
-                order: 3;
-            }
-            
-            .user-section {
-                justify-content: center;
-                order: 1;
-            }
-            
-            nav ul {
-                gap: 0.5rem;
+                padding-bottom: 70px;
             }
             
             .products-grid {
@@ -845,38 +680,6 @@
                 gap: 0;
             }
             
-            /* Ocultar navegación superior en móviles */
-            nav ul {
-                display: none;
-            }
-            
-            .social-icons {
-                display: none;
-            }
-        }
-        
-        @media (min-width: 769px) {
-            /* Ocultar navegación mágica en escritorio */
-            .magic-nav {
-                display: none;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .brand {
-                font-size: 1.5rem;
-            }
-            
-            nav a {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.9rem;
-            }
-            
-            .logout-btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
-            }
-            
             .magic-nav-item {
                 font-size: 0.65rem;
                 padding: 8px 10px;
@@ -884,6 +687,12 @@
             
             .magic-nav-item i {
                 font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .brand {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -894,42 +703,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
-    <!-- Header -->
-    <header>
-        <div class="container header-grid">
-            <div class="user-section">
-                <button class="logout-btn" id="logoutBtn" style="display: none;">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                </button>
-            </div>
-            
-            <div class="nav-social-container">
-                <nav>
-                    <ul>
-                        <li><a href="#" class="active" data-section="menu"><i class="fas fa-utensils"></i> Menú</a></li>
-                        <li><a href="#" data-section="orders"><i class="fas fa-list"></i> Pedidos</a></li>
-                        <li><a href="#" data-section="profile"><i class="fas fa-user"></i> Perfil</a></li>
-                        <li id="adminNavItem" style="display: none;">
-                            <a href="#" data-section="admin"><i class="fas fa-cog"></i> Admin</a>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
-            
-            <div class="brand-section">
-                <h1 class="brand">Arcanos Lunch</h1>
-                <div class="cart-icon" id="cartIcon" style="display: none;">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">0</span>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- Brand Section -->
+    <div class="container brand-section">
+        <h1 class="brand">Arcanos Lunch</h1>
+    </div>
     
     <!-- Main Content -->
     <main class="container">
@@ -1172,20 +949,7 @@
         </div>
     </div>
     
-    <!-- Footer -->
-    <footer>
-        <div class="container footer-content">
-            <p>&copy; 2023 Arcanos Lunch. Todos los derechos reservados.</p>
-            <p>Sistema de pedidos desarrollado con ❤️</p>
-            <div class="social-icons">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-whatsapp"></i></a>
-            </div>
-        </div>
-    </footer>
-    
-    <!-- Magic Navigation Menu v3 -->
+    <!-- Magic Navigation Menu v3 - Always Visible -->
     <nav class="magic-nav">
         <a href="#" class="magic-nav-item active" data-section="menu">
             <i class="fas fa-utensils"></i>
@@ -1237,16 +1001,13 @@
         
         // Referencias DOM
         const productsContainer = document.getElementById('productsContainer');
-        const cartIcon = document.getElementById('cartIcon');
         const cartModal = document.getElementById('cartModal');
         const closeModal = document.querySelector('.close-modal');
         const cartItems = document.getElementById('cartItems');
         const cartSubtotal = document.getElementById('cartSubtotal');
         const cartTax = document.getElementById('cartTax');
         const cartTotal = document.getElementById('cartTotal');
-        const cartCount = document.querySelector('.cart-count');
         const checkoutBtn = document.getElementById('checkoutBtn');
-        const navLinks = document.querySelectorAll('nav a');
         const sections = document.querySelectorAll('main > section');
         const adminBtns = document.querySelectorAll('.admin-btn');
         const adminSections = document.querySelectorAll('.admin-section');
@@ -1258,11 +1019,9 @@
         const authSection = document.getElementById('authSection');
         const googleLoginBtn = document.getElementById('googleLogin');
         const appleLoginBtn = document.getElementById('appleLogin');
-        const logoutBtn = document.getElementById('logoutBtn');
         const taxRateValue = document.getElementById('taxRateValue');
         const settingsForm = document.getElementById('settingsForm');
         const profileContainer = document.getElementById('profileContainer');
-        const adminNavItem = document.getElementById('adminNavItem');
         const authForm = document.getElementById('authForm');
         const authEmail = document.getElementById('authEmail');
         const authPassword = document.getElementById('authPassword');
@@ -1282,11 +1041,9 @@
             currentUser = user;
             if (user) {
                 // Ocultar sección de autenticación y mostrar menú inmediatamente
-                logoutBtn.style.display = 'flex';
-                cartIcon.style.display = 'block';
-                mobileCartIcon.style.display = 'flex';
                 authSection.style.display = 'none';
                 showSection('menu');
+                mobileCartIcon.style.display = 'flex';
                 
                 // Obtener datos del cliente incluyendo el rol
                 db.collection("customers").doc(user.uid).get()
@@ -1294,7 +1051,6 @@
                     if (doc.exists) {
                         const userData = doc.data();
                         currentUserRole = userData.isAdmin ? 'admin' : 'customer';
-                        console.log("Rol de usuario:", currentUserRole);
                         
                         // Actualizar la UI según el rol
                         updateUIForRole();
@@ -1320,13 +1076,10 @@
                 renderProfile();
             } else {
                 // Usuario no autenticado
-                logoutBtn.style.display = 'none';
-                cartIcon.style.display = 'none';
-                mobileCartIcon.style.display = 'none';
                 authSection.style.display = 'block';
                 currentUserRole = 'customer';
-                adminNavItem.style.display = 'none';
                 adminMobileNavItem.style.display = 'none';
+                mobileCartIcon.style.display = 'none';
                 
                 // Ocultar todas las secciones excepto autenticación
                 sections.forEach(section => {
@@ -1343,13 +1096,10 @@
         
         // Función para actualizar la UI según el rol
         function updateUIForRole() {
-            if (adminNavItem) {
+            if (adminMobileNavItem) {
                 if (currentUserRole === 'admin') {
-                    adminNavItem.style.display = 'list-item';
                     adminMobileNavItem.style.display = 'flex';
-                    console.log("Mostrando panel de administración");
                 } else {
-                    adminNavItem.style.display = 'none';
                     adminMobileNavItem.style.display = 'none';
                     // Si está en la sección de admin, redirigir
                     if (document.getElementById('adminSection').style.display === 'block') {
@@ -1518,34 +1268,6 @@
                 console.error("Error de autenticación: ", error);
                 showNotification(`Error al iniciar sesión: ${error.message}`);
             });
-        });
-        
-        // Cerrar sesión
-        logoutBtn.addEventListener('click', () => {
-            auth.signOut().then(() => {
-                cart = [];
-                updateCartCount();
-                showNotification('Sesión cerrada correctamente');
-            }).catch(error => {
-                console.error("Error cerrando sesión: ", error);
-                showNotification(`Error al cerrar sesión: ${error.message}`);
-            });
-        });
-        
-        // Enlaces de autenticación
-        signUpLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            setAuthMode('register');
-        });
-        
-        forgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            setAuthMode('forgot');
-        });
-        
-        loginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            setAuthMode('login');
         });
         
         // Cargar productos desde Firebase
@@ -1742,7 +1464,7 @@
             // Event listeners para cambiar estado
             document.querySelectorAll('.status-select').forEach(select => {
                 select.addEventListener('change', (e) => {
-                    const orderId = e.target.dataset.id;
+                    const orderId = e.target.closest('.status-select').dataset.id;
                     const newStatus = e.target.value;
                     updateOrderStatus(orderId, newStatus);
                 });
@@ -1831,14 +1553,6 @@
             `;
         }
         
-        // Animación del carrito
-        function animateCart() {
-            cartIcon.classList.add('animate');
-            setTimeout(() => {
-                cartIcon.classList.remove('animate');
-            }, 800);
-        }
-        
         // Añadir al carrito
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
@@ -1857,7 +1571,6 @@
                     });
                 }
                 
-                updateCartCount();
                 showNotification(`${product.name} añadida al carrito!`);
             }
         }
@@ -1943,7 +1656,6 @@
                     cart = cart.filter(item => item.id !== productId);
                 }
                 
-                updateCartCount();
                 renderCart();
             }
         }
@@ -1951,15 +1663,8 @@
         // Eliminar del carrito
         function removeFromCart(productId) {
             cart = cart.filter(item => item.id !== productId);
-            updateCartCount();
             renderCart();
             showNotification('Producto eliminado del carrito');
-        }
-        
-        // Actualizar contador del carrito
-        function updateCartCount() {
-            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-            cartCount.textContent = totalItems;
         }
         
         // Finalizar compra
@@ -1992,7 +1697,6 @@
             .then(() => {
                 showNotification('¡Pedido realizado con éxito!');
                 cart = [];
-                updateCartCount();
                 cartModal.style.display = 'none';
                 loadOrders();
                 loadAdminOrders();
@@ -2125,15 +1829,6 @@
                 }
             });
             
-            // Actualizar navegación activa
-            navLinks.forEach(link => {
-                if (link.dataset.section === sectionId) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-            
             // Actualizar navegación mágica activa
             magicNavItems.forEach(item => {
                 if (item.dataset.section === sectionId) {
@@ -2192,30 +1887,20 @@
         
         // Configurar event listeners
         function setupEventListeners() {
-            // Navegación
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showSection(link.dataset.section);
-                });
-            });
-            
             // Navegación mágica
             magicNavItems.forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (item.id !== 'mobileCartIcon') {
                         showSection(item.dataset.section);
+                    } else {
+                        renderCart();
+                        cartModal.style.display = 'flex';
                     }
                 });
             });
             
             // Carrito
-            cartIcon.addEventListener('click', () => {
-                renderCart();
-                cartModal.style.display = 'flex';
-            });
-            
             mobileCartIcon.addEventListener('click', () => {
                 renderCart();
                 cartModal.style.display = 'flex';
@@ -2272,6 +1957,22 @@
                 taxRate = parseFloat(document.getElementById('taxRate').value);
                 taxRateValue.textContent = taxRate;
                 showNotification('Configuración guardada correctamente');
+            });
+            
+            // Enlaces de autenticación
+            signUpLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                setAuthMode('register');
+            });
+            
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                setAuthMode('forgot');
+            });
+            
+            loginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                setAuthMode('login');
             });
         }
         
