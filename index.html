@@ -45,6 +45,84 @@
             padding: 0 15px;
         }
         
+        /* Nuevo Header Animado */
+        #mainHeader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--dark);
+            padding: 1rem 0;
+            z-index: 900;
+            transform: translateY(-100%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        box-shadow 0.3s ease;
+            box-shadow: none;
+            display: flex;
+            justify-content: center;
+        }
+        
+        #mainHeader.visible {
+            transform: translateY(0);
+        }
+        
+        #mainHeader.scrolled {
+            padding: 0.6rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 15px;
+        }
+        
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.8rem;
+            color: white;
+            text-decoration: none;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            padding: 0.6rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .logout-btn:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .logout-btn i {
+            transition: transform 0.3s ease;
+        }
+        
+        .logout-btn:hover i {
+            transform: rotate(-10deg);
+        }
+        
         /* Brand Styles */
         .brand-section {
             display: flex;
@@ -65,6 +143,12 @@
         main {
             padding: 1rem 0;
             flex-grow: 1;
+            padding-top: 80px; /* Espacio para el header */
+        }
+        
+        /* Ajustar sección de autenticación */
+        #authSection {
+            padding-top: 0;
         }
         
         .section-title {
@@ -688,10 +772,22 @@
             .magic-nav-item i {
                 font-size: 1.1rem;
             }
+            
+            .logout-btn span {
+                display: none;
+            }
+            
+            .logout-btn {
+                padding: 0.6rem;
+            }
         }
         
         @media (max-width: 480px) {
             .brand {
+                font-size: 1.5rem;
+            }
+            
+            .logo {
                 font-size: 1.5rem;
             }
         }
@@ -702,6 +798,17 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Nuevo Header Animado -->
+    <header id="mainHeader">
+        <div class="header-content">
+            <a href="#" class="logo">Arcanos Lunch</a>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
     
     <!-- Brand Section -->
     <div class="container brand-section">
@@ -1000,6 +1107,8 @@
         let authMode = 'login'; // 'login', 'register', 'forgot'
         
         // Referencias DOM
+        const mainHeader = document.getElementById('mainHeader');
+        const logoutBtn = document.getElementById('logoutBtn');
         const productsContainer = document.getElementById('productsContainer');
         const cartModal = document.getElementById('cartModal');
         const closeModal = document.querySelector('.close-modal');
@@ -1040,6 +1149,17 @@
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
+                // Mostrar header animado
+                setTimeout(() => {
+                    mainHeader.classList.add('visible');
+                    
+                    // Añadir efecto de scroll después de mostrar
+                    setTimeout(() => {
+                        window.addEventListener('scroll', handleHeaderScroll);
+                        handleHeaderScroll(); // Ejecutar al inicio
+                    }, 100);
+                }, 300);
+                
                 // Ocultar sección de autenticación y mostrar menú inmediatamente
                 authSection.style.display = 'none';
                 showSection('menu');
@@ -1075,6 +1195,10 @@
                 loadCustomers();
                 renderProfile();
             } else {
+                // Ocultar header
+                mainHeader.classList.remove('visible', 'scrolled');
+                window.removeEventListener('scroll', handleHeaderScroll);
+                
                 // Usuario no autenticado
                 authSection.style.display = 'block';
                 currentUserRole = 'customer';
@@ -1093,6 +1217,15 @@
                 setAuthMode('login');
             }
         });
+        
+        // Manejar scroll para efecto en header
+        function handleHeaderScroll() {
+            if (window.scrollY > 30) {
+                mainHeader.classList.add('scrolled');
+            } else {
+                mainHeader.classList.remove('scrolled');
+            }
+        }
         
         // Función para actualizar la UI según el rol
         function updateUIForRole() {
@@ -1268,6 +1401,26 @@
                 console.error("Error de autenticación: ", error);
                 showNotification(`Error al iniciar sesión: ${error.message}`);
             });
+        });
+        
+        // Cerrar sesión
+        logoutBtn.addEventListener('click', () => {
+            // Animación de salida
+            mainHeader.classList.remove('scrolled');
+            mainHeader.style.transition = 'transform 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+            mainHeader.style.transform = 'translateY(-100%)';
+            
+            // Cerrar sesión después de la animación
+            setTimeout(() => {
+                auth.signOut().then(() => {
+                    showNotification('Sesión cerrada correctamente');
+                }).catch(error => {
+                    showNotification(`Error al cerrar sesión: ${error.message}`);
+                });
+                
+                // Restaurar transición
+                mainHeader.style.transition = '';
+            }, 400);
         });
         
         // Cargar productos desde Firebase
@@ -1885,6 +2038,17 @@
             }, 3000);
         }
         
+        // Animación para icono del carrito
+        function animateCart() {
+            const cartIcon = document.getElementById('mobileCartIcon');
+            if (!cartIcon) return;
+            
+            cartIcon.classList.add('pulse');
+            setTimeout(() => {
+                cartIcon.classList.remove('pulse');
+            }, 500);
+        }
+        
         // Configurar event listeners
         function setupEventListeners() {
             // Navegación mágica
@@ -1981,6 +2145,20 @@
             setupEventListeners();
             // Establecer modo de autenticación inicial
             setAuthMode('login');
+            
+            // Añadir animación al carrito
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.2); }
+                    100% { transform: scale(1); }
+                }
+                .pulse i {
+                    animation: pulse 0.5s ease-in-out;
+                }
+            `;
+            document.head.appendChild(style);
         });
     </script>
 </body>
