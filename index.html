@@ -115,13 +115,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
-        /* ICONOS MÁS PEQUEÑOS Y MEJOR VISIBLES */
-        nav a i {
-            font-size: 1.1rem;
-            width: 20px;
-            text-align: center;
-        }
-        
         .social-icons {
             display: flex;
             gap: 1rem;
@@ -809,10 +802,6 @@
                 padding: 0.5rem 1rem;
                 font-size: 0.9rem;
             }
-            
-            nav a i {
-                font-size: 1rem;
-            }
         }
     </style>
 </head>
@@ -1178,7 +1167,7 @@
         const authMessage = document.getElementById('authMessage');
         const confirmPasswordField = document.getElementById('confirmPasswordField');
         
-        // Observador de autenticación
+        // Observador de autenticación - CORREGIDO
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
@@ -1461,7 +1450,7 @@
             });
         }
         
-        // Cargar pedidos del usuario - CORREGIDO
+        // Cargar pedidos del usuario
         function loadOrders() {
             if (!currentUser) return;
             
@@ -1481,14 +1470,6 @@
                 })
                 .catch(error => {
                     console.error("Error cargando pedidos: ", error);
-                    // Mostrar mensaje de error en la tabla
-                    ordersTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: var(--danger);">
-                                Error cargando pedidos: ${error.message}
-                            </td>
-                        </tr>
-                    `;
                 });
         }
         
@@ -1515,14 +1496,6 @@
                 })
                 .catch(error => {
                     console.error("Error cargando pedidos: ", error);
-                    // Mostrar mensaje de error en la tabla
-                    adminOrdersTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="6" style="text-align: center; color: var(--danger);">
-                                Error cargando pedidos: ${error.message}
-                            </td>
-                        </tr>
-                    `;
                 });
         }
         
@@ -1548,14 +1521,6 @@
                 })
                 .catch(error => {
                     console.error("Error cargando clientes: ", error);
-                    // Mostrar mensaje de error en la tabla
-                    customersTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: var(--danger);">
-                                Error cargando clientes: ${error.message}
-                            </td>
-                        </tr>
-                    `;
                 });
         }
         
@@ -1599,7 +1564,7 @@
             });
         }
         
-        // Renderizar pedidos - MEJORADO
+        // Renderizar pedidos
         function renderOrders() {
             ordersTableBody.innerHTML = '';
             
@@ -1614,17 +1579,11 @@
             
             orders.forEach(order => {
                 const orderDate = new Date(order.date).toLocaleString();
-                
-                // Crear lista de productos
-                const productsList = order.items.map(item => 
-                    `${item.quantity}x ${item.name} ($${item.price})`
-                ).join('<br>');
-                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${order.id.substring(0, 8)}</td>
                     <td>${orderDate}</td>
-                    <td>${productsList}</td>
+                    <td>${order.items.length} productos</td>
                     <td>$${order.total.toFixed(2)}</td>
                     <td><span class="status status-${order.status}">${order.status}</span></td>
                 `;
@@ -1647,18 +1606,11 @@
             
             adminOrders.forEach(order => {
                 const orderDate = new Date(order.date).toLocaleString();
-                
-                // Crear lista de productos
-                const productsList = order.items.map(item => 
-                    `${item.quantity}x ${item.name}`
-                ).join('<br>');
-                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${order.id.substring(0, 8)}</td>
                     <td>${order.userName || order.userEmail}</td>
                     <td>${orderDate}</td>
-                    <td>${productsList}</td>
                     <td>$${order.total.toFixed(2)}</td>
                     <td><span class="status status-${order.status}">${order.status}</span></td>
                     <td>
