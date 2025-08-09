@@ -599,38 +599,6 @@
             font-size: 0.9rem;
         }
         
-        /* Payment Verification */
-        .payment-verification {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .verification-code {
-            display: flex;
-            gap: 10px;
-        }
-
-        .verification-code input {
-            width: 40px;
-            height: 40px;
-            text-align: center;
-            font-size: 1.2rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .verify-btn {
-            background-color: var(--secondary);
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        
         /* Magic Navigation Menu */
         .magic-nav {
             position: fixed;
@@ -770,6 +738,54 @@
             transform: translateX(200%);
             transition: transform 0.3s ease-in-out;
         }
+
+        /* Tablas */
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .orders-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        .orders-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .orders-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .orders-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .order-status {
+            padding: 6px 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background: white;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .view-order {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -883,12 +899,14 @@
                             <th>Fecha</th>
                             <th>Productos</th>
                             <th>Total</th>
+                            <th>Método Pago</th>
+                            <th>Referencia</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
                         <tr>
-                            <td colspan="5" style="text-align: center;">Cargando pedidos...</td>
+                            <td colspan="7" style="text-align: center;">Cargando pedidos...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -973,13 +991,15 @@
                                         <th>Cliente</th>
                                         <th>Fecha</th>
                                         <th>Total</th>
+                                        <th>Método Pago</th>
+                                        <th>Referencia</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="adminOrdersTableBody">
                                     <tr>
-                                        <td colspan="6" style="text-align: center;">Cargando pedidos...</td>
+                                        <td colspan="8" style="text-align: center;">Cargando pedidos...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1074,15 +1094,8 @@
                 <!-- Detalles específicos para cada método de pago -->
                 <div id="posDetails" class="payment-detail">
                     <div class="bank-info">
-                        <p><strong>Banco de Venezuela</strong></p>
-                        <p>Tipo de cuenta: Corriente</p>
-                        <p>Número de cuenta: 0102-0456-7890-12345678</p>
-                        <p>Cédula/RIF: J-123456789</p>
+                        <p><strong>Punto de Venta</strong></p>
                     </div>
-                    <label for="posReference">Número de Referencia:</label>
-                    <input type="text" id="posReference" placeholder="Ingrese el número de referencia">
-                    <label for="posReceipt">Subir comprobante:</label>
-                    <input type="file" id="posReceipt" accept="image/*">
                 </div>
 
                 <div id="mobileDetails" class="payment-detail">
@@ -1092,18 +1105,8 @@
                         <p>Teléfono: 0412-1234567</p>
                         <p>Cédula: V-12345678</p>
                     </div>
-                    <div class="payment-verification">
-                        <label>Verificar Pago:</label>
-                        <div class="verification-code">
-                            <input type="text" maxlength="1" id="code1">
-                            <input type="text" maxlength="1" id="code2">
-                            <input type="text" maxlength="1" id="code3">
-                            <input type="text" maxlength="1" id="code4">
-                            <input type="text" maxlength="1" id="code5">
-                            <input type="text" maxlength="1" id="code6">
-                        </div>
-                        <button class="verify-btn" id="verifyMobileBtn">Verificar Pago</button>
-                    </div>
+                    <label for="mobileReference">Número de Referencia:</label>
+                    <input type="text" id="mobileReference" placeholder="Ingrese el número de referencia">
                 </div>
 
                 <div id="usdDetails" class="payment-detail">
@@ -1247,15 +1250,7 @@
         const usdDetails = document.getElementById('usdDetails');
         const eurDetails = document.getElementById('eurDetails');
         const cashDetails = document.getElementById('cashDetails');
-        const verifyMobileBtn = document.getElementById('verifyMobileBtn');
-        const codeInputs = [
-            document.getElementById('code1'),
-            document.getElementById('code2'),
-            document.getElementById('code3'),
-            document.getElementById('code4'),
-            document.getElementById('code5'),
-            document.getElementById('code6')
-        ];
+        const mobileReference = document.getElementById('mobileReference');
         
         // Observador de autenticación
         auth.onAuthStateChanged(user => {
@@ -1780,16 +1775,10 @@
             // Obtener referencia según el método
             switch(method) {
                 case 'pos':
-                    reference = document.getElementById('posReference').value;
-                    const posReceipt = document.getElementById('posReceipt').files[0];
-                    if (posReceipt) {
-                        try {
-                            receiptUrl = await uploadReceipt(posReceipt);
-                        } catch (error) {
-                            showNotification('Error al subir el comprobante: ' + error);
-                            return;
-                        }
-                    }
+                    reference = 'POS';
+                    break;
+                case 'mobile':
+                    reference = document.getElementById('mobileReference').value || 'N/A';
                     break;
                 case 'usd':
                     reference = document.getElementById('usdReference').value;
@@ -1814,6 +1803,9 @@
                             return;
                         }
                     }
+                    break;
+                case 'cash':
+                    reference = 'EFECTIVO';
                     break;
             }
             
@@ -1854,66 +1846,6 @@
                 console.error("Error guardando pedido: ", error);
                 showNotification('Error al guardar el pedido');
             });
-        }
-        
-        // Validar pago móvil
-        function verifyMobilePayment() {
-            const code = codeInputs.map(input => input.value).join('');
-            
-            if (code.length !== 6) {
-                showNotification('Por favor, ingrese un código de verificación válido');
-                return;
-            }
-            
-            // Aquí iría la lógica para validar el pago con el banco
-            // Esto es un ejemplo - en producción se conectaría con la API del banco
-            
-            // Simular validación exitosa
-            const isValid = Math.random() > 0.2; // 80% de éxito
-            
-            if (isValid) {
-                showNotification('Pago verificado con éxito!');
-                
-                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const tax = subtotal * (taxRate / 100);
-                const total = subtotal + tax;
-                
-                const order = {
-                    date: new Date().toISOString(),
-                    userId: currentUser.uid,
-                    userEmail: currentUser.email,
-                    userName: currentUser.displayName || "Cliente",
-                    items: cart.map(item => ({
-                        productId: item.id,
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity
-                    })),
-                    subtotal,
-                    tax,
-                    total,
-                    status: 'completed',
-                    paymentMethod: 'mobile',
-                    paymentReference: code,
-                    paymentReceipt: ''
-                };
-                
-                // Guardar en Firebase
-                db.collection("orders").add(order)
-                .then(() => {
-                    showNotification('¡Pedido realizado con éxito!');
-                    cart = [];
-                    cartModal.style.display = 'none';
-                    loadOrders();
-                    loadAdminOrders();
-                })
-                .catch(error => {
-                    console.error("Error guardando pedido: ", error);
-                    showNotification('Error al guardar el pedido');
-                });
-            } else {
-                showNotification('Código de verificación inválido. Por favor, intente nuevamente.');
-            }
         }
         
         // Agregar nuevo producto
@@ -2020,6 +1952,221 @@
                     deleteProduct(productId);
                 });
             });
+        }
+        
+        // Cargar pedidos del cliente
+        function loadOrders() {
+            if (!currentUser) return;
+            
+            db.collection("orders")
+                .where("userId", "==", currentUser.uid)
+                .orderBy("date", "desc")
+                .get()
+                .then(querySnapshot => {
+                    ordersTableBody.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        ordersTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="7" style="text-align: center;">No tienes pedidos registrados</td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const order = { id: doc.id, ...doc.data() };
+                        const date = new Date(order.date);
+                        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                        
+                        // Contar productos
+                        const productCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${order.id.substring(0, 8)}</td>
+                            <td>${formattedDate}</td>
+                            <td>${productCount} producto${productCount !== 1 ? 's' : ''}</td>
+                            <td>$${order.total.toFixed(2)}</td>
+                            <td>${getPaymentMethodName(order.paymentMethod)}</td>
+                            <td>${order.paymentReference || 'N/A'}</td>
+                            <td>${getStatusText(order.status)}</td>
+                        `;
+                        ordersTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error cargando pedidos: ", error);
+                    ordersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Error al cargar pedidos</td>
+                        </tr>
+                    `;
+                });
+        }
+        
+        // Cargar todos los pedidos (admin)
+        function loadAdminOrders() {
+            if (currentUserRole !== 'admin') return;
+            
+            db.collection("orders")
+                .orderBy("date", "desc")
+                .get()
+                .then(querySnapshot => {
+                    adminOrdersTableBody.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        adminOrdersTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="8" style="text-align: center;">No hay pedidos registrados</td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const order = { id: doc.id, ...doc.data() };
+                        const date = new Date(order.date);
+                        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${order.id.substring(0, 8)}</td>
+                            <td>${order.userName}</td>
+                            <td>${formattedDate}</td>
+                            <td>$${order.total.toFixed(2)}</td>
+                            <td>${getPaymentMethodName(order.paymentMethod)}</td>
+                            <td>${order.paymentReference || 'N/A'}</td>
+                            <td>
+                                <select class="order-status" data-id="${order.id}">
+                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendiente</option>
+                                    <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>En preparación</option>
+                                    <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Listo</option>
+                                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Entregado</option>
+                                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button class="view-order" data-id="${order.id}">Ver</button>
+                            </td>
+                        `;
+                        adminOrdersTableBody.appendChild(row);
+                    });
+                    
+                    // Event listeners para cambiar estado
+                    document.querySelectorAll('.order-status').forEach(select => {
+                        select.addEventListener('change', (e) => {
+                            const orderId = e.target.dataset.id;
+                            const newStatus = e.target.value;
+                            updateOrderStatus(orderId, newStatus);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error("Error cargando pedidos de admin: ", error);
+                    adminOrdersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center;">Error al cargar pedidos</td>
+                        </tr>
+                    `;
+                });
+        }
+        
+        // Obtener nombre de método de pago
+        function getPaymentMethodName(method) {
+            switch(method) {
+                case 'pos': return 'Punto de Venta';
+                case 'mobile': return 'Pago Móvil';
+                case 'usd': return 'Divisa USD';
+                case 'eur': return 'Divisa EUR';
+                case 'cash': return 'Efectivo';
+                default: return method;
+            }
+        }
+        
+        // Obtener texto de estado
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return 'Pendiente';
+                case 'preparing': return 'En preparación';
+                case 'ready': return 'Listo para entrega';
+                case 'delivered': return 'Entregado';
+                case 'cancelled': return 'Cancelado';
+                default: return status;
+            }
+        }
+        
+        // Cargar clientes (admin)
+        function loadCustomers() {
+            if (currentUserRole !== 'admin') return;
+            
+            db.collection("customers").get()
+                .then(querySnapshot => {
+                    customersTableBody.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        customersTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="5" style="text-align: center;">No hay clientes registrados</td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const customer = { id: doc.id, ...doc.data() };
+                        const lastLogin = customer.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'Nunca';
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${customer.displayName}</td>
+                            <td>${customer.email}</td>
+                            <td>${customer.phone || 'N/A'}</td>
+                            <td>${customer.orderCount || 0}</td>
+                            <td>${lastLogin}</td>
+                        `;
+                        customersTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error cargando clientes: ", error);
+                    customersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Error al cargar clientes</td>
+                        </tr>
+                    `;
+                });
+        }
+        
+        // Renderizar perfil
+        function renderProfile() {
+            if (!currentUser) return;
+            
+            profileContainer.innerHTML = `
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3>${currentUser.displayName || "Cliente"}</h3>
+                        <p>${currentUser.email}</p>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">${orders.length}</span>
+                            <span class="stat-label">Pedidos</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${new Date().getFullYear() - new Date(currentUser.metadata.creationTime).getFullYear()}</span>
+                            <span class="stat-label">Años con nosotros</span>
+                        </div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn">Editar Perfil</button>
+                        <button class="btn btn-secondary">Ver Historial</button>
+                    </div>
+                </div>
+            `;
         }
         
         // Mostrar sección
@@ -2247,24 +2394,6 @@
             
             // Cambio de método de pago
             paymentMethod.addEventListener('change', handlePaymentMethodChange);
-            
-            // Verificar pago móvil
-            verifyMobileBtn.addEventListener('click', verifyMobilePayment);
-            
-            // Manejar código de verificación
-            codeInputs.forEach((input, index) => {
-                input.addEventListener('input', () => {
-                    if (input.value.length === 1 && index < codeInputs.length - 1) {
-                        codeInputs[index + 1].focus();
-                    }
-                });
-                
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && input.value === '' && index > 0) {
-                        codeInputs[index - 1].focus();
-                    }
-                });
-            });
         }
         
         // Inicializar la aplicación
