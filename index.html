@@ -1146,10 +1146,106 @@
 </head>
 <body>
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js">
+function openCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.style.display = 'block';
+    m.classList.add('open');
+    renderCart();
+}
+function closeCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.classList.remove('open');
+    m.style.display = '';
+}
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('close-modal')) {
+        closeCartModal();
+    }
+    const m = document.getElementById('cartModal');
+    if (m && e.target === m) { // click outside content
+        closeCartModal();
+    }
+});
+
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js">
+function openCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.style.display = 'block';
+    m.classList.add('open');
+    renderCart();
+}
+function closeCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.classList.remove('open');
+    m.style.display = '';
+}
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('close-modal')) {
+        closeCartModal();
+    }
+    const m = document.getElementById('cartModal');
+    if (m && e.target === m) { // click outside content
+        closeCartModal();
+    }
+});
+
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js">
+function openCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.style.display = 'block';
+    m.classList.add('open');
+    renderCart();
+}
+function closeCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.classList.remove('open');
+    m.style.display = '';
+}
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('close-modal')) {
+        closeCartModal();
+    }
+    const m = document.getElementById('cartModal');
+    if (m && e.target === m) { // click outside content
+        closeCartModal();
+    }
+});
+
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js">
+function openCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.style.display = 'block';
+    m.classList.add('open');
+    renderCart();
+}
+function closeCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.classList.remove('open');
+    m.style.display = '';
+}
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('close-modal')) {
+        closeCartModal();
+    }
+    const m = document.getElementById('cartModal');
+    if (m && e.target === m) { // click outside content
+        closeCartModal();
+    }
+});
+
+</script>
     
     <!-- Header Animado -->
     <header id="mainHeader">
@@ -1459,22 +1555,15 @@
                             <i class="fas fa-utensils"></i>
                             <span>Mesa 8</span>
                         </div>
-                        <div class="table-card" data-table="barra">
-                            <i class="fas fa-glass-martini-alt"></i>
-                            <span>Barra</span>
+                        <div class="table-card" data-table="9">
+                            <i class="fas fa-utensils"></i>
+                            <span>Mesa 9</span>
                         </div>
-                        <div class="table-card" data-table="llevar">
-                            <i class="fas fa-shopping-bag"></i>
-                            <span>Para Llevar</span>
+                        <div class="table-card" data-table="10">
+                            <i class="fas fa-utensils"></i>
+                            <span>Mesa 10</span>
                         </div>
-                    </div>
-                </div>
-                
-                <div id="waiterMenuSection" style="display: none;">
-                    <h3>Menú</h3>
-                    <div class="products-grid" id="waiterProductsContainer">
-                        <!-- Productos cargados dinámicamente -->
-                    </div>
+</div>
                 </div>
             </div>
         </section>
@@ -1711,6 +1800,20 @@
         const customerPaymentSection = document.getElementById('customerPaymentSection');
         const magicNav = document.getElementById('magicNav');
         const desktopCartBtn = document.getElementById('desktopCartBtn');
+        // --- Añadido: carrito por mesa para meseros ---
+        let cartByTable = {}; // { mesaId: [ {id,name,price,quantity} ] }
+        function getActiveCart() {
+            if (currentUserRole === 'waiter') {
+                if (!currentTable) {
+                    showNotification('Seleccione una mesa antes de agregar al carrito');
+                    return null;
+                }
+                if (!cartByTable[currentTable]) cartByTable[currentTable] = [];
+                return cartByTable[currentTable];
+            }
+            return cart; // cliente
+        }
+
         
         // Observador de autenticación
         auth.onAuthStateChanged(user => {
@@ -1818,44 +1921,89 @@
         }
         
         // Función para actualizar la UI según el rol
-        function updateUIForRole() {
-            if (adminMobileNavItem) {
-                if (currentUserRole === 'admin') {
-                    adminMobileNavItem.style.display = 'flex';
-                } else {
-                    adminMobileNavItem.style.display = 'none';
-                    if (document.getElementById('adminSection').style.display === 'block') {
-                        showSection('menu');
-                    }
-                }
-            }
-            
-            // Mostrar u ocultar botón de carrito de escritorio
-            if (desktopCartBtn) {
-                if (currentUserRole === 'customer' || currentUserRole === 'waiter') {
-                    desktopCartBtn.style.display = 'flex';
-                } else {
-                    desktopCartBtn.style.display = 'none';
-                }
-            }
-            
-            // Ocultar sección de pago para meseros
-            if (currentUserRole === 'waiter') {
-                customerPaymentSection.style.display = 'none';
-            } else {
-                customerPaymentSection.style.display = 'block';
-            }
-            
-            // Actualizar contador de carrito
-            updateCartCount();
-        }
+        
+function updateUIForRole() {
+    const adminOnlyItems = document.querySelectorAll('.admin-only');
+    const premiumBadge = document.getElementById('premiumBadge');
+    const profileMenuItem = document.getElementById('profileMenuItem');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const paymentSection = document.getElementById('paymentSection');
+    const adminMenu = document.getElementById('adminMenu');
+    const adminMobileNavItem = document.getElementById('adminMobileNavItem');
+
+    // Magic nav items
+    const navMenu = document.querySelector('#magicNav .magic-nav-item[data-section="menu"]');
+    const navOrders = document.querySelector('#magicNav .magic-nav-item[data-section="orders"]');
+    const navProfile = document.querySelector('#magicNav .magic-nav-item[data-section="profile"]');
+    const mobileCartIcon = document.getElementById('mobileCartIcon');
+
+    // Sidebar & Categories
+    const sidebar = document.getElementById('sidebar');
+    const categoriesContainer = document.getElementById('categoriesContainer');
+    const menuToggle = document.getElementById('menuToggle');
+
+    // Hide all customizable nav items by default; then enable per role
+    [navMenu, navOrders, navProfile, mobileCartIcon, adminMenu, adminMobileNavItem].forEach(el => { if (el) el.style.display = 'none'; });
+
+    // Reset categories / sidebar visibility
+    if (sidebar) sidebar.style.display = '';
+    if (menuToggle) menuToggle.style.display = '';
+    if (categoriesContainer) categoriesContainer.parentElement.style.display = '';
+
+    // Admin toggles common
+    adminOnlyItems.forEach(el => el.style.display = userIsAdmin ? '' : 'none');
+    if (adminMenu) adminMenu.style.display = userIsAdmin ? '' : 'none';
+    if (adminMobileNavItem) adminMobileNavItem.style.display = userIsAdmin ? '' : 'none';
+    if (premiumBadge) premiumBadge.style.display = userIsPremium ? '' : 'none';
+    if (profileMenuItem) profileMenuItem.style.display = currentUser ? '' : 'none';
+    if (logoutBtn) logoutBtn.style.display = currentUser ? '' : 'none';
+
+    // Payment visible only for customers (not waiter/chefs)
+    if (paymentSection) paymentSection.style.display = (currentUserRole === 'customer') ? '' : 'none';
+
+    // Role-specific UI
+    if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
+        // Show only Orders icon; route to chef section
+        if (navOrders) navOrders.style.display = '';
+        // Hide category bar and cart/profile/menu
+        if (menuToggle) menuToggle.style.display = 'none';
+        if (sidebar) sidebar.style.display = 'none';
+        if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = 'none';
+        if (mobileCartIcon) mobileCartIcon.style.display = 'none';
+        if (navMenu) navMenu.style.display = 'none';
+        if (navProfile) navProfile.style.display = 'none';
+        // Default section for chefs
+        showSection('chef');
+    } else if (currentUserRole === 'waiter') {
+        // Waiter: Menu, Orders (read-only list), Profile, Cart
+        if (navMenu) navMenu.style.display = '';
+        if (navOrders) navOrders.style.display = '';
+        if (navProfile) navProfile.style.display = '';
+        if (mobileCartIcon) mobileCartIcon.style.display = '';
+        // Categories bar visible
+        if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
+        if (menuToggle) menuToggle.style.display = '';
+        // Default to waiter section so they can pick a table
+        showSection('waiter');
+    } else {
+        // Customer (default): Menu, Orders (own status), Profile, Cart, Categories visible
+        if (navMenu) navMenu.style.display = '';
+        if (navOrders) navOrders.style.display = '';
+        if (navProfile) navProfile.style.display = '';
+        if (mobileCartIcon) mobileCartIcon.style.display = '';
+        if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
+        if (menuToggle) menuToggle.style.display = '';
+        showSection('menu');
+    }
+}
+
         
         // Actualizar contador de carrito
         function updateCartCount() {
-            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-            document.querySelectorAll('.cart-count').forEach(span => {
-                span.textContent = count;
-            });
+            const active = getActiveCart();
+            const count = active ? active.reduce((sum, item) => sum + item.quantity, 0) : 0;
+            document.querySelectorAll('.cart-count').forEach(span => { span.textContent = count; });
+        });
         }
         
         // Guardar datos del cliente en Firebase
@@ -2144,13 +2292,17 @@
         // Añadir al carrito
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
-            
-            if (product) {
-                const existingItem = cart.find(item => item.id === productId);
-                
-                if (existingItem) {
-                    existingItem.quantity++;
-                } else {
+            const active = getActiveCart();
+            if (!product || !active) return;
+            const existingItem = active.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                active.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+            }
+            showNotification(`${product.name} añadida al carrito!`);
+            updateCartCount();
+        } else {
                     cart.push({
                         id: product.id,
                         name: product.name,
@@ -2166,15 +2318,63 @@
         
         // Renderizar carrito
         function renderCart() {
+            const active = getActiveCart();
             cartItems.innerHTML = '';
-            
-            if (cart.length === 0) {
+            if (!active || active.length === 0) {
                 cartItems.innerHTML = '<p class="empty-cart">Tu carrito está vacío</p>';
                 cartSubtotal.textContent = '$0.00';
                 cartTax.textContent = '$0.00';
                 cartTotal.textContent = '$0.00';
                 return;
             }
+            let subtotal = 0;
+            active.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-drumstick-bite" style="font-size: 1.5rem;"></i>
+                        <div class="item-info">
+                            <div class="item-title">${item.name}</div>
+                            <div class="item-price">$${item.price.toFixed(2)} c/u</div>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                        <span class="quantity">${item.quantity}</span>
+                        <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                        <button class="remove-item" data-id="${item.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>`;
+                cartItems.appendChild(cartItem);
+            });
+            const tax = subtotal * (taxRate / 100);
+            const total = subtotal + tax;
+            cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+            cartTax.textContent = `$${tax.toFixed(2)}`;
+            cartTotal.textContent = `$${total.toFixed(2)}`;
+            document.querySelectorAll('.quantity-btn.minus').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = e.target.closest('.quantity-btn').dataset.id;
+                    updateQuantity(productId, -1);
+                });
+            });
+            document.querySelectorAll('.quantity-btn.plus').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = e.target.closest('.quantity-btn').dataset.id;
+                    updateQuantity(productId, 1);
+                });
+            });
+            document.querySelectorAll('.remove-item').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = e.target.closest('.remove-item').dataset.id;
+                    removeFromCart(productId);
+                });
+            });
+        }
             
             let subtotal = 0;
             
@@ -2236,14 +2436,18 @@
         
         // Actualizar cantidad en carrito
         function updateQuantity(productId, change) {
-            const item = cart.find(item => item.id === productId);
-            
-            if (item) {
-                item.quantity += change;
-                
-                if (item.quantity <= 0) {
-                    cart = cart.filter(item => item.id !== productId);
-                }
+            const active = getActiveCart();
+            if (!active) return;
+            const item = active.find(i => i.id === productId);
+            if (!item) return;
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                const idx = active.findIndex(i => i.id === productId);
+                if (idx !== -1) active.splice(idx, 1);
+            }
+            renderCart();
+            updateCartCount();
+        }
                 
                 renderCart();
                 updateCartCount();
@@ -2252,10 +2456,12 @@
         
         // Eliminar del carrito
         function removeFromCart(productId) {
-            cart = cart.filter(item => item.id !== productId);
+            const active = getActiveCart();
+            if (!active) return;
+            const idx = active.findIndex(i => i.id === productId);
+            if (idx !== -1) active.splice(idx, 1);
             renderCart();
             updateCartCount();
-            showNotification('Producto eliminado del carrito');
         }
         
         // Subir comprobante a Firebase Storage
@@ -2737,6 +2943,12 @@
             } else if (sectionId === 'chef') {
                 loadKitchenOrders();
             }
+         else if (sectionId === 'waiter') { 
+                renderWaiterProducts(); 
+                loadOrders(); 
+                setupTableSelection();
+            const dcb=document.getElementById("desktopCartBtn"); if(dcb){dcb.addEventListener("click",openCartModal);} 
+            } 
         }
         
         // Mostrar notificación
@@ -2980,91 +3192,82 @@
         }
         
         // Cargar pedidos para cocina
-        function loadKitchenOrders() {
-            if (currentUserRole !== 'empanada_chef' && currentUserRole !== 'general_chef') return;
-            
-            let query = db.collection("orders")
-                .where("status", "in", ["pending", "preparing"])
-                .orderBy("date", "asc");
-            
-            // Aplicar filtros adicionales
-            if (chefFilter === 'pending') {
-                query = query.where("status", "==", "pending");
-            } else if (chefFilter === 'preparing') {
-                query = query.where("status", "==", "preparing");
-            } else if (chefFilter === 'ready') {
-                query = query.where("status", "==", "ready");
-            }
-            
-            query.get()
-                .then(querySnapshot => {
-                    kitchenOrdersContainer.innerHTML = '';
-                    
-                    if (querySnapshot.empty) {
-                        kitchenOrdersContainer.innerHTML = `
-                            <div class="empty-message">
-                                <i class="fas fa-utensils"></i>
-                                <p>No hay pedidos pendientes</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    querySnapshot.forEach(doc => {
-                        const order = { id: doc.id, ...doc.data() };
-                        const date = new Date(order.date);
-                        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-                        
-                        const orderElement = document.createElement('div');
-                        orderElement.className = 'kitchen-order-card';
-                        orderElement.innerHTML = `
-                            <div class="order-header">
-                                <div class="order-id">Pedido #${order.id.substring(0, 8)}</div>
-                                <div class="order-time">${formattedDate}</div>
-                                <div class="order-table">${order.table || 'Llevar'}</div>
-                            </div>
-                            
-                            <div class="order-items">
-                                ${order.items.map(item => `
-                                    <div class="order-item ${item.category === 'empanadas' ? 'empanada' : ''}">
-                                        <div class="item-name">${item.name}</div>
-                                        <div class="item-quantity">${item.quantity}x</div>
-                                        <div class="item-status status-${item.status}">
-                                            ${getStatusText(item.status)}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            
-                            <div class="order-actions">
-                                <div>
-                                    <button class="mark-ready-btn" data-order="${doc.id}">
-                                        <i class="fas fa-check"></i> Marcar como Listo
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        kitchenOrdersContainer.appendChild(orderElement);
-                    });
-                    
-                    // Agregar event listeners para los botones
-                    document.querySelectorAll('.mark-ready-btn').forEach(button => {
-                        button.addEventListener('click', (e) => {
-                            const orderId = e.target.closest('.mark-ready-btn').dataset.order;
-                            markOrderAsReady(orderId);
-                        });
-                    });
-                })
-                .catch(error => {
-                    console.error("Error cargando pedidos de cocina: ", error);
-                    kitchenOrdersContainer.innerHTML = `
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>Error al cargar pedidos</p>
-                        </div>
-                    `;
-                });
+        
+function loadKitchenOrders() {
+    if (currentUserRole !== 'empanada_chef' && currentUserRole !== 'general_chef') return;
+    const container = document.getElementById('kitchenOrdersContainer');
+    if (!container) return;
+    container.innerHTML = '<div class="loading">Cargando pedidos...</div>';
+
+    db.collection('orders')
+      .where('status', 'in', ['pending', 'processing'])
+      .orderBy('createdAt', 'asc')
+      .onSnapshot((snapshot) => {
+        container.innerHTML = '';
+        if (snapshot.empty) {
+          container.innerHTML = '<p class="muted">No hay pedidos por ahora.</p>';
+          return;
         }
+        snapshot.forEach(doc => {
+          const order = doc.data();
+          order.id = doc.id;
+
+          // Filter items depending on chef role
+          const filteredItems = (order.items || []).filter(it => {
+            const cat = (it.category || '').toLowerCase();
+            if (currentUserRole === 'empanada_chef') {
+              return cat === 'empanadas' || cat === 'bebidas';
+            }
+            if (currentUserRole === 'general_chef') {
+              return cat !== 'empanadas';
+            }
+            return true;
+          });
+
+          if (!filteredItems.length) return; // Don't render card if nothing for this chef
+
+          // Build order card
+          const el = document.createElement('div');
+          el.className = 'kitchen-order-card';
+          el.innerHTML = `
+            <div class="header">
+              <div>
+                <div class="order-id">#${order.shortId || order.id.slice(-6)}</div>
+                <div class="meta">Mesa: ${order.table || order.tableNumber || 'N/A'} • ${new Date(order.createdAt?.toDate ? order.createdAt.toDate() : order.createdAt).toLocaleTimeString()}</div>
+              </div>
+              <div class="status ${order.status}">${order.status}</div>
+            </div>
+            <ul class="items">
+              ${filteredItems.map(it => `
+                <li>
+                  <span class="qty">${it.quantity || 1}×</span>
+                  <span class="name">${it.name}</span>
+                  ${it.notes ? `<span class="notes">— ${it.notes}</span>` : ''}
+                </li>
+              `).join('')}
+            </ul>
+            <div class="order-actions">
+              <button class="mark-ready-btn" data-id="${order.id}">Marcar como listo</button>
+            </div>
+          `;
+          container.appendChild(el);
+        });
+
+        // Attach handlers for ready buttons (only visible for chefs)
+        container.querySelectorAll('.mark-ready-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const id = e.currentTarget.dataset.id;
+            try {
+              await db.collection('orders').doc(id).update({ status: 'ready', readyAt: new Date() });
+            } catch (err) {
+              console.error('No se pudo actualizar el pedido', err);
+              alert('No se pudo actualizar el pedido: ' + err.message);
+            }
+          });
+        });
+      });
+}
+
         
         // Marcar pedido como listo
         function markOrderAsReady(orderId) {
@@ -3216,7 +3419,9 @@
         
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
+            setupMagicNav();
+            setupSidebar();
+            setupTableSelection();
             // Establecer modo de autenticación inicial
             setAuthMode('login');
             
@@ -3248,6 +3453,98 @@
                 }, 1000);
             }
         });
-    </script>
+    
+
+// === Mesas: seleccionar mesa activa para el mesero ===
+function setupTableSelection() {
+    const cards = document.querySelectorAll('.table-card');
+    if (!cards.length) return;
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const table = card.getAttribute('data-table');
+            currentTable = table;
+            // UI highlight
+            document.querySelectorAll('.table-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+        });
+    });
+}
+// === MAGIC NAV & SIDEBAR SETUP (role-aware) ===
+function setupMagicNav() {
+    const navItems = document.querySelectorAll('#magicNav .magic-nav-item');
+    const mobileCartIcon = document.getElementById('mobileCartIcon');
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sec = item.dataset.section;
+            // Map click to section based on role
+            if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
+                if (sec === 'orders') {
+                    showSection('chef');
+                }
+                return; // other icons are hidden, but ignore if clicked
+            }
+            if (currentUserRole === 'waiter') {
+                if (sec === 'orders') {
+                    showSection('orders');
+                    return;
+                }
+                if (sec === 'menu') {
+                    showSection('menu');
+                    return;
+                }
+            }
+            // default behavior
+            showSection(sec);
+        });
+    });
+    if (mobileCartIcon) {
+        mobileCartIcon.addEventListener('click', (e) => {
+            e.preventDefault();
+            openCartModal();
+        });
+    }
+}
+
+function setupSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const closeBtn = document.getElementById('closeSidebar');
+    const open = () => { if (sidebar){ sidebar.classList.add('open'); sidebar.style.display='block'; } if (overlay){ overlay.classList.add('active'); overlay.style.display='block'; } };
+    const close = () => { if (sidebar){ sidebar.classList.remove('open'); sidebar.style.display=''; } if (overlay){ overlay.classList.remove('active'); overlay.style.display=''; } };
+    if (menuToggle) menuToggle.addEventListener('click', (e)=>{ 
+        if (currentUserRole==='empanada_chef' || currentUserRole==='general_chef') return;
+        e.preventDefault(); open(); 
+    });
+    if (closeBtn) closeBtn.addEventListener('click', (e)=>{ e.preventDefault(); close(); });
+    if (overlay) overlay.addEventListener('click', close);
+}
+
+
+function openCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.style.display = 'block';
+    m.classList.add('open');
+    renderCart();
+}
+function closeCartModal() {
+    const m = document.getElementById('cartModal');
+    if (!m) return;
+    m.classList.remove('open');
+    m.style.display = '';
+}
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('close-modal')) {
+        closeCartModal();
+    }
+    const m = document.getElementById('cartModal');
+    if (m && e.target === m) { // click outside content
+        closeCartModal();
+    }
+});
+
+</script>
 </body>
 </html>
