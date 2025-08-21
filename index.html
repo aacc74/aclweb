@@ -2060,7 +2060,36 @@
                 mainHeader.style.transition = '';
             }, 400);
         });
-        
+        // Manejo de clic en la barra de navegación mágica
+		magicNavItems.forEach(item => {
+		item.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        // Quitar 'active' de todos los ítems
+        magicNavItems.forEach(i => i.classList.remove('active'));
+
+        // Marcar el clicado como activo
+        item.classList.add('active');
+
+        // Ocultar todas las secciones
+        sections.forEach(section => section.style.display = 'none');
+
+        // Mostrar la sección correspondiente
+        const sectionKey = item.dataset.section;
+        if (sectionKey) {
+            const targetSection = document.getElementById(sectionKey + 'Section');
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+        }
+
+        // Si es el carrito (ícono de carrito móvil), abre el modal
+        if (item.id === 'mobileCartIcon') {
+            cartModal.style.display = 'flex';
+        }
+    });
+});
+
         // Cargar productos desde Firebase
         function loadProducts() {
             db.collection("products").get().then(querySnapshot => {
