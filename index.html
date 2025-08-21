@@ -1033,8 +1033,8 @@
             background: white;
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow);
+            margin-bottom: 15px
+			            box-shadow: var(--shadow);
         }
 
         .order-header {
@@ -1265,11 +1265,12 @@
                             <th>Método Pago</th>
                             <th>Referencia</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
                         <tr>
-                            <td colspan="7" style="text-align: center;">Cargando pedidos...</td>
+                            <td colspan="8" style="text-align: center;">Cargando pedidos...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1471,8 +1472,6 @@
                     <div class="products-grid" id="waiterProductsContainer">
                         <!-- Productos cargados dinámicamente -->
                     </div>
-                    <button class="btn btn-secondary" id="processOrderBtn">Procesar Pedido</button>
-                    <button class="btn btn-danger" id="cancelOrderBtn">Cancelar Pedido</button>
                 </section>
             </div>
         </section>
@@ -1583,6 +1582,7 @@
                 </div>
 
                 <button class="btn btn-secondary" id="checkoutBtn">Proceder al Pago</button>
+                 <button class="btn btn-secondary" id="processOrderBtn">Procesar Pedido</button>
             </div>
         </div>
     </div>
@@ -1597,7 +1597,7 @@
             <i class="fas fa-list"></i>
             <span>Pedidos</span>
         </a>
-        <a href="#" class="magic-nav-item" data-section="profile">
+        <a href="#" class="magic-nav-item" data-section="profile" style="display:none">
             <i class="fas fa-user"></i>
             <span>Perfil</span>
         </a>
@@ -1867,7 +1867,7 @@
             // Hide all customizable nav items by default; then enable per role
             [navMenu, navOrders, navProfile, mobileCartIcon, adminMenu, adminMobileNavItem].forEach(el => { if (el) el.style.display = 'none'; });
 
-            // Reset categories / sidebar visibility
+            //Reset categories / sidebar visibility
             if (sidebar) sidebar.style.display = '';
             if (menuToggle) menuToggle.style.display = '';
             if (categoriesContainer) categoriesContainer.parentElement.style.display = '';
@@ -1902,7 +1902,6 @@
                 // Waiter: Menu, Orders (read-only list), Profile, Cart
                 if (navMenu) navMenu.style.display = '';
                 if (navOrders) navOrders.style.display = '';
-                if (navProfile) navProfile.style.display = '';
                 if (mobileCartIcon) mobileCartIcon.style.display = '';
                 // Categories bar visible
                 if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
@@ -2541,7 +2540,7 @@
                     if (querySnapshot.empty) {
                         ordersTableBody.innerHTML = `
                             <tr>
-                                <td colspan="7" style="text-align: center;">No tienes pedidos registrados</td>
+                                <td colspan="8" style="text-align: center;">No tienes pedidos registrados</td>
                             </tr>
                         `;
                         return;
@@ -2565,18 +2564,35 @@
                             <td>${getPaymentMethodName(order.paymentMethod)}</td>
                             <td>${order.paymentReference || 'N/A'}</td>
                             <td><span class="order-status status-${order.status}">${getStatusText(order.status)}</span></td>
+                             <td>
+                                <button class="cancel-order" data-id="${order.id}">Cancelar</button>
+                            </td>
                         `;
                         ordersTableBody.appendChild(row);
+                    });
+                      document.querySelectorAll('.cancel-order').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const orderId = e.target.dataset.id;
+                            cancelOrder(orderId);
+                        });
                     });
                 })
                 .catch(error => {
                     console.error("Error cargando pedidos: ", error);
                     ordersTableBody.innerHTML = `
                         <tr>
-                            <td colspan="7" style="text-align: center;">Error al cargar pedidos</td>
+                            <td colspan="8" style="text-align: center;">Error al cargar pedidos</td>
                         </tr>
                     `;
                 });
+        }
+         function cancelOrder(orderId) {
+            // Aquí deberías agregar la lógica para cancelar el pedido en Firebase
+            // Esto podría implicar cambiar el estado del pedido a "cancelado"
+            // y posiblemente realizar otras acciones como notificar al restaurante
+            // o al cliente.
+            // Por ahora, simplemente mostraremos una alerta.
+            alert(`Pedido ${orderId} cancelado.`);
         }
         
         // Cargar todos los pedidos (admin)
