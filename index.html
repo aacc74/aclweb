@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -29,13 +30,13 @@
             --sidebar-width: 280px;
             --transition: all 0.3s ease;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
@@ -47,14 +48,14 @@
             padding-bottom: 70px;
             overflow-x: hidden;
         }
-        
+
         .container {
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 15px;
         }
-        
+
         /* Header Animado */
         #mainHeader {
             position: fixed;
@@ -65,22 +66,22 @@
             padding: 1rem 0;
             z-index: 900;
             transform: translateY(-100%);
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                         box-shadow 0.3s ease;
             box-shadow: none;
             display: flex;
             justify-content: center;
         }
-        
+
         #mainHeader.visible {
             transform: translateY(0);
         }
-        
+
         #mainHeader.scrolled {
             padding: 0.6rem 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-        
+
         .header-content {
             display: flex;
             justify-content: space-between;
@@ -89,7 +90,7 @@
             max-width: 1200px;
             padding: 0 15px;
         }
-        
+
         .menu-toggle {
             background: none;
             border: none;
@@ -99,7 +100,7 @@
             margin-right: 15px;
             z-index: 1001;
         }
-        
+
         .logo {
             font-family: 'Montserrat', sans-serif;
             font-size: 1.8rem;
@@ -110,7 +111,7 @@
             transition: var(--transition);
             flex-grow: 1;
         }
-        
+
         .logo:hover {
             color: var(--primary);
             transform: scale(1.05);
@@ -150,7 +151,7 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .logout-btn {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -164,21 +165,21 @@
             transition: var(--transition);
             box-shadow: var(--shadow);
         }
-        
+
         .logout-btn:hover {
             background-color: var(--primary);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
-        
+
         .logout-btn i {
             transition: transform 0.3s ease;
         }
-        
+
         .logout-btn:hover i {
             transform: rotate(-10deg);
         }
-        
+
         /* Brand Styles */
         .brand-section {
             display: flex;
@@ -187,7 +188,7 @@
             margin-top: 70px;
             animation: fadeIn 0.8s ease;
         }
-        
+
         .brand {
             font-family: 'Montserrat', sans-serif;
             font-size: 2.2rem;
@@ -200,7 +201,7 @@
             -webkit-text-fill-color: transparent;
             position: relative;
         }
-        
+
         .brand::after {
             content: '';
             position: absolute;
@@ -212,7 +213,7 @@
             background: var(--primary);
             border-radius: 2px;
         }
-        
+
         /* Sección de autenticación mejorada */
         #authSection {
             padding-top: 40px;
@@ -221,7 +222,7 @@
             align-items: center;
             min-height: 80vh;
         }
-        
+
         .auth-container {
             width: 100%;
             max-width: 450px;
@@ -235,7 +236,7 @@
             opacity: 0;
             animation: slideUp 0.6s forwards 0.3s;
         }
-        
+
         .auth-header {
             background: linear-gradient(135deg, var(--dark), var(--primary-dark));
             padding: 2rem;
@@ -244,7 +245,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .auth-header::before {
             content: '';
             position: absolute;
@@ -255,7 +256,7 @@
             background: rgba(255,255,255,0.1);
             border-radius: 50%;
         }
-        
+
         .auth-header::after {
             content: '';
             position: absolute;
@@ -266,13 +267,13 @@
             background: rgba(255,255,255,0.05);
             border-radius: 50%;
         }
-        
+
         .auth-logo {
             position: relative;
             z-index: 2;
             margin-bottom: 1rem;
         }
-        
+
         .auth-logo i {
             font-size: 3.5rem;
             color: white;
@@ -285,33 +286,33 @@
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
-        
+
         .auth-logo h2 {
             font-size: 1.8rem;
             margin-bottom: 0.5rem;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        
+
         #authMessage {
             font-size: 1rem;
             opacity: 0.9;
         }
-        
+
         .auth-body {
             padding: 2rem;
         }
-        
+
         .form-group {
             margin-bottom: 1.5rem;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
             color: var(--dark);
         }
-        
+
         .form-group input {
             width: 100%;
             padding: 0.8rem 1.2rem;
@@ -321,25 +322,25 @@
             transition: var(--transition);
             background: var(--lighter);
         }
-        
+
         .form-group input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
             outline: none;
         }
-        
+
         .auth-footer {
             padding: 0 2rem 2rem;
             text-align: center;
         }
-        
+
         .auth-links {
             display: flex;
             justify-content: center;
             gap: 15px;
             margin-top: 1.5rem;
         }
-        
+
         .auth-links a {
             color: var(--primary);
             text-decoration: none;
@@ -347,7 +348,7 @@
             transition: var(--transition);
             position: relative;
         }
-        
+
         .auth-links a::after {
             content: '';
             position: absolute;
@@ -358,18 +359,18 @@
             background: var(--primary);
             transition: var(--transition);
         }
-        
+
         .auth-links a:hover::after {
             width: 100%;
         }
-        
+
         .auth-options {
             display: flex;
             flex-direction: column;
             gap: 12px;
             margin-top: 1.5rem;
         }
-        
+
         .auth-btn {
             display: flex;
             align-items: center;
@@ -384,15 +385,15 @@
             box-shadow: var(--shadow);
             color: white;
         }
-        
+
         .btn-google {
             background-color: var(--google);
         }
-        
+
         .btn-apple {
             background-color: var(--apple);
         }
-        
+
         .section-title {
             text-align: center;
             margin-bottom: 2rem;
@@ -400,7 +401,7 @@
             position: relative;
             padding-top: 1rem;
         }
-        
+
         .section-title::after {
             content: '';
             position: absolute;
@@ -412,7 +413,7 @@
             background: var(--primary);
             border-radius: 2px;
         }
-        
+
         /* Barra lateral de categorías */
         .sidebar {
             position: fixed;
@@ -427,11 +428,11 @@
             padding-top: 70px;
             overflow-y: auto;
         }
-        
+
         .sidebar.open {
             left: 0;
         }
-        
+
         .sidebar-header {
             padding: 1rem;
             border-bottom: 1px solid #444;
@@ -444,7 +445,7 @@
             top: 0;
             z-index: 10;
         }
-        
+
         .close-sidebar {
             background: none;
             border: none;
@@ -452,14 +453,14 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
-        
+
         .categories-container {
             display: flex;
             flex-direction: column;
             padding: 1.5rem 1rem;
             gap: 10px;
         }
-        
+
         .category-btn {
             display: flex;
             align-items: center;
@@ -473,7 +474,7 @@
             font-weight: 500;
             color: #ddd;
         }
-        
+
         .category-btn:hover, .category-btn.active {
             background: var(--primary);
             color: white;
@@ -481,7 +482,7 @@
             transform: translateX(5px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        
+
         .category-btn i {
             width: 30px;
             font-size: 1.2rem;
@@ -489,12 +490,12 @@
             margin-right: 10px;
             transition: var(--transition);
         }
-        
+
         .category-btn:hover i, .category-btn.active i {
             color: white;
             transform: scale(1.2);
         }
-        
+
         /* Overlay para fondo oscuro */
         .overlay {
             display: none;
@@ -506,11 +507,11 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 800;
         }
-        
+
         .overlay.active {
             display: block;
         }
-        
+
         /* Products Grid */
         .products-grid {
             display: grid;
@@ -518,7 +519,7 @@
             gap: 2rem;
             margin-bottom: 3rem;
         }
-        
+
         .product-card {
             background: white;
             border-radius: 15px;
@@ -528,12 +529,12 @@
             border: none;
             position: relative;
         }
-        
+
         .product-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-lg);
         }
-        
+
         .product-badge {
             position: absolute;
             top: 10px;
@@ -547,7 +548,7 @@
             z-index: 2;
             box-shadow: var(--shadow);
         }
-        
+
         .product-image {
             height: 200px;
             background: linear-gradient(45deg, var(--gray-light), #e2e6ea);
@@ -557,22 +558,22 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .product-image img {
             max-width: 100%;
             max-height: 100%;
             object-fit: cover;
             transition: var(--transition);
         }
-        
+
         .product-card:hover .product-image img {
             transform: scale(1.05);
         }
-        
+
         .product-info {
             padding: 1.5rem;
         }
-        
+
         .product-title {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
@@ -580,26 +581,26 @@
             display: flex;
             justify-content: space-between;
         }
-        
+
         .product-description {
             color: var(--gray);
             font-size: 0.9rem;
             margin-bottom: 1rem;
             min-height: 60px;
         }
-        
+
         .product-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .product-price {
             font-weight: 700;
             font-size: 1.3rem;
             color: var(--primary);
         }
-        
+
         /* Botones mejorados */
         .add-to-cart {
             background-color: var(--primary);
@@ -617,12 +618,12 @@
             gap: 8px;
             font-weight: 600;
         }
-        
+
         .add-to-cart:hover {
             background-color: var(--primary-dark);
             transform: scale(1.05);
         }
-        
+
         /* Magic Navigation Menu - Bloqueada hasta login */
         .magic-nav {
             position: fixed;
@@ -639,12 +640,12 @@
             opacity: 0;
             transition: var(--transition);
         }
-        
+
         .magic-nav.visible {
             transform: translateY(0);
             opacity: 1;
         }
-        
+
         .magic-nav-item {
             display: flex;
             flex-direction: column;
@@ -661,7 +662,7 @@
             pointer-events: auto;
             transform: scale(0.9);
         }
-        
+
         .magic-nav-item.active {
             color: white;
             background: var(--primary);
@@ -670,17 +671,17 @@
             opacity: 1;
             pointer-events: auto;
         }
-        
+
         .magic-nav-item i {
             font-size: 1.3rem;
             margin-bottom: 5px;
             transition: var(--transition);
         }
-        
+
         .magic-nav-item.active i {
             transform: scale(1.2);
         }
-        
+
         .magic-nav-item.active::after {
             content: '';
             position: absolute;
@@ -691,7 +692,7 @@
             transform: rotate(45deg);
             z-index: -1;
         }
-        
+
         /* Interfaz de Mesero mejorada */
         .waiter-view {
             padding: 20px;
@@ -700,24 +701,24 @@
             margin-bottom: 20px;
             box-shadow: var(--shadow);
         }
-        
+
         .table-selection {
             margin-bottom: 30px;
         }
-        
+
         .table-selection h3 {
             margin-bottom: 15px;
             color: var(--dark);
             text-align: center;
             font-size: 1.4rem;
         }
-        
+
         .tables-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 15px;
         }
-        
+
         .table-card {
             background: var(--lighter);
             border-radius: 12px;
@@ -730,7 +731,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .table-card::before {
             content: '';
             position: absolute;
@@ -741,13 +742,13 @@
             background: var(--gray-light);
             transition: var(--transition);
         }
-        
+
         .table-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-lg);
             border-color: var(--primary-light);
         }
-        
+
         .table-card.active {
             background: var(--primary);
             color: white;
@@ -755,44 +756,44 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
         }
-        
+
         .table-card.active::before {
             background: white;
         }
-        
+
         .table-card i {
             font-size: 2rem;
             margin-bottom: 10px;
             color: var(--primary);
             transition: var(--transition);
         }
-        
+
         .table-card.active i {
             color: white;
         }
-        
+
         .table-card span {
             font-weight: 600;
             font-size: 1.1rem;
         }
-        
+
         /* Animaciones */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
+
         @keyframes slideUp {
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-        
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        
+
         @keyframes float {
             0% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
@@ -1047,8 +1048,7 @@
 
         .order-item {
             display: flex;
-            justify-content
-			space-between;
+            justify-content: space-between;
             padding: 8px 0;
             border-bottom: 1px solid #f5f5f5;
         }
@@ -1066,6 +1066,7 @@
         .order-actions {
             margin-top: 15px;
             text-align: right;
+			
         }
 
         .mark-ready-btn {
@@ -1107,31 +1108,31 @@
         .pulse {
             animation: pulse 0.5s ease-in-out;
         }
-        
+
         /* Responsive */
         @media (max-width: 768px) {
             .brand {
                 font-size: 1.8rem;
             }
-            
+
             .tables-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
-            
+
             .auth-container {
                 margin: 0 15px;
             }
         }
-        
+
         @media (max-width: 480px) {
             .brand {
                 font-size: 1.5rem;
             }
-            
+
             .auth-header {
                 padding: 1.5rem;
             }
-            
+
             .auth-logo i {
                 font-size: 2.5rem;
                 width: 70px;
@@ -1147,7 +1148,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
-    
+
     <!-- Header Animado -->
     <header id="mainHeader">
         <div class="header-content">
@@ -1165,7 +1166,7 @@
             </button>
         </div>
     </header>
-    
+
     <!-- Barra lateral de categorías -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -1178,15 +1179,15 @@
             <!-- Las categorías se cargarán dinámicamente -->
         </div>
     </aside>
-    
+
     <!-- Overlay para fondo oscuro -->
     <div class="overlay" id="overlay"></div>
-    
+
     <!-- Brand Section -->
     <div class="container brand-section">
         <h1 class="brand">Arcanos Lunch</h1>
     </div>
-    
+
     <!-- Main Content -->
     <main class="container">
         <!-- Auth Section mejorada -->
@@ -1199,7 +1200,7 @@
                         <p id="authMessage">Inicia sesión para continuar</p>
                     </div>
                 </div>
-                
+
                 <div class="auth-body">
                     <form id="authForm" class="auth-form">
                         <div class="form-group">
@@ -1219,14 +1220,14 @@
                         <button type="submit" class="btn" id="authSubmitBtn">Iniciar Sesión</button>
                     </form>
                 </div>
-                
+
                 <div class="auth-footer">
                     <div class="auth-links">
-                        <a href="#" id="signUpLink">Registrarse</a> 
+                        <a href="#" id="signUpLink">Registrarse</a>
                         <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
                         <a href="#" id="loginLink" style="display: none;">Volver a Iniciar Sesión</a>
                     </div>
-                    
+
                     <div class="auth-options">
                         <button class="auth-btn btn-google" id="googleLogin">
                             <i class="fab fa-google"></i>
@@ -1240,20 +1241,20 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Menu Section -->
         <section id="menuSection" style="display: none;" class="for-customer">
             <h2 class="section-title">Nuestro Menú</h2>
-            
+
             <div class="products-grid" id="productsContainer">
                 <!-- Productos cargados dinámicamente -->
             </div>
         </section>
-        
+
         <!-- Orders Section -->
         <section id="ordersSection" style="display: none;" class="for-customer">
             <h2 class="section-title">Historial de Pedidos</h2>
-            
+
             <div class="orders-container" id="ordersContainer">
                 <table class="orders-table">
                     <thead>
@@ -1265,30 +1266,31 @@
                             <th>Método Pago</th>
                             <th>Referencia</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
                         <tr>
-                            <td colspan="7" style="text-align: center;">Cargando pedidos...</td>
+                            <td colspan="8" style="text-align: center;">Cargando pedidos...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </section>
-        
+
         <!-- Profile Section -->
         <section id="profileSection" style="display: none;" class="for-customer">
             <h2 class="section-title">Mi Perfil</h2>
-            
+
             <div class="profile-container" id="profileContainer">
                 <!-- Perfil cargado dinámicamente -->
             </div>
         </section>
-        
+
         <!-- Admin Section -->
         <section id="adminSection" style="display: none;" class="for-customer">
             <h2 class="section-title">Panel de Administración</h2>
-            
+
             <div class="admin-panel">
                 <div class="admin-controls">
                     <button class="admin-btn active" data-tab="products">Productos</button>
@@ -1296,7 +1298,7 @@
                     <button class="admin-btn" data-tab="customers">Clientes</button>
                     <button class="admin-btn" data-tab="settings">Configuración</button>
                 </div>
-                
+
                 <div class="admin-sections">
                     <div class="admin-section active" id="productsAdmin">
                         <h3>Gestión de Productos</h3>
@@ -1335,7 +1337,7 @@
                             </div>
                             <button type="submit" class="btn">Agregar Producto</button>
                         </form>
-                        
+
                         <div class="current-products" style="margin-top: 2rem;">
                             <h4>Productos Actuales</h4>
                             <div id="currentProducts">
@@ -1343,7 +1345,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="admin-section" id="ordersAdmin">
                         <h3>Gestión de Pedidos</h3>
                         <div class="orders-list" id="adminOrdersList">
@@ -1368,7 +1370,7 @@
                             </table>
                         </div>
                     </div>
-                    
+
                     <div class="admin-section" id="customersAdmin">
                         <h3>Gestión de Clientes</h3>
                         <div class="customers-list" id="customersList">
@@ -1390,7 +1392,7 @@
                             </table>
                         </div>
                     </div>
-                    
+
                     <div class="admin-section" id="settingsAdmin">
                         <h3>Configuración del Sistema</h3>
                         <form id="settingsForm">
@@ -1416,7 +1418,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Nueva Sección para Meseros con diseño mejorado -->
         <section id="waiterSection" style="display: none;" class="for-waiter">
             <div class="waiter-view">
@@ -1471,29 +1473,27 @@
                     <div class="products-grid" id="waiterProductsContainer">
                         <!-- Productos cargados dinámicamente -->
                     </div>
-                    <button class="btn btn-secondary" id="processOrderBtn">Procesar Pedido</button>
-                    <button class="btn btn-danger" id="cancelOrderBtn">Cancelar Pedido</button>
                 </section>
             </div>
         </section>
-        
+
         <!-- Nueva Sección para Cocineros -->
         <section id="chefSection" style="display: none;" class="for-chef">
             <h2 class="section-title">Panel de Cocina</h2>
-            
+
             <div class="chef-filter">
                 <button class="filter-btn active" id="filterAll">Todos los Pedidos</button>
                 <button class="filter-btn" id="filterPending">Pendientes</button>
                 <button class="filter-btn" id="filterPreparing">En Preparación</button>
                 <button class="filter-btn" id="filterReady">Listos</button>
             </div>
-            
+
             <div class="kitchen-orders" id="kitchenOrdersContainer">
                 <!-- Pedidos cargados dinámicamente -->
             </div>
         </section>
     </main>
-    
+
     <!-- Cart Modal -->
     <div class="modal" id="cartModal">
         <div class="modal-content">
@@ -1583,10 +1583,11 @@
                 </div>
 
                 <button class="btn btn-secondary" id="checkoutBtn">Proceder al Pago</button>
+                 <button class="btn btn-secondary" id="processOrderBtn">Procesar Pedido</button>
             </div>
         </div>
     </div>
-    
+
     <!-- Magic Navigation Menu -->
     <nav class="magic-nav" id="magicNav">
         <a href="#" class="magic-nav-item active" data-section="menu">
@@ -1597,26 +1598,22 @@
             <i class="fas fa-list"></i>
             <span>Pedidos</span>
         </a>
-        <a href="#" class="magic-nav-item" data-section="profile">
-            <i class="fas fa-user"></i>
-            <span>Perfil</span>
+         <a href="#" class="magic-nav-item" id="mobileCartIcon">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Carrito</span>
         </a>
         <a href="#" class="magic-nav-item" data-section="admin" id="adminMobileNavItem" style="display: none;">
             <i class="fas fa-cog"></i>
             <span>Admin</span>
         </a>
-        <a href="#" class="magic-nav-item" id="mobileCartIcon">
-            <i class="fas fa-shopping-cart"></i>
-            <span>Carrito</span>
-        </a>
     </nav>
-    
+
     <!-- Notificación para cocineros -->
     <div class="notification" id="orderNotification">
         <h4>¡Nuevo Pedido!</h4>
-        <p id="notificationContent">Mesa 1 ha realizado un nuevo pedido</p>
+        <p id="notificationContent">Mesa ${order.table || 'Llevar'} ha realizado un nuevo pedido</p>
     </div>
-    
+
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
@@ -1627,13 +1624,13 @@
             messagingSenderId: "708200899753",
             appId: "1:708200899753:web:eafb8bf818a25fdbfd75b8"
         };
-        
+
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
-        
+
         // Variables globales
         let cart = [];
         let products = [];
@@ -1649,7 +1646,7 @@
         let chefFilter = 'all';
         let realtimeOrdersListener = null;
         let cartByTable = {};
-        
+
         // Referencias DOM
         const mainHeader = document.getElementById('mainHeader');
         const logoutBtn = document.getElementById('logoutBtn');
@@ -1713,7 +1710,7 @@
          const waiterMenuSection = document.getElementById('waiterMenuSection');
         const processOrderBtn = document.getElementById('processOrderBtn');
         const cancelOrderBtn = document.getElementById('cancelOrderBtn');
-        
+
         // Función para obtener el carrito activo (cliente o mesa de mesero)
         function getActiveCart() {
             if (currentUserRole === 'waiter') {
@@ -1726,7 +1723,7 @@
             }
             return cart; // cliente
         }
-        
+
         // Actualizar contador de carrito
         function updateCartCount() {
             const active = getActiveCart();
@@ -1735,7 +1732,7 @@
                 span.textContent = count;
             });
         }
-        
+
         // Observador de autenticación
         auth.onAuthStateChanged(user => {
             currentUser = user;
@@ -1743,20 +1740,20 @@
                 // Mostrar header animado
                 setTimeout(() => {
                     mainHeader.classList.add('visible');
-                    
+
                     // Añadir efecto de scroll después de mostrar
                     setTimeout(() => {
                         window.addEventListener('scroll', handleHeaderScroll);
                         handleHeaderScroll(); // Ejecutar al inicio
                     }, 100);
                 }, 300);
-                
+
                 // Ocultar sección de autenticación
                 authSection.style.display = 'none';
-                
+
                 // Mostrar barra mágica
                 magicNav.classList.add('visible');
-                
+
                 // Obtener datos del cliente
                 db.collection("customers").doc(user.uid).get()
                 .then(doc => {
@@ -1769,14 +1766,14 @@
                         currentUserRole = 'customer';
                         updateUIForRole();
                     }
-                    
+
                     // Determinar vista según rol
                     if (currentUserRole === 'waiter') {
                         showSection('waiter');
                         document.body.classList.add('role-waiter');
                         mobileCartIcon.style.display = 'flex';
                         desktopCartBtn.style.display = 'flex';
-                    } 
+                    }
                     else if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
                         showSection('chef');
                         document.body.classList.add('role-chef');
@@ -1787,7 +1784,7 @@
                         }
                         loadKitchenOrders();
                         listenForNewOrders();
-                    } 
+                    }
                     else {
                         document.body.classList.add('role-customer');
                         showSection('menu');
@@ -1800,7 +1797,7 @@
                     currentUserRole = 'customer';
                     updateUIForRole();
                 });
-                
+
                 // Cargar datos
                 loadProducts();
                 loadOrders();
@@ -1811,7 +1808,7 @@
                 // Ocultar header
                 mainHeader.classList.remove('visible', 'scrolled');
                 window.removeEventListener('scroll', handleHeaderScroll);
-                
+
                 // Usuario no autenticado
                 authSection.style.display = 'block';
                 currentUserRole = 'customer';
@@ -1820,20 +1817,20 @@
                 desktopCartBtn.style.display = 'none';
                 document.body.classList.remove('role-customer', 'role-waiter', 'role-chef');
                 magicNav.classList.remove('visible');
-                
+
                 // Ocultar todas las secciones excepto autenticación
                 sections.forEach(section => {
                     if (section.id !== 'authSection') {
                         section.style.display = 'none';
                     }
                 });
-                
+
                 // Resetear formulario de autenticación
                 authForm.reset();
                 setAuthMode('login');
             }
         });
-        
+
         // Manejar scroll para efecto en header
         function handleHeaderScroll() {
             if (window.scrollY > 30) {
@@ -1842,7 +1839,7 @@
                 mainHeader.classList.remove('scrolled');
             }
         }
-        
+
         // Función para actualizar la UI según el rol
         function updateUIForRole() {
             const adminOnlyItems = document.querySelectorAll('.admin-only');
@@ -1870,7 +1867,7 @@
             // Reset categories / sidebar visibility
             if (sidebar) sidebar.style.display = '';
             if (menuToggle) menuToggle.style.display = '';
-            if (categoriesContainer) categoriesContainer.parentElement.style.display = '';
+            if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
 
             // Admin toggles common
             const userIsAdmin = currentUserRole === 'admin';
@@ -1885,6 +1882,12 @@
             // Payment visible only for customers (not waiter/chefs)
             if (paymentSection) paymentSection.style.display = (currentUserRole === 'customer') ? '' : 'none';
 
+             // Magic nav items - waiter
+            if (currentUserRole === 'waiter') {
+                if (navMenu) navMenu.style.display = '';
+                if (navOrders) navOrders.style.display = '';
+                if (mobileCartIcon) mobileCartIcon.style.display = '';
+            }
             // Role-specific UI
             if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
                 // Show only Orders icon; route to chef section
@@ -1899,10 +1902,9 @@
                 // Default section for chefs
                 showSection('chef');
             } else if (currentUserRole === 'waiter') {
-                // Waiter: Menu, Orders (read-only list), Profile, Cart
+                // Waiter: Menu, Orders (read-only list), Cart
                 if (navMenu) navMenu.style.display = '';
                 if (navOrders) navOrders.style.display = '';
-                if (navProfile) navProfile.style.display = '';
                 if (mobileCartIcon) mobileCartIcon.style.display = '';
                 // Categories bar visible
                 if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
@@ -1920,7 +1922,7 @@
                 showSection('menu');
             }
         }
-        
+
         // Guardar datos del cliente en Firebase
         function saveCustomerData(user) {
             const customerRef = db.collection("customers").doc(user.uid);
@@ -1946,7 +1948,7 @@
                 console.error("Error obteniendo datos del cliente: ", error);
             });
         }
-        
+
         // Establecer modo de autenticación
         function setAuthMode(mode) {
             authMode = mode;
@@ -1977,27 +1979,27 @@
                     break;
             }
         }
-        
+
         // Manejar envío de formulario de autenticación
         authForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = authEmail.value;
             const password = authPassword.value;
             const confirmPassword = authConfirmPassword.value;
-            
+
             switch(authMode) {
                 case 'login': loginWithEmail(email, password); break;
-                case 'register': 
+                case 'register':
                     if (password !== confirmPassword) {
                         showNotification("Las contraseñas no coinciden");
                         return;
                     }
-                    signUpWithEmail(email, password); 
+                    signUpWithEmail(email, password);
                     break;
                 case 'forgot': resetPassword(email); break;
             }
         });
-        
+
         // Iniciar sesión con correo/contraseña
         function loginWithEmail(email, password) {
             auth.signInWithEmailAndPassword(email, password)
@@ -2007,7 +2009,7 @@
                 showNotification(`Error al iniciar sesión: ${error.message}`);
             });
         }
-        
+
         // Registrar nuevo usuario
         function signUpWithEmail(email, password) {
             auth.createUserWithEmailAndPassword(email, password)
@@ -2026,7 +2028,7 @@
                 showNotification(`Error al registrar: ${error.message}`);
             });
         }
-        
+
         // Recuperar contraseña
         function resetPassword(email) {
             auth.sendPasswordResetEmail(email)
@@ -2039,7 +2041,7 @@
                 showNotification(`Error: ${error.message}`);
             });
         }
-        
+
         // Iniciar sesión con Google
         googleLoginBtn.addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -2047,8 +2049,8 @@
                 console.error("Error de autenticación: ", error);
                 showNotification(`Error al iniciar sesión: ${error.message}`);
             });
-        });
-        
+        }
+
         // Iniciar sesión con Apple
         appleLoginBtn.addEventListener('click', () => {
             const provider = new firebase.auth.OAuthProvider('apple.com');
@@ -2056,21 +2058,21 @@
                 console.error("Error de autenticación: ", error);
                 showNotification(`Error al iniciar sesión: ${error.message}`);
             });
-        });
-        
+        }
+
         // Cerrar sesión
         logoutBtn.addEventListener('click', () => {
             mainHeader.classList.remove('scrolled');
             mainHeader.style.transition = 'transform 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
             mainHeader.style.transform = 'translateY(-100%)';
-            
+
             setTimeout(() => {
                 auth.signOut().then(() => showNotification('Sesión cerrada correctamente'))
                 .catch(error => showNotification(`Error al cerrar sesión: ${error.message}`));
                 mainHeader.style.transition = '';
             }, 400);
         });
-        
+
         // Cargar productos desde Firebase
         function loadProducts() {
             db.collection("products").get().then(querySnapshot => {
@@ -2086,21 +2088,21 @@
                 console.error("Error cargando productos: ", error);
             });
         }
-        
+
         // Renderizar los botones de categorías
         function renderCategoryFilters() {
             // Obtener categorías únicas
             const categories = [...new Set(products.map(product => product.category))];
-            
+
             // Limpiar contenedor
             categoriesContainer.innerHTML = '';
-            
+
             // Crear botones de categoría
             categories.forEach(category => {
                 const button = document.createElement('div');
                 button.className = `category-btn ${currentCategory === category ? 'active' : ''}`;
                 button.dataset.category = category;
-                
+
                 // Asignar íconos según categoría
                 let iconClass = 'fas fa-utensils'; // Icono por defecto
                 switch(category) {
@@ -2118,7 +2120,7 @@
                     case 'bebidas': iconClass = 'fas fa-glass-martini-alt'; break;
                     case 'postres': iconClass = 'fas fa-ice-cream'; break;
                 }
-                
+
                 button.innerHTML = `
                     <i class="${iconClass}"></i>
                     <span>${category}</span>
@@ -2134,7 +2136,7 @@
                 });
                 categoriesContainer.appendChild(button);
             });
-            
+
             // Botón para mostrar todos los productos
             const allButton = document.createElement('div');
             allButton.className = `category-btn ${currentCategory === 'all' ? 'active' : ''}`;
@@ -2154,22 +2156,22 @@
             });
             categoriesContainer.insertBefore(allButton, categoriesContainer.firstChild);
         }
-        
+
         // Renderizar productos
         function renderProducts() {
             productsContainer.innerHTML = '';
-            
+
             // Filtrar productos por categoría
             let filteredProducts = products;
             if (currentCategory !== 'all') {
                 filteredProducts = products.filter(product => product.category === currentCategory);
             }
-            
+
             if (filteredProducts.length === 0) {
                 productsContainer.innerHTML = '<p class="empty-message">No hay productos disponibles en esta categoría.</p>';
                 return;
             }
-            
+
             filteredProducts.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
@@ -2193,7 +2195,7 @@
                 `;
                 productsContainer.appendChild(productCard);
             });
-            
+
             // Añadir event listeners
             document.querySelectorAll('.add-to-cart').forEach(button => {
                 button.addEventListener('click', (e) => {
@@ -2203,7 +2205,7 @@
                 });
             });
         }
-        
+
         // Añadir al carrito
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
@@ -2218,7 +2220,7 @@
             showNotification(`${product.name} añadida al carrito!`);
             updateCartCount();
         }
-        
+
         // Renderizar carrito
         function renderCart() {
             const active = getActiveCart();
@@ -2278,7 +2280,7 @@
                 });
             });
         }
-        
+
         // Actualizar cantidad en carrito
         function updateQuantity(productId, change) {
             const active = getActiveCart();
@@ -2293,7 +2295,7 @@
             renderCart();
             updateCartCount();
         }
-        
+
         // Eliminar del carrito
         function removeFromCart(productId) {
             const active = getActiveCart();
@@ -2303,7 +2305,7 @@
             renderCart();
             updateCartCount();
         }
-        
+
         // Subir comprobante a Firebase Storage
         function uploadReceipt(file) {
             return new Promise((resolve, reject) => {
@@ -2311,10 +2313,10 @@
                     reject('Usuario no autenticado');
                     return;
                 }
-                
+
                 const storageRef = storage.ref();
                 const receiptRef = storageRef.child(`receipts/${currentUser.uid}/${Date.now()}_${file.name}`);
-                
+
                 receiptRef.put(file)
                 .then(snapshot => {
                     snapshot.ref.getDownloadURL().then(url => {
@@ -2326,16 +2328,16 @@
                 });
             });
         }
-        
+
         // Finalizar compra
         async function checkout() {
             const active = getActiveCart();
             if (!active || active.length === 0) return;
-            
+
             const method = document.getElementById('paymentMethod').value;
             let reference = '';
             let receiptUrl = '';
-            
+
             // Obtener referencia según el método
             switch(method) {
                 case 'pos':
@@ -2372,11 +2374,11 @@
                     reference = 'EFECTIVO';
                     break;
             }
-            
+
             const subtotal = active.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const tax = subtotal * (taxRate / 100);
             const total = subtotal + tax;
-            
+
             const order = {
                 date: new Date().toISOString(),
                 userId: currentUser.uid,
@@ -2398,7 +2400,7 @@
                 paymentReference: reference,
                 paymentReceipt: receiptUrl
             };
-            
+
             // Guardar en Firebase
             db.collection("orders").add(order)
             .then(() => {
@@ -2418,7 +2420,7 @@
                 showNotification('Error al guardar el pedido');
             });
         }
-        
+
         // Agregar nuevo producto
         function addProduct(name, price, description, category) {
             const newProduct = {
@@ -2428,7 +2430,7 @@
                 category,
                 createdAt: new Date().toISOString()
             };
-            
+
             db.collection("products").add(newProduct)
             .then(() => {
                 showNotification('¡Producto agregado con éxito!');
@@ -2439,7 +2441,7 @@
                 showNotification('Error al agregar producto');
             });
         }
-        
+
         // Eliminar producto
         function deleteProduct(productId) {
             if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
@@ -2454,7 +2456,7 @@
                 });
             }
         }
-        
+
         // Actualizar estado de pedido
         function updateOrderStatus(orderId, status) {
             db.collection("orders").doc(orderId).update({ status })
@@ -2468,21 +2470,21 @@
                 showNotification('Error al actualizar estado');
             });
         }
-        
+
         // Renderizar productos actuales en panel de administración
         function renderCurrentProducts() {
             currentProducts.innerHTML = '';
-            
+
             if (products.length === 0) {
                 currentProducts.innerHTML = '<p>No hay productos registrados.</p>';
                 return;
             }
-            
+
             const table = document.createElement('table');
             table.style.width = '100%';
             table.style.borderCollapse = 'collapse';
             table.style.marginTop = '1rem';
-            
+
             // Cabecera
             thead = document.createElement('thead');
             thead.innerHTML = `
@@ -2494,10 +2496,10 @@
                 </tr>
             `;
             table.appendChild(thead);
-            
+
             // Cuerpo
             const tbody = document.createElement('tbody');
-            
+
             products.forEach(product => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = '1px solid #eee';
@@ -2513,10 +2515,10 @@
                 `;
                 tbody.appendChild(tr);
             });
-            
+
             table.appendChild(tbody);
             currentProducts.appendChild(table);
-            
+
             // Event listeners para eliminar
             document.querySelectorAll('.delete-product').forEach(button => {
                 button.addEventListener('click', (e) => {
@@ -2525,11 +2527,11 @@
                 });
             });
         }
-        
+
         // Cargar pedidos del cliente
         function loadOrders() {
             if (!currentUser) return;
-            
+
             db.collection("orders")
                 .where("userId", "==", currentUser.uid)
                 .orderBy("date", "desc")
@@ -2537,25 +2539,25 @@
                 .then(querySnapshot => {
                     orders = [];
                     ordersTableBody.innerHTML = '';
-                    
+
                     if (querySnapshot.empty) {
                         ordersTableBody.innerHTML = `
                             <tr>
-                                <td colspan="7" style="text-align: center;">No tienes pedidos registrados</td>
+                                <td colspan="8" style="text-align: center;">No tienes pedidos registrados</td>
                             </tr>
                         `;
                         return;
                     }
-                    
+
                     querySnapshot.forEach(doc => {
                         const order = { id: doc.id, ...doc.data() };
                         orders.push(order);
                         const date = new Date(order.date);
                         const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-                        
+
                         // Contar productos
                         const productCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-                        
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${order.id.substring(0, 8)}</td>
@@ -2565,30 +2567,41 @@
                             <td>${getPaymentMethodName(order.paymentMethod)}</td>
                             <td>${order.paymentReference || 'N/A'}</td>
                             <td><span class="order-status status-${order.status}">${getStatusText(order.status)}</span></td>
+                             <td>
+                                <button class="cancel-order" data-id="${order.id}">Cancelar</button>
+                            </td>
                         `;
                         ordersTableBody.appendChild(row);
+                    });
+
+                    // Event listeners para cancelar pedido
+                    document.querySelectorAll('.cancel-order').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const orderId = e.target.dataset.id;
+                            cancelOrder(orderId);
+                        });
                     });
                 })
                 .catch(error => {
                     console.error("Error cargando pedidos: ", error);
                     ordersTableBody.innerHTML = `
                         <tr>
-                            <td colspan="7" style="text-align: center;">Error al cargar pedidos</td>
+                            <td colspan="8" style="text-align: center;">Error al cargar pedidos</td>
                         </tr>
                     `;
                 });
         }
-        
+
         // Cargar todos los pedidos (admin)
         function loadAdminOrders() {
             if (currentUserRole !== 'admin') return;
-            
+
             db.collection("orders")
                 .orderBy("date", "desc")
                 .get()
                 .then(querySnapshot => {
                     adminOrdersTableBody.innerHTML = '';
-                    
+
                     if (querySnapshot.empty) {
                         adminOrdersTableBody.innerHTML = `
                             <tr>
@@ -2597,12 +2610,12 @@
                         `;
                         return;
                     }
-                    
+
                     querySnapshot.forEach(doc => {
                         const order = { id: doc.id, ...doc.data() };
                         const date = new Date(order.date);
                         const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-                        
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${order.id.substring(0, 8)}</td>
@@ -2626,7 +2639,7 @@
                         `;
                         adminOrdersTableBody.appendChild(row);
                     });
-                    
+
                     // Event listeners para cambiar estado
                     document.querySelectorAll('.order-status').forEach(select => {
                         select.addEventListener('change', (e) => {
@@ -2645,7 +2658,7 @@
                     `;
                 });
         }
-        
+
         // Obtener nombre de método de pago
         function getPaymentMethodName(method) {
             switch(method) {
@@ -2657,7 +2670,7 @@
                 default: return method;
             }
         }
-        
+
         // Obtener texto de estado
         function getStatusText(status) {
             switch(status) {
@@ -2669,15 +2682,31 @@
                 default: return status;
             }
         }
-        
+
+         // Cancelar pedido
+        function cancelOrder(orderId) {
+            // Aquí puedes implementar la lógica para cancelar el pedido en Firebase
+            // Por ejemplo, actualizar el estado del pedido a "cancelado"
+            db.collection("orders").doc(orderId).update({ status: 'cancelled' })
+                .then(() => {
+                    showNotification('Pedido cancelado correctamente');
+                    loadOrders(); // Recargar la lista de pedidos
+                    loadAdminOrders(); // Recargar la lista de pedidos del admin
+                })
+                .catch(error => {
+                    console.error("Error al cancelar el pedido: ", error);
+                    showNotification('Error al cancelar el pedido');
+                });
+        }
+
         // Cargar clientes (admin)
         function loadCustomers() {
             if (currentUserRole !== 'admin') return;
-            
+
             db.collection("customers").get()
                 .then(querySnapshot => {
                     customersTableBody.innerHTML = '';
-                    
+
                     if (querySnapshot.empty) {
                         customersTableBody.innerHTML = `
                             <tr>
@@ -2686,11 +2715,11 @@
                         `;
                         return;
                     }
-                    
+
                     querySnapshot.forEach(doc => {
                         const customer = { id: doc.id, ...doc.data() };
                         const lastLogin = customer.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'Nunca';
-                        
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${customer.displayName}</td>
@@ -2711,7 +2740,7 @@
                     `;
                 });
         }
-        
+
         // Renderizar perfil
         function renderProfile() {
             if (!currentUser) return;
@@ -2739,7 +2768,7 @@
                             <span class="stat-label">Pedidos realizados</span>
                         </div>
                     </div>
-                    <div class="profile-actions">
+                    <div classclass="profile-actions">
                         <button class="btn">Editar Perfil</button>
                         <button class="btn btn-secondary" id="viewHistoryBtn">Ver Historial</button>
                     </div>
@@ -2751,7 +2780,7 @@
                 showSection('orders');
             });
         }
-        
+
         // Mostrar sección
         function showSection(sectionId) {
             // Verificar acceso a administración
@@ -2759,7 +2788,7 @@
                 showNotification('Acceso denegado: se requieren privilegios de administrador');
                 sectionId = 'menu';
             }
-            
+
             sections.forEach(section => {
                 if (section.id === `${sectionId}Section`) {
                     section.style.display = 'block';
@@ -2767,7 +2796,7 @@
                     section.style.display = 'none';
                 }
             });
-            
+
             // Actualizar navegación mágica activa
             magicNavItems.forEach(item => {
                 if (item.dataset.section === sectionId) {
@@ -2776,7 +2805,7 @@
                     item.classList.remove('active');
                 }
             });
-            
+
             // Cargar datos específicos de la sección
             if (sectionId === 'profile') {
                 renderProfile();
@@ -2787,17 +2816,17 @@
                 loadCustomers();
             } else if (sectionId === 'chef') {
                 loadKitchenOrders();
-            } else if (sectionId === 'waiter') { 
-                renderWaiterProducts(); 
-                loadOrders(); 
+            } else if (sectionId === 'waiter') {
+                renderWaiterProducts();
+                loadOrders();
                 setupTableSelection();
-                const dcb = document.getElementById("desktopCartBtn"); 
+                const dcb = document.getElementById("desktopCartBtn");
                 if (dcb) {
                     dcb.addEventListener("click", openCartModal);
-                } 
-            } 
+                }
+            }
         }
-        
+
         // Mostrar notificación
         function showNotification(message) {
             // Crear elemento de notificación
@@ -2817,14 +2846,14 @@
                 transform: translateX(200%);
                 transition: transform 0.3s ease-in-out;
             `;
-            
+
             document.body.appendChild(notification);
-            
+
             // Animación de entrada
             setTimeout(() => {
                 notification.style.transform = 'translateX(0)';
             }, 10);
-            
+
             // Eliminar después de 3 segundos
             setTimeout(() => {
                 notification.style.transform = 'translateX(200%)';
@@ -2833,43 +2862,43 @@
                 }, 300);
             }, 3000);
         }
-        
+
         // Animación para icono del carrito
         function animateCart() {
             const cartIcon = document.getElementById('mobileCartIcon');
             if (!cartIcon) return;
-            
+
             cartIcon.classList.add('pulse');
             setTimeout(() => {
                 cartIcon.classList.remove('pulse');
             }, 500);
         }
-        
+
         // Función para abrir el menú lateral
         function openSidebar() {
             sidebar.classList.add('open');
             overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
-        
+
         // Función para cerrar el menú lateral
         function closeSidebarFunc() {
             sidebar.classList.remove('open');
             overlay.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
-        
+
         // Manejar cambio de método de pago
         function handlePaymentMethodChange() {
             const method = paymentMethod.value;
-            
+
             // Ocultar todos los detalles
             posDetails.classList.remove('active');
             mobileDetails.classList.remove('active');
             usdDetails.classList.remove('active');
             eurDetails.classList.remove('active');
             cashDetails.classList.remove('active');
-            
+
             // Mostrar detalles del método seleccionado
             switch(method) {
                 case 'pos':
@@ -2889,11 +2918,11 @@
                     break;
             }
         }
-        
+
         // =====================================
         // Funciones para Meseros
         // =====================================
-        
+
         // Seleccionar mesa
         function setupTableSelection() {
             document.querySelectorAll('.table-card').forEach(card => {
@@ -2903,21 +2932,21 @@
                     });
                     card.classList.add('active');
                     currentTable = card.dataset.table;
-                    
+
                     // Habilitar el menú
                     waiterMenuSection.style.display = 'block';
-                    
+
                     // Cargar productos
                     renderWaiterProducts();
                 });
             });
         }
-        
+
         // Renderizar productos para meseros
         function renderWaiterProducts() {
             if (!waiterProductsContainer) return;
             waiterProductsContainer.innerHTML = '';
-            
+
             products.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
@@ -2941,7 +2970,7 @@
                 `;
                 waiterProductsContainer.appendChild(productCard);
             });
-            
+
             // Event listeners para añadir al carrito
             document.querySelectorAll('.add-to-cart').forEach(button => {
                 button.addEventListener('click', (e) => {
@@ -2951,7 +2980,7 @@
                 });
             });
         }
-        
+
         // Procesar pedido de mesero
         async function processWaiterOrder() {
             const active = getActiveCart();
@@ -2959,16 +2988,16 @@
                 showNotification('El carrito está vacío');
                 return;
             }
-            
+
             if (!currentTable) {
                 showNotification('Seleccione una mesa primero');
                 return;
             }
-            
+
             const subtotal = active.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const tax = subtotal * (taxRate / 100);
             const total = subtotal + tax;
-            
+
             const order = {
                 date: new Date().toISOString(),
                 userId: currentUser.uid,
@@ -2991,7 +3020,7 @@
                 table: currentTable,
                 waiterId: currentUser.uid
             };
-            
+
             // Guardar en Firebase
             try {
                 await db.collection("orders").add(order);
@@ -3020,18 +3049,18 @@
             showNotification(`Pedido para Mesa ${currentTable} cancelado`);
             waiterMenuSection.style.display = 'none';
         }
-        
+
         // =====================================
         // Funciones para Cocineros
         // =====================================
-        
+
         // Escuchar nuevos pedidos en tiempo real
         function listenForNewOrders() {
             // Detener listener anterior si existe
             if (realtimeOrdersListener) {
                 realtimeOrdersListener();
             }
-            
+
             realtimeOrdersListener = db.collection("orders")
                 .where("status", "in", ["pending", "preparing"])
                 .orderBy("date", "desc")
@@ -3042,18 +3071,18 @@
                             const order = change.doc.data();
                             notificationContent.textContent = `Mesa ${order.table || 'Llevar'} ha realizado un nuevo pedido`;
                             orderNotification.classList.add('show');
-                            
+
                             setTimeout(() => {
                                 orderNotification.classList.remove('show');
                             }, 5000);
                         }
                     });
-                    
+
                     // Actualizar la lista de pedidos
                     loadKitchenOrders();
                 });
         }
-        
+
         // Cargar pedidos para cocina
         function loadKitchenOrders() {
             if (currentUserRole !== 'empanada_chef' && currentUserRole !== 'general_chef') return;
@@ -3071,7 +3100,7 @@
                         container.innerHTML = '<p class="muted">No hay pedidos por ahora.</p>';
                         return;
                     }
-                    
+
                     snapshot.forEach(doc => {
                         const order = doc.data();
                         order.id = doc.id;
@@ -3135,7 +3164,7 @@
                     container.innerHTML = '<p class="muted">Error al cargar pedidos.</p>';
                 });
         }
-        
+
         // Aplicar filtros
         function setupChefFilters() {
             filterButtons.forEach(button => {
@@ -3147,11 +3176,11 @@
                 });
             });
         }
-        
+
         // =====================================
         // Configuración de Event Listeners
         // =====================================
-        
+
         function setupEventListeners() {
         // Toggle del menú lateral
         menuToggle.addEventListener('click', openSidebar);
