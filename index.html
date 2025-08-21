@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1066,7 +1065,7 @@
         .order-actions {
             margin-top: 15px;
             text-align: right;
-			
+        
         }
 
         .mark-ready-btn {
@@ -1888,6 +1887,7 @@
                 if (navOrders) navOrders.style.display = '';
                 if (mobileCartIcon) mobileCartIcon.style.display = '';
             }
+
             // Role-specific UI
             if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
                 // Show only Orders icon; route to chef section
@@ -1915,7 +1915,7 @@
                 // Customer (default): Menu, Orders (own status), Profile, Cart, Categories visible
                 if (navMenu) navMenu.style.display = '';
                 if (navOrders) navOrders.style.display = '';
-                if (navProfile) navProfile.style.display = '';
+                 //if (navProfile) navProfile.style.display = '';
                 if (mobileCartIcon) mobileCartIcon.style.display = '';
                 if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
                 if (menuToggle) menuToggle.style.display = '';
@@ -2768,7 +2768,7 @@
                             <span class="stat-label">Pedidos realizados</span>
                         </div>
                     </div>
-                    <div classclass="profile-actions">
+                    <div class="profile-actions">
                         <button class="btn">Editar Perfil</button>
                         <button class="btn btn-secondary" id="viewHistoryBtn">Ver Historial</button>
                     </div>
@@ -2779,6 +2779,7 @@
             document.getElementById('viewHistoryBtn').addEventListener('click', () => {
                 showSection('orders');
             });
+			
         }
 
         // Mostrar sección
