@@ -1033,8 +1033,8 @@
             background: white;
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 15px
-			            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
         }
 
         .order-header {
@@ -1422,7 +1422,7 @@
         <section id="waiterSection" style="display: none;" class="for-waiter">
             <div class="waiter-view">
                 <h2 class="section-title">Panel de Mesero</h2>
-                <div class="table-selection">
+                <div class="table-selection" id="tableSelection">
                     <h3>Seleccione una Mesa:</h3>
                     <div class="tables-grid">
                         <div class="table-card" data-table="1">
@@ -1580,10 +1580,7 @@
                         <p>El pago se realizará al momento de recibir el pedido.</p>
                     </div>
                 </div>
-
-                <button class="btn btn-secondary" id="checkoutBtn">Proceder al Pago</button>
-                 <button class="btn btn-secondary" id="processOrderBtn">Procesar Pedido</button>
-            </div>
+  </div>
         </div>
     </div>
     
@@ -1649,6 +1646,7 @@
         let chefFilter = 'all';
         let realtimeOrdersListener = null;
         let cartByTable = {};
+         let lockedTables = {};
         
         // Referencias DOM
         const mainHeader = document.getElementById('mainHeader');
@@ -1713,6 +1711,7 @@
          const waiterMenuSection = document.getElementById('waiterMenuSection');
         const processOrderBtn = document.getElementById('processOrderBtn');
         const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+         const tableSelection = document.getElementById('tableSelection');
         
         // Función para obtener el carrito activo (cliente o mesa de mesero)
         function getActiveCart() {
@@ -1864,10 +1863,10 @@
             const categoriesContainer = document.getElementById('categoriesContainer');
             const menuToggle = document.getElementById('menuToggle');
 
-            // Hide all customizable nav items by default; then enable per role
+            // Hide all customizable navitems by default; then enable per role
             [navMenu, navOrders, navProfile, mobileCartIcon, adminMenu, adminMobileNavItem].forEach(el => { if (el) el.style.display = 'none'; });
 
-            //Reset categories / sidebar visibility
+            // Reset categories / sidebar visibility
             if (sidebar) sidebar.style.display = '';
             if (menuToggle) menuToggle.style.display = '';
             if (categoriesContainer) categoriesContainer.parentElement.style.display = '';
@@ -2404,6 +2403,8 @@
                 showNotification('¡Pedido realizado con éxito!');
                 if (currentUserRole === 'waiter') {
                     cartByTable[currentTable] = [];
+                      // Unlock the table after the order is successfully placed
+                    unlockTable(currentTable);
                 } else {
                     cart = [];
                 }
@@ -2566,6 +2567,7 @@
                             <td><span class="order-status status-${order.status}">${getStatusText(order.status)}</span></td>
                              <td>
                                 <button class="cancel-order" data-id="${order.id}">Cancelar</button>
+                                <button class="paid-order" data-id="${order.id}">Pago</button>
                             </td>
                         `;
                         ordersTableBody.appendChild(row);
@@ -2574,6 +2576,12 @@
                         button.addEventListener('click', (e) => {
                             const orderId = e.target.dataset.id;
                             cancelOrder(orderId);
+                        });
+                    });
+                     document.querySelectorAll('.paid-order').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const orderId = e.target.dataset.id;
+                            markOrderPaid(orderId);
                         });
                     });
                 })
@@ -2592,7 +2600,37 @@
             // y posiblemente realizar otras acciones como notificar al restaurante
             // o al cliente.
             // Por ahora, simplemente mostraremos una alerta.
-            alert(`Pedido ${orderId} cancelado.`);
+             db.collection("orders").doc(orderId).update({ status: 'cancelled' })
+            .then(() => {
+                showNotification('Pedido cancelado correctamente');
+                loadOrders();
+                loadAdminOrders();
+            })
+            .catch(error => {
+                console.error("Error cancelando pedido: ", error);
+                showNotification('Error al cancelar pedido');
+            });
+        }
+          function markOrderPaid(orderId) {
+            // Aquí deberías agregar la lógica para marcar el pedido como pagado en Firebase
+            // Esto podría implicar cambiar el estado del pedido a "pagado"
+            // y posiblemente realizar otras acciones como liberar la mesa
+            // Por ahora, simplemente mostraremos una alerta.
+              db.collection("orders").doc(orderId).update({ status: 'paid' })
+            .then(() => {
+                showNotification('Pedido pagado correctamente');
+                loadOrders();
+                loadAdminOrders();
+                // Unlock the table after the order is marked as paid
+                const order = orders.find(order => order.id === orderId);
+                if (order && order.table) {
+                    unlockTable(order.table);
+                }
+            })
+            .catch(error => {
+                console.error("Error marcando pedido como pagado: ", error);
+                showNotification('Error al marcar pedido como pagado');
+            });
         }
         
         // Cargar todos los pedidos (admin)
@@ -2634,6 +2672,7 @@
                                     <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Listo</option>
                                     <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Entregado</option>
                                     <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
+                                      <option value="paid" ${order.status === 'paid' ? 'selected' : ''}>Pagado</option>
                                 </select>
                             </td>
                             <td>
@@ -2682,6 +2721,7 @@
                 case 'ready': return 'Listo para entrega';
                 case 'delivered': return 'Entregado';
                 case 'cancelled': return 'Cancelado';
+                   case 'paid': return 'Pagado';
                 default: return status;
             }
         }
@@ -2768,6 +2808,30 @@
             });
         }
         
+           // Función para bloquear la mesa
+        function lockTable(tableNumber) {
+            lockedTables[tableNumber] = true;
+            updateTableCardState(tableNumber);
+        }
+
+        // Función para desbloquear la mesa
+        function unlockTable(tableNumber) {
+            delete lockedTables[tableNumber];
+            updateTableCardState(tableNumber);
+        }
+
+        // Función para actualizar el estado visual de la tarjeta de la mesa
+        function updateTableCardState(tableNumber) {
+            const tableCard = document.querySelector(`.table-card[data-table="${tableNumber}"]`);
+            if (tableCard) {
+                if (lockedTables[tableNumber]) {
+                    tableCard.classList.add('locked');
+                } else {
+                    tableCard.classList.remove('locked');
+                }
+            }
+        }
+        
         // Mostrar sección
         function showSection(sectionId) {
             // Verificar acceso a administración
@@ -2803,7 +2867,13 @@
                 loadCustomers();
             } else if (sectionId === 'chef') {
                 loadKitchenOrders();
-            } else if (sectionId === 'waiter') { 
+            } else if (sectionId === 'waiter') {
+                  // Show or hide the table selection based on whether a table is currently selected
+                if (currentTable) {
+                    if (tableSelection) tableSelection.style.display = 'none';
+                } else {
+                    if (tableSelection) tableSelection.style.display = 'block';
+                }
                 renderWaiterProducts(); 
                 loadOrders(); 
                 setupTableSelection();
@@ -2912,14 +2982,25 @@
         
         // Seleccionar mesa
         function setupTableSelection() {
-            document.querySelectorAll('.table-card').forEach(card => {
+            const tableCards = document.querySelectorAll('.table-card');
+            tableCards.forEach(card => {
                 card.addEventListener('click', () => {
+                     const tableNumber = card.dataset.table;
+
+                    // Check if the table is locked
+                    if (lockedTables[tableNumber]) {
+                        showNotification('Esta mesa está bloqueada.');
+                        return;
+                    }
                     document.querySelectorAll('.table-card').forEach(c => {
                         c.classList.remove('active');
                     });
                     card.classList.add('active');
                     currentTable = card.dataset.table;
                     
+                     // Ocultar la sección de selección de mesa
+                    if (tableSelection) tableSelection.style.display = 'none';
+
                     // Habilitar el menú
                     waiterMenuSection.style.display = 'block';
                     
@@ -3013,6 +3094,8 @@
                 await db.collection("orders").add(order);
                 showNotification(`Pedido para Mesa ${currentTable} realizado con éxito!`);
                 cartByTable[currentTable] = [];
+                  // Lock the table after the order is successfully placed
+                lockTable(currentTable);
                 updateCartCount();
                 cartModal.style.display = 'none';
                 loadAdminOrders();
@@ -3219,11 +3302,7 @@
 
         // Checkout
         checkoutBtn.addEventListener('click', () => {
-            if (currentUserRole === 'waiter') {
-                processWaiterOrder();
-            } else {
-                checkout();
-            }
+           checkout();
         });
 
         // Panel de administración
@@ -3343,6 +3422,12 @@
         } else if (sectionId === 'chef') {
             loadKitchenOrders();
         } else if (sectionId === 'waiter') {
+              // Show or hide the table selection based on whether a table is currently selected
+            if (currentTable) {
+                if (tableSelection) tableSelection.style.display = 'none';
+            } else {
+                if (tableSelection) tableSelection.style.display = 'block';
+            }
             renderWaiterProducts();
             loadOrders();
             setupTableSelection();
@@ -3358,6 +3443,14 @@
         cartModal.style.display = 'flex';
         cartModal.classList.add('open');
         renderCart();
+         // Ocultar la sección de pago si el usuario es un mesero
+        if (currentUserRole === 'waiter') {
+            document.getElementById('customerPaymentSection').style.display = 'none';
+            document.getElementById('checkoutBtn').style.display = 'none';
+        } else {
+            document.getElementById('customerPaymentSection').style.display = 'block';
+             document.getElementById('checkoutBtn').style.display = 'block';
+        }
     }
 
     // Función para cerrar modal del carrito
