@@ -2060,36 +2060,7 @@
                 mainHeader.style.transition = '';
             }, 400);
         });
-        // Manejo de clic en la barra de navegación mágica
-		magicNavItems.forEach(item => {
-		item.addEventListener('click', (e) => {
-        e.preventDefault();
-
-        // Quitar 'active' de todos los ítems
-        magicNavItems.forEach(i => i.classList.remove('active'));
-
-        // Marcar el clicado como activo
-        item.classList.add('active');
-
-        // Ocultar todas las secciones
-        sections.forEach(section => section.style.display = 'none');
-
-        // Mostrar la sección correspondiente
-        const sectionKey = item.dataset.section;
-        if (sectionKey) {
-            const targetSection = document.getElementById(sectionKey + 'Section');
-            if (targetSection) {
-                targetSection.style.display = 'block';
-            }
-        }
-
-        // Si es el carrito (ícono de carrito móvil), abre el modal
-        if (item.id === 'mobileCartIcon') {
-            cartModal.style.display = 'flex';
-        }
-    });
-});
-
+        
         // Cargar productos desde Firebase
         function loadProducts() {
             db.collection("products").get().then(querySnapshot => {
@@ -3158,182 +3129,193 @@
         // =====================================
         
         function setupEventListeners() {
-            // Toggle del menú lateral
-            menuToggle.addEventListener('click', openSidebar);
-            closeSidebar.addEventListener('click', closeSidebarFunc);
-            overlay.addEventListener('click', closeSidebarFunc);
-            
-            // Navegación mágica
-            magicNavItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (item.id !== 'mobileCartIcon') {
-                        showSection(item.dataset.section);
-                    } else {
-                        renderCart();
-                        cartModal.style.display = 'flex';
-                    }
-                });
-            });
-            
-            // Carrito
-            mobileCartIcon.addEventListener('click', () => {
-                renderCart();
-                cartModal.style.display = 'flex';
-            });
-            
-            if (desktopCartBtn) {
-                desktopCartBtn.addEventListener('click', () => {
+        // Toggle del menú lateral
+        menuToggle.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        overlay.addEventListener('click', closeSidebarFunc);
+
+        // Barra de navegación mágica - CORREGIDO
+        magicNavItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const section = item.getAttribute('data-section');
+                // Carrito: se muestra el modal
+                if (item.id === 'mobileCartIcon') {
                     renderCart();
                     cartModal.style.display = 'flex';
+                    cartModal.classList.add('open');
+                } else if (section) {
+                    showSection(section);
+                }
+                // Actualizar clase activa visualmente
+                magicNavItems.forEach(nav => {
+                    nav.classList.remove('active');
                 });
-            }
-            
-            if (closeModal) {
-                closeModal.addEventListener('click', () => {
-                    cartModal.style.display = 'none';
-                });
-            }
-            
-            // Cerrar modal al hacer clic fuera
-            window.addEventListener('click', (e) => {
-                if (e.target === cartModal) {
-                    cartModal.style.display = 'none';
+                // Solo poner activo si no es el carrito (el carrito es modal, no sección)
+                if (section && section !== '') {
+                    item.classList.add('active');
                 }
             });
-            
-            // Checkout
-            checkoutBtn.addEventListener('click', () => {
-                if (currentUserRole === 'waiter') {
-                    processWaiterOrder();
-                } else {
-                    checkout();
-                }
+        });
+
+        // Carrito: icono desktop
+        if (desktopCartBtn) {
+            desktopCartBtn.addEventListener('click', () => {
+                renderCart();
+                cartModal.style.display = 'flex';
+                cartModal.classList.add('open');
             });
-            
-            // Panel de administración
-            if (adminBtns.length > 0) {
-                adminBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const tab = btn.dataset.tab;
-                        
-                        // Actualizar clase activa
-                        adminBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        
-                        // Mostrar sección correspondiente
-                        adminSections.forEach(sec => {
-                            sec.classList.remove('active');
-                        });
-                        
-                        document.getElementById(`${tab}Admin`).classList.add('active');
-                    });
-                });
-            }
-            
-            // Formulario de producto
-            if (productForm) {
-                productForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const name = document.getElementById('productName').value;
-                    const price = parseFloat(document.getElementById('productPrice').value);
-                    const description = document.getElementById('productDescription').value;
-                    const category = document.getElementById('productCategory').value;
-                    
-                    addProduct(name, price, description, category);
-                    productForm.reset();
-                });
-            }
-            
-            // Formulario de configuración
-            if (settingsForm) {
-                settingsForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    taxRate = parseFloat(document.getElementById('taxRate').value);
-                    taxRateValue.textContent = taxRate;
-                    showNotification('Configuración guardada correctamente');
-                });
-            }
-            
-            // Enlaces de autenticación
-            signUpLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                setAuthMode('register');
-            });
-            
-            forgotPasswordLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                setAuthMode('forgot');
-            });
-            
-            loginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                setAuthMode('login');
-            });
-            
-            // Cambio de método de pago
-            paymentMethod.addEventListener('change', handlePaymentMethodChange);
-            
-            // Configurar selección de mesa
-            setupTableSelection();
-            
-            // Configurar filtros de cocina
-            setupChefFilters();
         }
-        
-        // Inicializar la aplicación
-        document.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
-            
-            // Establecer modo de autenticación inicial
-            setAuthMode('login');
-            
-            // Añadir animación al carrito
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes pulse {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.2); }
-                    100% { transform: scale(1); }
-                }
-                .pulse i {
-                    animation: pulse 0.5s ease-in-out;
-                }
-                
-                @keyframes float {
-                    0% { transform: translateY(0); }
-                    50% { transform: translateY(-10px); }
-                    100% { transform: translateY(0); }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // Añadir animación al logo
-            const brand = document.querySelector('.brand');
-            if (brand) {
-                setTimeout(() => {
-                    brand.style.animation = "float 3s ease-in-out infinite";
-                }, 1000);
+
+        // Cerrar modal del carrito
+        if (closeModal) {
+            closeModal.addEventListener('click', closeCartModal);
+        }
+        cartModal.addEventListener('click', function(e) {
+            if (e.target === cartModal) {
+                closeCartModal();
             }
         });
 
-        // Función para abrir modal del carrito
-        function openCartModal() {
-            const m = document.getElementById('cartModal');
-            if (!m) return;
-            m.style.display = 'block';
-            m.classList.add('open');
-            renderCart();
+        // Checkout
+        checkoutBtn.addEventListener('click', () => {
+            if (currentUserRole === 'waiter') {
+                processWaiterOrder();
+            } else {
+                checkout();
+            }
+        });
+
+        // Panel de administración
+        if (adminBtns.length > 0) {
+            adminBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+                    adminBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    adminSections.forEach(sec => {
+                        sec.classList.remove('active');
+                    });
+                    document.getElementById(`${tab}Admin`).classList.add('active');
+                });
+            });
         }
 
-        // Función para cerrar modal del carrito
-        function closeCartModal() {
-            const m = document.getElementById('cartModal');
-            if (!m) return;
-            m.classList.remove('open');
-            m.style.display = 'none';
+        // Formulario de producto
+        if (productForm) {
+            productForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('productName').value;
+                const price = parseFloat(document.getElementById('productPrice').value);
+                const description = document.getElementById('productDescription').value;
+                const category = document.getElementById('productCategory').value;
+                addProduct(name, price, description, category);
+                productForm.reset();
+            });
         }
+
+        // Formulario de configuración
+        if (settingsForm) {
+            settingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                taxRate = parseFloat(document.getElementById('taxRate').value);
+                taxRateValue.textContent = taxRate;
+                showNotification('Configuración guardada correctamente');
+            });
+        }
+
+        // Enlaces de autenticación
+        signUpLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            setAuthMode('register');
+        });
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            setAuthMode('forgot');
+        });
+        loginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            setAuthMode('login');
+        });
+
+        // Cambio de método de pago
+        paymentMethod.addEventListener('change', handlePaymentMethodChange);
+
+        // Configurar selección de mesa
+        setupTableSelection();
+
+        // Configurar filtros de cocina
+        setupChefFilters();
+    }
+
+    // Inicializar la aplicación
+    document.addEventListener('DOMContentLoaded', () => {
+        setupEventListeners();
+        setAuthMode('login');
+        // Animación al logo
+        const brand = document.querySelector('.brand');
+        if (brand) {
+            setTimeout(() => {
+                brand.style.animation = "float 3s ease-in-out infinite";
+            }, 1000);
+        }
+    });
+
+    // Función para mostrar una sección y actualizar el nav activo
+    function showSection(sectionId) {
+        // Verificar acceso a administración
+        if (sectionId === 'admin' && currentUserRole !== 'admin') {
+            showNotification('Acceso denegado: se requieren privilegios de administrador');
+            sectionId = 'menu';
+        }
+        sections.forEach(section => {
+            if (section.id === `${sectionId}Section`) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+        // Actualizar el nav activo SOLO para los íconos de sección (no el carrito)
+        magicNavItems.forEach(item => {
+            if (item.getAttribute('data-section') === sectionId) {
+                item.classList.add('active');
+            } else if (item.getAttribute('data-section')) {
+                item.classList.remove('active');
+            }
+        });
+        // Cargar datos específicos de la sección
+        if (sectionId === 'profile') {
+            renderProfile();
+        } else if (sectionId === 'orders') {
+            loadOrders();
+        } else if (sectionId === 'admin') {
+            loadAdminOrders();
+            loadCustomers();
+        } else if (sectionId === 'chef') {
+            loadKitchenOrders();
+        } else if (sectionId === 'waiter') {
+            renderWaiterProducts();
+            loadOrders();
+            setupTableSelection();
+            const dcb = document.getElementById("desktopCartBtn");
+            if (dcb) {
+                dcb.addEventListener("click", openCartModal);
+            }
+        }
+    }
+
+    // Función para abrir modal del carrito
+    function openCartModal() {
+        cartModal.style.display = 'flex';
+        cartModal.classList.add('open');
+        renderCart();
+    }
+
+    // Función para cerrar modal del carrito
+    function closeCartModal() {
+        cartModal.classList.remove('open');
+        cartModal.style.display = 'none';
+    }
 
         // Event listeners para cerrar modal
         document.addEventListener('click', (e) => {
