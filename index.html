@@ -21,6 +21,7 @@
             --gray-light: #e9ecef;
             --danger: #e76f51;
             --success: #2a9d8f;
+            --warning: #fca311;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             --shadow-md: 0 6px 15px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
@@ -1013,6 +1014,11 @@
         .btn-secondary {
             background: var(--secondary);
         }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
 
         .btn-secondary:hover {
             background: var(--secondary-dark);
@@ -1068,26 +1074,35 @@
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 0.8rem;
+            font-weight: 500;
         }
 
-        .status-pending { background-color: #ffcc80; color: #333; }
-        .status-preparing { background-color: #81d4fa; color: #333; }
-        .status-ready { background-color: #a5d6a7; color: #333; }
+        .status-pending { background-color: #ffcdd2; color: #c62828; }
+        .status-preparing { background-color: #bbdefb; color: #1565c0; }
+        .status-ready { background-color: #c8e6c9; color: #2e7d32; }
 
         .order-actions {
             margin-top: 15px;
             text-align: right;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
         }
 
-        .mark-ready-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
+        .chef-btn {
+             border: none;
             padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: 500;
+            transition: var(--transition);
         }
+        .chef-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .mark-preparing-btn { background: var(--warning); color: white; }
+        .mark-ready-btn { background: var(--success); color: white; }
 
         /* Notificación */
         .notification {
@@ -1661,7 +1676,6 @@
         let chefFilter = 'all';
         let realtimeOrdersListener = null;
         let cartByTable = {};
-         let lockedTables = {};
         
         // Referencias DOM
         const mainHeader = document.getElementById('mainHeader');
@@ -1723,7 +1737,7 @@
         const customerPaymentSection = document.getElementById('customerPaymentSection');
         const magicNav = document.getElementById('magicNav');
         const desktopCartBtn = document.getElementById('desktopCartBtn');
-         const waiterMenuSection = document.getElementById('waiterMenuSection');
+        const waiterMenuSection = document.getElementById('waiterMenuSection');
         const processOrderBtn = document.getElementById('processOrderBtn');
         const tableSelection = document.getElementById('tableSelection');
         
@@ -1789,6 +1803,7 @@
                         document.body.classList.add('role-waiter');
                         mobileCartIcon.style.display = 'flex';
                         desktopCartBtn.style.display = 'flex';
+                        listenForTableLocks(); // PERSISTENCE
                     } 
                     else if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
                         showSection('chef');
@@ -1798,8 +1813,7 @@
                         } else {
                             document.body.classList.add('role-general-chef');
                         }
-                        loadKitchenOrders();
-                        listenForNewOrders();
+                        listenForKitchenOrders(); // REAL-TIME
                     } 
                     else {
                         document.body.classList.add('role-customer');
@@ -1841,6 +1855,9 @@
                     }
                 });
                 
+                // Detener listeners si existen
+                if (realtimeOrdersListener) realtimeOrdersListener();
+
                 // Resetear formulario de autenticación
                 authForm.reset();
                 setAuthMode('login');
@@ -2415,8 +2432,8 @@
             .then(() => {
                 showNotification('¡Pedido realizado con éxito!');
                 if (currentUserRole === 'waiter') {
+                    // Locking is handled by the real-time listener
                     cartByTable[currentTable] = [];
-                    lockTable(currentTable);
                 } else {
                     cart = [];
                 }
@@ -2472,8 +2489,8 @@
             db.collection("orders").doc(orderId).update({ status })
             .then(() => {
                 showNotification('Estado actualizado correctamente');
-                loadAdminOrders();
-                loadKitchenOrders();
+                loadAdminOrders(); // Admin view refreshes
+                // Kitchen view is real-time, it will refresh automatically
             })
             .catch(error => {
                 console.error("Error actualizando estado: ", error);
@@ -2545,8 +2562,7 @@
             db.collection("orders")
                 .where("userId", "==", currentUser.uid)
                 .orderBy("date", "desc")
-                .get()
-                .then(querySnapshot => {
+                .onSnapshot(querySnapshot => { // Changed to onSnapshot for real-time updates
                     orders = [];
                     ordersTableBody.innerHTML = '';
                     
@@ -2565,7 +2581,6 @@
                         const date = new Date(order.date);
                         const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
                         
-                        // Contar productos
                         const productCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
                         
                         const row = document.createElement('tr');
@@ -2598,8 +2613,7 @@
                             markOrderPaid(orderId, tableNumber);
                         });
                     });
-                })
-                .catch(error => {
+                }, error => {
                     console.error("Error cargando pedidos: ", error);
                     ordersTableBody.innerHTML = `
                         <tr>
@@ -2608,30 +2622,24 @@
                     `;
                 });
         }
+
          function cancelOrder(orderId, tableNumber) {
              db.collection("orders").doc(orderId).update({ status: 'cancelled' })
             .then(() => {
                 showNotification('Pedido cancelado correctamente');
-                loadOrders();
-                loadAdminOrders();
-                if (tableNumber) {
-                    unlockTable(tableNumber);
-                }
+                // Views will update automatically via listeners
             })
             .catch(error => {
                 console.error("Error cancelando pedido: ", error);
                 showNotification('Error al cancelar pedido');
             });
         }
+
           function markOrderPaid(orderId, tableNumber) {
               db.collection("orders").doc(orderId).update({ status: 'paid' })
             .then(() => {
                 showNotification('Pedido pagado correctamente');
-                loadOrders();
-                loadAdminOrders();
-                if (tableNumber) {
-                    unlockTable(tableNumber);
-                }
+                // Views will update automatically via listeners
             })
             .catch(error => {
                 console.error("Error marcando pedido como pagado: ", error);
@@ -2645,8 +2653,7 @@
             
             db.collection("orders")
                 .orderBy("date", "desc")
-                .get()
-                .then(querySnapshot => {
+                .onSnapshot(querySnapshot => { // Changed to onSnapshot for real-time updates
                     adminOrdersTableBody.innerHTML = '';
                     
                     if (querySnapshot.empty) {
@@ -2672,13 +2679,13 @@
                             <td>${getPaymentMethodName(order.paymentMethod)}</td>
                             <td>${order.paymentReference || 'N/A'}</td>
                             <td>
-                                <select class="order-status" data-id="${order.id}">
+                                <select class="order-status-select" data-id="${order.id}">
                                     <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendiente</option>
                                     <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>En preparación</option>
                                     <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Listo</option>
                                     <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Entregado</option>
                                     <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
-                                      <option value="paid" ${order.status === 'paid' ? 'selected' : ''}>Pagado</option>
+                                    <option value="paid" ${order.status === 'paid' ? 'selected' : ''}>Pagado</option>
                                 </select>
                             </td>
                             <td>
@@ -2689,16 +2696,15 @@
                     });
                     
                     // Event listeners para cambiar estado
-                    document.querySelectorAll('.order-status').forEach(select => {
+                    document.querySelectorAll('.order-status-select').forEach(select => {
                         select.addEventListener('change', (e) => {
                             const orderId = e.target.dataset.id;
                             const newStatus = e.target.value;
                             updateOrderStatus(orderId, newStatus);
                         });
                     });
-                })
-                .catch(error => {
-                    console.error("Error cargando pedidos de admin: ", error);
+                }, error => {
+                     console.error("Error cargando pedidos de admin: ", error);
                     adminOrdersTableBody.innerHTML = `
                         <tr>
                             <td colspan="8" style="text-align: center;">Error al cargar pedidos</td>
@@ -2727,7 +2733,7 @@
                 case 'ready': return 'Listo para entrega';
                 case 'delivered': return 'Entregado';
                 case 'cancelled': return 'Cancelado';
-                   case 'paid': return 'Pagado';
+                case 'paid': return 'Pagado';
                 default: return status;
             }
         }
@@ -2814,30 +2820,6 @@
             });
         }
         
-           // Función para bloquear la mesa
-        function lockTable(tableNumber) {
-            lockedTables[tableNumber] = true;
-            updateTableCardState(tableNumber);
-        }
-
-        // Función para desbloquear la mesa
-        function unlockTable(tableNumber) {
-            delete lockedTables[tableNumber];
-            updateTableCardState(tableNumber);
-        }
-
-        // Función para actualizar el estado visual de la tarjeta de la mesa
-        function updateTableCardState(tableNumber) {
-            const tableCard = document.querySelector(`.table-card[data-table="${tableNumber}"]`);
-            if (tableCard) {
-                if (lockedTables[tableNumber]) {
-                    tableCard.classList.add('locked');
-                } else {
-                    tableCard.classList.remove('locked');
-                }
-            }
-        }
-        
         // Mostrar sección
         function showSection(sectionId) {
             // Verificar acceso a administración
@@ -2878,12 +2860,13 @@
                 loadAdminOrders();
                 loadCustomers();
             } else if (sectionId === 'chef') {
-                loadKitchenOrders();
+                listenForKitchenOrders();
             } else if (sectionId === 'waiter') {
                 if (tableSelection) tableSelection.style.display = 'block';
                 if (waiterMenuSection) waiterMenuSection.style.display = 'block';
                 renderWaiterProducts(); 
                 setupTableSelection();
+                listenForTableLocks();
             } 
         }
         
@@ -2983,14 +2966,41 @@
         // Funciones para Meseros
         // =====================================
         
+        // Escuchar cambios en los pedidos para bloquear/desbloquear mesas en tiempo real
+        function listenForTableLocks() {
+            db.collection("orders")
+              .where("status", "in", ["pending", "preparing", "ready"])
+              .onSnapshot(snapshot => {
+                const lockedTables = new Set();
+                snapshot.forEach(doc => {
+                    const order = doc.data();
+                    if (order.table) {
+                        lockedTables.add(order.table);
+                    }
+                });
+                
+                // Actualizar la UI de todas las mesas
+                const tableCards = document.querySelectorAll('.table-card');
+                tableCards.forEach(card => {
+                    const tableNumber = card.dataset.table;
+                    if (lockedTables.has(tableNumber)) {
+                        card.classList.add('locked');
+                    } else {
+                        card.classList.remove('locked');
+                    }
+                });
+            });
+        }
+
         // Seleccionar mesa
         function setupTableSelection() {
             const tableCards = document.querySelectorAll('.table-card');
             tableCards.forEach(card => {
                 card.addEventListener('click', () => {
-                     const tableNumber = card.dataset.table;
+                    const tableNumber = card.dataset.table;
 
-                    if (lockedTables[tableNumber]) {
+                    // La comprobación de 'locked' se hace visualmente y con el listener
+                    if (card.classList.contains('locked')) {
                         showNotification('Esta mesa está ocupada.');
                         return;
                     }
@@ -3097,18 +3107,14 @@
                 await db.collection("orders").add(order);
                 showNotification(`Pedido para Mesa ${currentTable} realizado con éxito!`);
                 
-                lockTable(currentTable);
+                // Limpiar carrito de la mesa y des-seleccionar
                 cartByTable[currentTable] = [];
-                
-                // Des-seleccionar mesa activa
                 const activeCard = document.querySelector('.table-card.active');
                 if(activeCard) activeCard.classList.remove('active');
                 currentTable = null;
 
                 updateCartCount();
                 closeCartModal();
-                loadAdminOrders();
-                loadKitchenOrders();
                 
             } catch (error) {
                 console.error("Error guardando pedido: ", error);
@@ -3121,19 +3127,20 @@
         // =====================================
         
         // Escuchar nuevos pedidos en tiempo real
-        function listenForNewOrders() {
-            // Detener listener anterior si existe
+        function listenForKitchenOrders() {
+            if (currentUserRole !== 'empanada_chef' && currentUserRole !== 'general_chef') return;
+
             if (realtimeOrdersListener) {
-                realtimeOrdersListener();
+                realtimeOrdersListener(); // Detener listener anterior
             }
             
             realtimeOrdersListener = db.collection("orders")
-                .where("status", "in", ["pending", "preparing"])
-                .orderBy("date", "desc")
+                .where("status", "in", ["pending", "preparing", "ready"])
+                .orderBy("date", "asc")
                 .onSnapshot(snapshot => {
+                    
                     snapshot.docChanges().forEach(change => {
                         if (change.type === "added") {
-                            // Mostrar notificación de nuevo pedido
                             const order = change.doc.data();
                             notificationContent.textContent = `Mesa ${order.table || 'Llevar'} ha realizado un nuevo pedido`;
                             orderNotification.classList.add('show');
@@ -3144,103 +3151,89 @@
                         }
                     });
                     
-                    // Actualizar la lista de pedidos
-                    loadKitchenOrders();
+                    renderKitchenOrders(snapshot.docs);
+                }, error => {
+                     console.error("Error escuchando pedidos de cocina: ", error);
                 });
         }
         
-        // Cargar pedidos para cocina
-        function loadKitchenOrders() {
-            if (currentUserRole !== 'empanada_chef' && currentUserRole !== 'general_chef') return;
-            const container = document.getElementById('kitchenOrdersContainer');
+        // Renderizar pedidos para cocina
+        function renderKitchenOrders(docs) {
+             const container = document.getElementById('kitchenOrdersContainer');
             if (!container) return;
-            container.innerHTML = '<div class="loading">Cargando pedidos...</div>';
+            container.innerHTML = '';
 
-            db.collection('orders')
-                .where('status', 'in', ['pending', 'preparing'])
-                .orderBy('date', 'asc')
-                .get()
-                .then((snapshot) => {
-                    container.innerHTML = '';
-                    if (snapshot.empty) {
-                        container.innerHTML = '<p class="muted">No hay pedidos por ahora.</p>';
-                        return;
+            if (docs.length === 0) {
+                container.innerHTML = '<p class="muted" style="text-align:center; padding: 2rem;">No hay pedidos activos.</p>';
+                return;
+            }
+            
+            docs.forEach(doc => {
+                const order = { id: doc.id, ...doc.data() };
+
+                // Filtrar items dependiendo del rol del chef
+                const filteredItems = (order.items || []).filter(it => {
+                    const cat = (it.category || '').toLowerCase();
+                    if (currentUserRole === 'empanada_chef') {
+                        return cat === 'empanadas' || cat === 'bebidas';
                     }
-                    
-                    snapshot.forEach(doc => {
-                        const order = doc.data();
-                        order.id = doc.id;
-
-                        // Filtrar items dependiendo del rol del chef
-                        const filteredItems = (order.items || []).filter(it => {
-                            const cat = (it.category || '').toLowerCase();
-                            if (currentUserRole === 'empanada_chef') {
-                                return cat === 'empanadas' || cat === 'bebidas';
-                            }
-                            if (currentUserRole === 'general_chef') {
-                                return cat !== 'empanadas';
-                            }
-                            return true;
-                        });
-
-                        if (!filteredItems.length) return; // No renderizar tarjeta si no hay nada para este chef
-
-                        // Construir tarjeta de pedido
-                        const el = document.createElement('div');
-                        el.className = 'kitchen-order-card';
-                        el.innerHTML = `
-                            <div class="order-header">
-                                <div>
-                                    <div class="order-id">#${order.id.slice(-6)}</div>
-                                    <div class="meta">Mesa: ${order.table || order.tableNumber || 'N/A'} • ${new Date(order.date).toLocaleTimeString()}</div>
-                                </div>
-                                <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
-                            </div>
-                            <div class="order-items">
-                                ${filteredItems.map(it => `
-                                    <div class="order-item">
-                                        <span>${it.quantity || 1}× ${it.name}</span>
-                                        ${it.notes ? `<span class="notes">— ${it.notes}</span>` : ''}
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <div class="order-actions">
-                                <button class="mark-ready-btn" data-id="${order.id}">Marcar como listo</button>
-                            </div>
-                        `;
-                        container.appendChild(el);
-                    });
-
-                    // Adjuntar manejadores para botones de listo (solo visibles para chefs)
-                    container.querySelectorAll('.mark-ready-btn').forEach(btn => {
-                        btn.addEventListener('click', async (e) => {
-                            const id = e.currentTarget.dataset.id;
-                            try {
-                                // CORRECTED: This only updates the status and does NOT unlock the table.
-                                await db.collection('orders').doc(id).update({ status: 'ready', readyTime: new Date().toISOString() });
-                                showNotification('Pedido marcado como listo');
-                                loadKitchenOrders(); // Refresh the chef's view
-                            } catch (err) {
-                                console.error('No se pudo actualizar el pedido', err);
-                                showNotification('No se pudo actualizar el pedido: ' + err.message);
-                            }
-                        });
-                    });
-                })
-                .catch(error => {
-                    console.error("Error cargando pedidos de cocina: ", error);
-                    container.innerHTML = '<p class="muted">Error al cargar pedidos.</p>';
+                    if (currentUserRole === 'general_chef') {
+                        return cat !== 'empanadas';
+                    }
+                    return true;
                 });
+
+                if (!filteredItems.length) return; // No renderizar tarjeta si no hay nada para este chef
+
+                const el = document.createElement('div');
+                el.className = 'kitchen-order-card';
+                el.innerHTML = `
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">#${order.id.slice(-6)}</div>
+                            <div class="meta">Mesa: ${order.table || 'N/A'} • ${new Date(order.date).toLocaleTimeString()}</div>
+                        </div>
+                        <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
+                    </div>
+                    <div class="order-items">
+                        ${filteredItems.map(it => `
+                            <div class="order-item">
+                                <span>${it.quantity || 1}× ${it.name}</span>
+                                ${it.notes ? `<span class="notes">— ${it.notes}</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-actions">
+                        ${order.status === 'pending' ? `<button class="chef-btn mark-preparing-btn" data-id="${order.id}">Preparar</button>` : ''}
+                        <button class="chef-btn mark-ready-btn" data-id="${order.id}">Marcar como listo</button>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+
+            // Adjuntar manejadores para botones de chef
+            container.querySelectorAll('.mark-preparing-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    updateOrderStatus(id, 'preparing');
+                });
+            });
+            container.querySelectorAll('.mark-ready-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    updateOrderStatus(id, 'ready');
+                });
+            });
         }
         
-        // Aplicar filtros
+        // Aplicar filtros (ahora obsoleto, pero se mantiene por si se quiere reactivar)
         function setupChefFilters() {
             filterButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     filterButtons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
                     chefFilter = button.id.replace('filter', '').toLowerCase();
-                    loadKitchenOrders();
+                    listenForKitchenOrders(); // Re-ejecutar la consulta con el nuevo filtro
                 });
             });
         }
