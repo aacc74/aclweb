@@ -3216,8 +3216,10 @@
                         btn.addEventListener('click', async (e) => {
                             const id = e.currentTarget.dataset.id;
                             try {
+                                // CORRECTED: This only updates the status and does NOT unlock the table.
                                 await db.collection('orders').doc(id).update({ status: 'ready', readyTime: new Date().toISOString() });
                                 showNotification('Pedido marcado como listo');
+                                loadKitchenOrders(); // Refresh the chef's view
                             } catch (err) {
                                 console.error('No se pudo actualizar el pedido', err);
                                 showNotification('No se pudo actualizar el pedido: ' + err.message);
