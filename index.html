@@ -1894,7 +1894,8 @@
             });
 
             if (currentUserRole.includes('chef')) {
-                magicNav.querySelector('[data-section="chef"]').innerHTML = '<i class="fas fa-hat-chef"></i><span>Cocina</span>';
+                const chefNavItem = magicNav.querySelector('[data-section="chef"]');
+                if(chefNavItem) chefNavItem.innerHTML = '<i class="fas fa-hat-chef"></i><span>Cocina</span>';
             }
         }
         
@@ -2092,7 +2093,7 @@
             magicNavItems.forEach(item => {
                 let iSection = item.dataset.section;
                 if (currentUserRole === 'waiter' && iSection === 'menu') iSection = 'waiter';
-                if (currentUserRole.includes('chef')) iSection = 'chef';
+                else if (currentUserRole.includes('chef') && iSection === 'chef') iSection = 'chef';
                 item.classList.toggle('active', iSection === sectionId);
             });
         }
@@ -2148,6 +2149,9 @@
         }
 
         function renderFilteredOrders(container, filter) {
+            // SOLUCIÓN: Añadir una verificación para asegurarse de que el contenedor existe
+            if (!container) return; 
+            
             container.innerHTML = '';
             const statusMap = { active: ['pending', 'preparing', 'ready'], history: ['paid', 'cancelled'] };
             const targetStatuses = statusMap[filter] || [filter];
@@ -2262,17 +2266,35 @@
             checkoutBtn.addEventListener('click', checkout);
             processOrderBtn.addEventListener('click', processWaiterOrder);
             setupTableSelection();
-            ['chef', 'cashier', 'waiter'].forEach(role => {
-                document.querySelectorAll(`#${role}FilterControls .filter-btn`).forEach(btn => btn.addEventListener('click', e => {
-                    const status = e.target.dataset.status;
-                    if (role === 'chef') chefFilter = status;
-                    else if (role === 'cashier') cashierFilter = status;
-                    else waiterFilter = status;
-                    document.querySelectorAll(`#${role}FilterControls .filter-btn`).forEach(b => b.classList.remove('active'));
+
+            // SOLUCIÓN: Solo configurar los listeners para los filtros que existen en el DOM
+            const chefControls = document.getElementById('chefFilterControls');
+            if (chefControls) {
+                chefControls.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', e => {
+                    chefFilter = e.target.dataset.status;
+                    chefControls.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
-                    renderFilteredOrders(document.getElementById(`${role === 'waiter' ? 'waiter' : role}OrdersContainer`), status);
+                    renderFilteredOrders(kitchenOrdersContainer, chefFilter);
                 }));
-            });
+            }
+            const cashierControls = document.getElementById('cashierFilterControls');
+            if (cashierControls) {
+                cashierControls.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', e => {
+                    cashierFilter = e.target.dataset.status;
+                    cashierControls.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderFilteredOrders(cashierOrdersContainer, cashierFilter);
+                }));
+            }
+            const waiterControls = document.getElementById('waiterFilterControls');
+            if (waiterControls) {
+                waiterControls.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', e => {
+                    waiterFilter = e.target.dataset.status;
+                    waiterControls.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderFilteredOrders(waiterOrdersContainer, waiterFilter);
+                }));
+            }
         }
 
     document.addEventListener('DOMContentLoaded', () => {
