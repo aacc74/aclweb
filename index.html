@@ -770,6 +770,16 @@
         .table-card.active i {
             color: white;
         }
+         .table-card.locked {
+            background: var(--gray);
+            color: white;
+            border-color: var(--gray);
+            cursor: not-allowed;
+        }
+
+        .table-card.locked i {
+            color: white;
+        }
         
         .table-card span {
             font-weight: 600;
@@ -1024,8 +1034,7 @@
             transition: var(--transition);
         }
 
-        .filter-btn.active,
-        .filter-btn:hover {
+        .filter-btn.active, .filter-btn:hover {
             background: var(--primary);
             color: white;
         }
@@ -1041,15 +1050,6 @@
         .order-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content
-			space-between;
             padding: 8px 0;
             border-bottom: 1px solid #f5f5f5;
         }
@@ -1876,7 +1876,7 @@
             const userIsAdmin = currentUserRole === 'admin';
             const userIsPremium = currentUserRole === 'premium';
             adminOnlyItems.forEach(el => el.style.display = userIsAdmin ? '' : 'none');
-            if (adminMenu) adminMenu.style.display = userIsAdmin ? '' : 'none';
+            if (admin Menu) adminMenu.style.display = userIsAdmin ? '' : 'none';
             if (adminMobileNavItem) adminMobileNavItem.style.display = userIsAdmin ? '' : 'none';
             if (premiumBadge) premiumBadge.style.display = userIsPremium ? '' : 'none';
             if (profileMenuItem) profileMenuItem.style.display = currentUser ? '' : 'none';
@@ -2614,6 +2614,7 @@
         }
           function markOrderPaid(orderId) {
             // Aquí deberías agregar la lógica para marcar el pedido como pagado en Firebase
+            // Esto podría implicar cambiar el estado del pedido a "pagado" en Firebase
             // Esto podría implicar cambiar el estado del pedido a "pagado"
             // y posiblemente realizar otras acciones como liberar la mesa
             // Por ahora, simplemente mostraremos una alerta.
@@ -2717,7 +2718,7 @@
         // Obtener texto de estado
         function getStatusText(status) {
             switch(status) {
-                case 'pending': return 'Pendiente';
+			                case 'pending': return 'Pendiente';
                 case 'preparing': return 'En preparación';
                 case 'ready': return 'Listo para entrega';
                 case 'delivered': return 'Entregado';
