@@ -602,6 +602,20 @@
         }
         
         /* Botones mejorados */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
         .add-to-cart {
             background-color: var(--primary);
             color: white;
@@ -995,26 +1009,10 @@
             justify-content: center;
         }
 
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
         .btn-secondary {
             background: var(--secondary);
         }
-        
+
         .btn-warning {
             background: var(--warning);
             color: var(--dark);
@@ -1024,8 +1022,8 @@
             background: var(--secondary-dark);
         }
 
-        /* Panel de cocina */
-        .chef-filter {
+        /* Panel de cocina y Cajero */
+        .chef-filter, .cashier-filter {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
@@ -1046,7 +1044,7 @@
             color: white;
         }
 
-        .kitchen-order-card {
+        .kitchen-order-card, .cashier-order-card {
             background: white;
             border-radius: 10px;
             padding: 15px;
@@ -1071,15 +1069,17 @@
         }
 
         .item-status {
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 5px 10px;
+            border-radius: 20px;
             font-size: 0.8rem;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .status-pending { background-color: #ffcdd2; color: #c62828; }
         .status-preparing { background-color: #bbdefb; color: #1565c0; }
         .status-ready { background-color: #c8e6c9; color: #2e7d32; }
+        .status-paid { background-color: var(--success); color: white; }
+        .status-cancelled { background-color: var(--gray); color: white; }
 
         .order-actions {
             margin-top: 15px;
@@ -1089,20 +1089,22 @@
             justify-content: flex-end;
         }
 
-        .chef-btn {
-             border: none;
+        .chef-btn, .cashier-btn {
+            border: none;
             padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: 500;
             transition: var(--transition);
         }
-        .chef-btn:hover {
+        .chef-btn:hover, .cashier-btn:hover {
             transform: scale(1.05);
         }
         
         .mark-preparing-btn { background: var(--warning); color: white; }
         .mark-ready-btn { background: var(--success); color: white; }
+        .mark-paid-btn { background: var(--primary); color: white; }
+
 
         /* Notificación */
         .notification {
@@ -1277,7 +1279,7 @@
         </section>
         
         <!-- Orders Section -->
-        <section id="ordersSection" style="display: none;" class="for-customer">
+        <section id="ordersSection" style="display: none;" class="for-waiter">
             <h2 class="section-title">Historial de Pedidos</h2>
             
             <div class="orders-container" id="ordersContainer">
@@ -1288,7 +1290,6 @@
                             <th>Fecha</th>
                             <th>Productos</th>
                             <th>Total</th>
-                            <th>Método Pago</th>
                             <th>Referencia</th>
                             <th>Estado</th>
                             <th>Acciones</th>
@@ -1296,7 +1297,7 @@
                     </thead>
                     <tbody id="ordersTableBody">
                         <tr>
-                            <td colspan="8" style="text-align: center;">Cargando pedidos...</td>
+                            <td colspan="7" style="text-align: center;">Cargando pedidos...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1313,7 +1314,7 @@
         </section>
         
         <!-- Admin Section -->
-        <section id="adminSection" style="display: none;" class="for-customer">
+        <section id="adminSection" style="display: none;" class="for-admin">
             <h2 class="section-title">Panel de Administración</h2>
             
             <div class="admin-panel">
@@ -1506,15 +1507,16 @@
         <section id="chefSection" style="display: none;" class="for-chef">
             <h2 class="section-title">Panel de Cocina</h2>
             
-            <div class="chef-filter">
-                <button class="filter-btn active" id="filterAll">Todos los Pedidos</button>
-                <button class="filter-btn" id="filterPending">Pendientes</button>
-                <button class="filter-btn" id="filterPreparing">En Preparación</button>
-                <button class="filter-btn" id="filterReady">Listos</button>
-            </div>
-            
             <div class="kitchen-orders" id="kitchenOrdersContainer">
                 <!-- Pedidos cargados dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Nueva Sección para Cajero -->
+        <section id="cashierSection" style="display: none;" class="for-cajero">
+            <h2 class="section-title">Panel de Caja</h2>
+            <div class="cashier-orders" id="cashierOrdersContainer">
+                <!-- Pedidos para cobrar cargados dinámicamente -->
             </div>
         </section>
     </main>
@@ -1632,6 +1634,10 @@
             <i class="fas fa-cog"></i>
             <span>Admin</span>
         </a>
+        <a href="#" class="magic-nav-item" data-section="cashier" id="cashierMobileNavItem" style="display: none;">
+            <i class="fas fa-cash-register"></i>
+            <span>Caja</span>
+        </a>
         <a href="#" class="magic-nav-item" id="mobileCartIcon">
             <i class="fas fa-shopping-cart"></i>
             <span>Carrito</span>
@@ -1673,8 +1679,7 @@
         let currentCategory = 'all';
         let paymentReceiptFile = null;
         let currentTable = null;
-        let chefFilter = 'all';
-        let realtimeOrdersListener = null;
+        let realtimeListener = null; // Listener genérico
         let cartByTable = {};
         
         // Referencias DOM
@@ -1714,6 +1719,7 @@
         const confirmPasswordField = document.getElementById('confirmPasswordField');
         const magicNavItems = document.querySelectorAll('.magic-nav-item');
         const adminMobileNavItem = document.getElementById('adminMobileNavItem');
+        const cashierMobileNavItem = document.getElementById('cashierMobileNavItem');
         const mobileCartIcon = document.getElementById('mobileCartIcon');
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
@@ -1729,9 +1735,10 @@
         const mobileReference = document.getElementById('mobileReference');
         const waiterSection = document.getElementById('waiterSection');
         const chefSection = document.getElementById('chefSection');
+        const cashierSection = document.getElementById('cashierSection');
         const waiterProductsContainer = document.getElementById('waiterProductsContainer');
         const kitchenOrdersContainer = document.getElementById('kitchenOrdersContainer');
-        const filterButtons = document.querySelectorAll('.filter-btn');
+        const cashierOrdersContainer = document.getElementById('cashierOrdersContainer');
         const orderNotification = document.getElementById('orderNotification');
         const notificationContent = document.getElementById('notificationContent');
         const customerPaymentSection = document.getElementById('customerPaymentSection');
@@ -1770,57 +1777,27 @@
                 // Mostrar header animado
                 setTimeout(() => {
                     mainHeader.classList.add('visible');
-                    
-                    // Añadir efecto de scroll después de mostrar
                     setTimeout(() => {
                         window.addEventListener('scroll', handleHeaderScroll);
-                        handleHeaderScroll(); // Ejecutar al inicio
+                        handleHeaderScroll();
                     }, 100);
                 }, 300);
                 
-                // Ocultar sección de autenticación
                 authSection.style.display = 'none';
-                
-                // Mostrar barra mágica
                 magicNav.classList.add('visible');
                 
-                // Obtener datos del cliente
+                // Obtener rol del usuario
                 db.collection("customers").doc(user.uid).get()
                 .then(doc => {
                     if (doc.exists) {
                         const userData = doc.data();
                         currentUserRole = userData.role || 'customer';
-                        updateUIForRole();
                     } else {
                         saveCustomerData(user);
                         currentUserRole = 'customer';
-                        updateUIForRole();
                     }
-                    
-                    // Determinar vista según rol
-                    if (currentUserRole === 'waiter') {
-                        showSection('waiter');
-                        document.body.classList.add('role-waiter');
-                        mobileCartIcon.style.display = 'flex';
-                        desktopCartBtn.style.display = 'flex';
-                        listenForTableLocks(); // PERSISTENCE
-                    } 
-                    else if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
-                        showSection('chef');
-                        document.body.classList.add('role-chef');
-                        if (currentUserRole === 'empanada_chef') {
-                            document.body.classList.add('role-empanada-chef');
-                        } else {
-                            document.body.classList.add('role-general-chef');
-                        }
-                        listenForKitchenOrders(); // REAL-TIME
-                    } 
-                    else {
-                        document.body.classList.add('role-customer');
-                        showSection('menu');
-                        mobileCartIcon.style.display = 'flex';
-                        desktopCartBtn.style.display = 'flex';
-                    }
+                    updateUIForRole();
+                    setupRoleSpecificListeners();
                 })
                 .catch(error => {
                     console.error("Error obteniendo datos de usuario: ", error);
@@ -1828,37 +1805,25 @@
                     updateUIForRole();
                 });
                 
-                // Cargar datos
+                // Cargar datos iniciales
                 loadProducts();
-                loadOrders();
-                loadAdminOrders();
-                loadCustomers();
+                loadAdminData(); // Carga clientes y pedidos para admin
                 renderProfile();
             } else {
-                // Ocultar header
+                // Limpieza al cerrar sesión
                 mainHeader.classList.remove('visible', 'scrolled');
                 window.removeEventListener('scroll', handleHeaderScroll);
                 
-                // Usuario no autenticado
                 authSection.style.display = 'block';
                 currentUserRole = 'customer';
-                adminMobileNavItem.style.display = 'none';
-                mobileCartIcon.style.display = 'none';
-                desktopCartBtn.style.display = 'none';
-                document.body.classList.remove('role-customer', 'role-waiter', 'role-chef');
                 magicNav.classList.remove('visible');
                 
-                // Ocultar todas las secciones excepto autenticación
                 sections.forEach(section => {
-                    if (section.id !== 'authSection') {
-                        section.style.display = 'none';
-                    }
+                    if (section.id !== 'authSection') section.style.display = 'none';
                 });
                 
-                // Detener listeners si existen
-                if (realtimeOrdersListener) realtimeOrdersListener();
-
-                // Resetear formulario de autenticación
+                if (realtimeListener) realtimeListener(); // Detener listener
+                
                 authForm.reset();
                 setAuthMode('login');
             }
@@ -1866,83 +1831,44 @@
         
         // Manejar scroll para efecto en header
         function handleHeaderScroll() {
-            if (window.scrollY > 30) {
-                mainHeader.classList.add('scrolled');
-            } else {
-                mainHeader.classList.remove('scrolled');
-            }
+            if (window.scrollY > 30) mainHeader.classList.add('scrolled');
+            else mainHeader.classList.remove('scrolled');
         }
         
         // Función para actualizar la UI según el rol
         function updateUIForRole() {
-            const adminOnlyItems = document.querySelectorAll('.admin-only');
-            const premiumBadge = document.getElementById('premiumBadge');
-            const profileMenuItem = document.getElementById('profileMenuItem');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const paymentSection = document.getElementById('paymentSection');
-            const adminMenu = document.getElementById('adminMenu');
-            const adminMobileNavItem = document.getElementById('adminMobileNavItem');
+            document.body.className = `role-${currentUserRole}`;
+            
+            // Ocultar todos los items de navegación específicos de rol
+            [adminMobileNavItem, cashierMobileNavItem].forEach(el => { if(el) el.style.display = 'none'; });
 
-            // Magic nav items
-            const navMenu = document.querySelector('#magicNav .magic-nav-item[data-section="menu"]');
-            const navOrders = document.querySelector('#magicNav .magic-nav-item[data-section="orders"]');
-            const navProfile = document.querySelector('#magicNav .magic-nav-item[data-section="profile"]');
-            const mobileCartIcon = document.getElementById('mobileCartIcon');
-
-            // Sidebar & Categories
-            const sidebar = document.getElementById('sidebar');
-            const categoriesContainer = document.getElementById('categoriesContainer');
-            const menuToggle = document.getElementById('menuToggle');
-
-            // Hide all customizable navitems by default; then enable per role
-            [navOrders, navProfile, mobileCartIcon, adminMenu, adminMobileNavItem].forEach(el => { if (el) el.style.display = 'none'; });
-            if (navMenu) navMenu.style.display = ''; // Menu is almost always visible
-
-            // Reset categories / sidebar visibility
-            if (sidebar) sidebar.style.display = '';
-            if (menuToggle) menuToggle.style.display = '';
-            if (categoriesContainer) categoriesContainer.parentElement.style.display = '';
-
-            // Admin toggles common
-            const userIsAdmin = currentUserRole === 'admin';
-            const userIsPremium = currentUserRole === 'premium';
-            adminOnlyItems.forEach(el => el.style.display = userIsAdmin ? '' : 'none');
-            if (adminMenu) adminMenu.style.display = userIsAdmin ? '' : 'none';
-            if (adminMobileNavItem) adminMobileNavItem.style.display = userIsAdmin ? '' : 'none';
-            if (premiumBadge) premiumBadge.style.display = userIsPremium ? '' : 'none';
-            if (profileMenuItem) profileMenuItem.style.display = currentUser ? '' : 'none';
-            if (logoutBtn) logoutBtn.style.display = currentUser ? '' : 'none';
-
-            // Payment visible only for customers (not waiter/chefs)
-            if (paymentSection) paymentSection.style.display = (currentUserRole === 'customer') ? '' : 'none';
-
-            // Role-specific UI
-            if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
-                if (navOrders) navOrders.style.display = '';
-                if (menuToggle) menuToggle.style.display = 'none';
-                if (sidebar) sidebar.style.display = 'none';
-                if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = 'none';
-                if (mobileCartIcon) mobileCartIcon.style.display = 'none';
-                if (navMenu) navMenu.style.display = 'none';
-                if (navProfile) navProfile.style.display = 'none';
-                showSection('chef');
+            if (currentUserRole === 'admin') {
+                adminMobileNavItem.style.display = 'flex';
+                showSection('admin');
+            } else if (currentUserRole === 'cajero') {
+                cashierMobileNavItem.style.display = 'flex';
+                showSection('cashier');
             } else if (currentUserRole === 'waiter') {
-                 // The menu button should now always point to the waiter section
-                if (navMenu) navMenu.dataset.section = 'waiter';
-                if (navOrders) navOrders.style.display = '';
-                if (mobileCartIcon) mobileCartIcon.style.display = '';
-                if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
-                if (menuToggle) menuToggle.style.display = '';
                 showSection('waiter');
-            } else {
-                // Customer (default)
-                if (navMenu) navMenu.dataset.section = 'menu';
-                if (navOrders) navOrders.style.display = '';
-                if (navProfile) navProfile.style.display = '';
-                if (mobileCartIcon) mobileCartIcon.style.display = '';
-                if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
-                if (menuToggle) menuToggle.style.display = '';
+            } else if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
+                showSection('chef');
+            } else { // customer
                 showSection('menu');
+            }
+        }
+
+        // Configurar listeners específicos para cada rol
+        function setupRoleSpecificListeners() {
+            if (realtimeListener) realtimeListener(); // Detener listener anterior
+
+            if (currentUserRole === 'waiter') {
+                listenForWaiterData();
+            } else if (currentUserRole === 'cajero') {
+                listenForCashierOrders();
+            } else if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
+                listenForKitchenOrders();
+            } else if (currentUserRole === 'customer') {
+                listenForCustomerOrders();
             }
         }
         
@@ -1960,15 +1886,7 @@
                     createdAt: doc.exists ? currentData.createdAt : firebase.firestore.FieldValue.serverTimestamp(),
                     role: currentData.role || 'customer'
                 };
-                customerRef.set(customerData, { merge: true })
-                .then(() => {
-                    console.log("Datos del cliente guardados correctamente");
-                })
-                .catch(error => {
-                    console.error("Error guardando datos del cliente: ", error);
-                });
-            }).catch(error => {
-                console.error("Error obteniendo datos del cliente: ", error);
+                customerRef.set(customerData, { merge: true });
             });
         }
         
@@ -2027,10 +1945,7 @@
         function loginWithEmail(email, password) {
             auth.signInWithEmailAndPassword(email, password)
             .then(() => showNotification("Sesión iniciada correctamente"))
-            .catch(error => {
-                console.error("Error de autenticación: ", error);
-                showNotification(`Error al iniciar sesión: ${error.message}`);
-            });
+            .catch(error => showNotification(`Error al iniciar sesión: ${error.message}`));
         }
         
         // Registrar nuevo usuario
@@ -2046,10 +1961,7 @@
                 }, { merge: true })
                 .then(() => showNotification("¡Cuenta creada correctamente!"));
             })
-            .catch(error => {
-                console.error("Error registrando usuario: ", error);
-                showNotification(`Error al registrar: ${error.message}`);
-            });
+            .catch(error => showNotification(`Error al registrar: ${error.message}`));
         }
         
         // Recuperar contraseña
@@ -2059,31 +1971,19 @@
                 showNotification("Correo de recuperación enviado. Revisa tu bandeja de entrada.");
                 setAuthMode('login');
             })
-            .catch(error => {
-                console.error("Error enviando correo de recuperación: ", error);
-                showNotification(`Error: ${error.message}`);
-            });
+            .catch(error => showNotification(`Error: ${error.message}`));
         }
         
-        // Iniciar sesión con Google
         googleLoginBtn.addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(error => {
-                console.error("Error de autenticación: ", error);
-                showNotification(`Error al iniciar sesión: ${error.message}`);
-            });
+            auth.signInWithPopup(provider).catch(error => showNotification(`Error al iniciar sesión: ${error.message}`));
         });
         
-        // Iniciar sesión con Apple
         appleLoginBtn.addEventListener('click', () => {
             const provider = new firebase.auth.OAuthProvider('apple.com');
-            auth.signInWithPopup(provider).catch(error => {
-                console.error("Error de autenticación: ", error);
-                showNotification(`Error al iniciar sesión: ${error.message}`);
-            });
+            auth.signInWithPopup(provider).catch(error => showNotification(`Error al iniciar sesión: ${error.message}`));
         });
         
-        // Cerrar sesión
         logoutBtn.addEventListener('click', () => {
             mainHeader.classList.remove('scrolled');
             mainHeader.style.transition = 'transform 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
@@ -2107,79 +2007,42 @@
                 renderWaiterProducts();
                 renderCurrentProducts();
                 renderCategoryFilters();
-            }).catch(error => {
-                console.error("Error cargando productos: ", error);
-            });
+            }).catch(error => console.error("Error cargando productos: ", error));
         }
         
         // Renderizar los botones de categorías
         function renderCategoryFilters() {
-            // Obtener categorías únicas
             const categories = [...new Set(products.map(product => product.category))];
-            
-            // Limpiar contenedor
             categoriesContainer.innerHTML = '';
             
-            // Crear botones de categoría
-            categories.forEach(category => {
+            const createCategoryButton = (category, iconClass, text) => {
                 const button = document.createElement('div');
                 button.className = `category-btn ${currentCategory === category ? 'active' : ''}`;
                 button.dataset.category = category;
-                
-                // Asignar íconos según categoría
-                let iconClass = 'fas fa-utensils'; // Icono por defecto
-                switch(category) {
-                    case 'empanadas': iconClass = 'fas fa-pizza-slice'; break;
-                    case 'entradas': iconClass = 'fas fa-appetizer'; break;
-                    case 'sopas': iconClass = 'fas fa-bowl-food'; break;
-                    case 'desayuno criollo': iconClass = 'fas fa-egg'; break;
-                    case 'cachapas': iconClass = 'fas fa-bread-slice'; break;
-                    case 'arepas': iconClass = 'fas fa-cookie'; break;
-                    case 'tipico de venezuela': iconClass = 'fas fa-flag'; break;
-                    case 'extras': iconClass = 'fas fa-plus-circle'; break;
-                    case 'carne': iconClass = 'fas fa-drumstick-bite'; break;
-                    case 'aves': iconClass = 'fas fa-dove'; break;
-                    case 'ensaladas': iconClass = 'fas fa-leaf'; break;
-                    case 'bebidas': iconClass = 'fas fa-glass-martini-alt'; break;
-                    case 'postres': iconClass = 'fas fa-ice-cream'; break;
-                }
-                
-                button.innerHTML = `
-                    <i class="${iconClass}"></i>
-                    <span>${category}</span>
-                `;
+                button.innerHTML = `<i class="${iconClass}"></i> <span>${text}</span>`;
                 button.addEventListener('click', () => {
                     currentCategory = category;
                     renderProducts();
                     renderWaiterProducts();
-                    document.querySelectorAll('.category-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
+                    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
-                    closeSidebarFunc(); // Cerrar barra lateral al seleccionar categoría
+                    closeSidebarFunc();
                 });
-                categoriesContainer.appendChild(button);
+                return button;
+            };
+
+            const iconMap = {
+                'empanadas': 'fas fa-pizza-slice', 'entradas': 'fas fa-concierge-bell', 'sopas': 'fas fa-bowl-food',
+                'desayuno criollo': 'fas fa-egg', 'cachapas': 'fas fa-stroopwafel', 'arepas': 'fas fa-compact-disc',
+                'tipico de venezuela': 'fas fa-flag', 'extras': 'fas fa-plus-circle', 'carne': 'fas fa-drumstick-bite',
+                'aves': 'fas fa-feather-alt', 'ensaladas': 'fas fa-leaf', 'bebidas': 'fas fa-glass-martini-alt',
+                'postres': 'fas fa-ice-cream'
+            };
+
+            categoriesContainer.appendChild(createCategoryButton('all', 'fas fa-utensils', 'Todos'));
+            categories.forEach(cat => {
+                categoriesContainer.appendChild(createCategoryButton(cat, iconMap[cat] || 'fas fa-utensils', cat));
             });
-            
-            // Botón para mostrar todos los productos
-            const allButton = document.createElement('div');
-            allButton.className = `category-btn ${currentCategory === 'all' ? 'active' : ''}`;
-            allButton.dataset.category = 'all';
-            allButton.innerHTML = `
-                <i class="fas fa-utensils"></i>
-                <span>Todos los productos</span>
-            `;
-            allButton.addEventListener('click', () => {
-                currentCategory = 'all';
-                renderProducts();
-                renderWaiterProducts();
-                document.querySelectorAll('.category-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                allButton.classList.add('active');
-                closeSidebarFunc(); // Cerrar barra lateral al seleccionar categoría
-            });
-            categoriesContainer.insertBefore(allButton, categoriesContainer.firstChild);
         }
         
         // Renderizar productos
@@ -2187,11 +2050,7 @@
             if (!productsContainer) return;
             productsContainer.innerHTML = '';
             
-            // Filtrar productos por categoría
-            let filteredProducts = products;
-            if (currentCategory !== 'all') {
-                filteredProducts = products.filter(product => product.category === currentCategory);
-            }
+            let filteredProducts = (currentCategory === 'all') ? products : products.filter(p => p.category === currentCategory);
             
             if (filteredProducts.length === 0) {
                 productsContainer.innerHTML = '<p class="empty-message">No hay productos disponibles en esta categoría.</p>';
@@ -2222,8 +2081,7 @@
                 productsContainer.appendChild(productCard);
             });
             
-            // Añadir event listeners
-            document.querySelectorAll('.add-to-cart').forEach(button => {
+            document.querySelectorAll('#productsContainer .add-to-cart').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const productId = e.target.closest('.add-to-cart').dataset.id;
                     addToCart(productId);
@@ -2235,23 +2093,23 @@
         // Añadir al carrito
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
-            const active = getActiveCart();
-            if (!product || !active) return;
-            const existingItem = active.find(item => item.id === productId);
+            const activeCart = getActiveCart();
+            if (!product || !activeCart) return;
+            const existingItem = activeCart.find(item => item.id === productId);
             if (existingItem) {
                 existingItem.quantity++;
             } else {
-                active.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+                activeCart.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
             }
-            showNotification(`${product.name} añadida al carrito!`);
+            showNotification(`${product.name} añadido al carrito!`);
             updateCartCount();
         }
         
         // Renderizar carrito
         function renderCart() {
-            const active = getActiveCart();
+            const activeCart = getActiveCart();
             cartItems.innerHTML = '';
-            if (!active || active.length === 0) {
+            if (!activeCart || activeCart.length === 0) {
                 cartItems.innerHTML = '<p class="empty-cart">Tu carrito está vacío</p>';
                 cartSubtotal.textContent = '$0.00';
                 cartTax.textContent = '$0.00';
@@ -2259,7 +2117,7 @@
                 return;
             }
             let subtotal = 0;
-            active.forEach(item => {
+            activeCart.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 subtotal += itemTotal;
                 const cartItem = document.createElement('div');
@@ -2276,9 +2134,7 @@
                         <button class="quantity-btn minus" data-id="${item.id}">-</button>
                         <span class="quantity">${item.quantity}</span>
                         <button class="quantity-btn plus" data-id="${item.id}">+</button>
-                        <button class="remove-item" data-id="${item.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <button class="remove-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
                     </div>`;
                 cartItems.appendChild(cartItem);
             });
@@ -2287,36 +2143,22 @@
             cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
             cartTax.textContent = `$${tax.toFixed(2)}`;
             cartTotal.textContent = `$${total.toFixed(2)}`;
-            document.querySelectorAll('.quantity-btn.minus').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.quantity-btn').dataset.id;
-                    updateQuantity(productId, -1);
-                });
-            });
-            document.querySelectorAll('.quantity-btn.plus').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.quantity-btn').dataset.id;
-                    updateQuantity(productId, 1);
-                });
-            });
-            document.querySelectorAll('.remove-item').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.remove-item').dataset.id;
-                    removeFromCart(productId);
-                });
-            });
+
+            document.querySelectorAll('.quantity-btn.minus').forEach(button => button.addEventListener('click', e => updateQuantity(e.currentTarget.dataset.id, -1)));
+            document.querySelectorAll('.quantity-btn.plus').forEach(button => button.addEventListener('click', e => updateQuantity(e.currentTarget.dataset.id, 1)));
+            document.querySelectorAll('.remove-item').forEach(button => button.addEventListener('click', e => removeFromCart(e.currentTarget.dataset.id)));
         }
         
         // Actualizar cantidad en carrito
         function updateQuantity(productId, change) {
-            const active = getActiveCart();
-            if (!active) return;
-            const item = active.find(i => i.id === productId);
+            const activeCart = getActiveCart();
+            if (!activeCart) return;
+            const item = activeCart.find(i => i.id === productId);
             if (!item) return;
             item.quantity += change;
             if (item.quantity <= 0) {
-                const idx = active.findIndex(i => i.id === productId);
-                if (idx !== -1) active.splice(idx, 1);
+                const idx = activeCart.findIndex(i => i.id === productId);
+                if (idx !== -1) activeCart.splice(idx, 1);
             }
             renderCart();
             updateCartCount();
@@ -2324,84 +2166,54 @@
         
         // Eliminar del carrito
         function removeFromCart(productId) {
-            const active = getActiveCart();
-            if (!active) return;
-            const idx = active.findIndex(i => i.id === productId);
-            if (idx !== -1) active.splice(idx, 1);
+            const activeCart = getActiveCart();
+            if (!activeCart) return;
+            const idx = activeCart.findIndex(i => i.id === productId);
+            if (idx !== -1) activeCart.splice(idx, 1);
             renderCart();
             updateCartCount();
         }
         
         // Subir comprobante a Firebase Storage
-        function uploadReceipt(file) {
-            return new Promise((resolve, reject) => {
-                if (!currentUser) {
-                    reject('Usuario no autenticado');
-                    return;
-                }
-                
-                const storageRef = storage.ref();
-                const receiptRef = storageRef.child(`receipts/${currentUser.uid}/${Date.now()}_${file.name}`);
-                
-                receiptRef.put(file)
-                .then(snapshot => {
-                    snapshot.ref.getDownloadURL().then(url => {
-                        resolve(url);
-                    });
-                })
-                .catch(error => {
-                    reject(error);
-                });
-            });
+        async function uploadReceipt(file) {
+            if (!currentUser) throw new Error('Usuario no autenticado');
+            const storageRef = storage.ref();
+            const receiptRef = storageRef.child(`receipts/${currentUser.uid}/${Date.now()}_${file.name}`);
+            const snapshot = await receiptRef.put(file);
+            return await snapshot.ref.getDownloadURL();
         }
         
-        // Finalizar compra
+        // Finalizar compra (Cliente)
         async function checkout() {
-            const active = getActiveCart();
-            if (!active || active.length === 0) return;
+            const activeCart = getActiveCart();
+            if (!activeCart || activeCart.length === 0) return;
             
             const method = document.getElementById('paymentMethod').value;
             let reference = '';
             let receiptUrl = '';
             
-            // Obtener referencia según el método
-            switch(method) {
-                case 'pos':
-                    reference = 'POS';
-                    break;
-                case 'mobile':
-                    reference = document.getElementById('mobileReference').value || 'N/A';
-                    break;
-                case 'usd':
-                    reference = document.getElementById('usdReference').value;
-                    const usdReceipt = document.getElementById('usdReceipt').files[0];
-                    if (usdReceipt) {
-                        try {
-                            receiptUrl = await uploadReceipt(usdReceipt);
-                        } catch (error) {
-                            showNotification('Error al subir el comprobante: ' + error);
-                            return;
-                        }
-                    }
-                    break;
-                case 'eur':
-                    reference = document.getElementById('eurReference').value;
-                    const eurReceipt = document.getElementById('eurReceipt').files[0];
-                    if (eurReceipt) {
-                        try {
-                            receiptUrl = await uploadReceipt(eurReceipt);
-                        } catch (error) {
-                            showNotification('Error al subir el comprobante: ' + error);
-                            return;
-                        }
-                    }
-                    break;
-                case 'cash':
-                    reference = 'EFECTIVO';
-                    break;
+            try {
+                switch(method) {
+                    case 'mobile': reference = document.getElementById('mobileReference').value || 'N/A'; break;
+                    case 'usd':
+                        reference = document.getElementById('usdReference').value;
+                        const usdReceipt = document.getElementById('usdReceipt').files[0];
+                        if (usdReceipt) receiptUrl = await uploadReceipt(usdReceipt);
+                        break;
+                    case 'eur':
+                        reference = document.getElementById('eurReference').value;
+                        const eurReceipt = document.getElementById('eurReceipt').files[0];
+                        if (eurReceipt) receiptUrl = await uploadReceipt(eurReceipt);
+                        break;
+                    case 'pos': reference = 'POS'; break;
+                    case 'cash': reference = 'EFECTIVO'; break;
+                }
+            } catch (error) {
+                showNotification('Error al subir el comprobante: ' + error.message);
+                return;
             }
             
-            const subtotal = active.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const subtotal = activeCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const tax = subtotal * (taxRate / 100);
             const total = subtotal + tax;
             
@@ -2410,66 +2222,35 @@
                 userId: currentUser.uid,
                 userEmail: currentUser.email,
                 userName: currentUser.displayName || "Cliente",
-                items: active.map(item => ({
-                    productId: item.id,
-                    name: item.name,
-                    price: item.price,
-                    quantity: item.quantity,
-                    category: products.find(p => p.id === item.id)?.category || 'general',
-                    status: 'pending'
+                items: activeCart.map(item => ({
+                    productId: item.id, name: item.name, price: item.price, quantity: item.quantity,
+                    category: products.find(p => p.id === item.id)?.category || 'general', status: 'pending'
                 })),
-                subtotal,
-                tax,
-                total,
-                status: 'pending',
-                paymentMethod: method,
-                paymentReference: reference,
-                paymentReceipt: receiptUrl
+                subtotal, tax, total, status: 'pending',
+                paymentMethod: method, paymentReference: reference, paymentReceipt: receiptUrl
             };
             
-            // Guardar en Firebase
             db.collection("orders").add(order)
             .then(() => {
                 showNotification('¡Pedido realizado con éxito!');
-                if (currentUserRole === 'waiter') {
-                    // Locking is handled by the real-time listener
-                    cartByTable[currentTable] = [];
-                } else {
-                    cart = [];
-                }
+                cart = [];
                 updateCartCount();
                 cartModal.style.display = 'none';
-                loadOrders();
-                loadAdminOrders();
             })
-            .catch(error => {
-                console.error("Error guardando pedido: ", error);
-                showNotification('Error al guardar el pedido');
-            });
+            .catch(error => showNotification('Error al guardar el pedido: ' + error.message));
         }
         
-        // Agregar nuevo producto
+        // Agregar nuevo producto (Admin)
         function addProduct(name, price, description, category) {
-            const newProduct = {
-                name,
-                price: parseFloat(price),
-                description,
-                category,
-                createdAt: new Date().toISOString()
-            };
-            
-            db.collection("products").add(newProduct)
+            db.collection("products").add({ name, price: parseFloat(price), description, category, createdAt: new Date().toISOString() })
             .then(() => {
                 showNotification('¡Producto agregado con éxito!');
                 loadProducts();
             })
-            .catch(error => {
-                console.error("Error agregando producto: ", error);
-                showNotification('Error al agregar producto');
-            });
+            .catch(error => showNotification('Error al agregar producto: ' + error.message));
         }
         
-        // Eliminar producto
+        // Eliminar producto (Admin)
         function deleteProduct(productId) {
             if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
                 db.collection("products").doc(productId).delete()
@@ -2477,771 +2258,409 @@
                     showNotification('Producto eliminado');
                     loadProducts();
                 })
-                .catch(error => {
-                    console.error("Error eliminando producto: ", error);
-                    showNotification('Error al eliminar producto');
-                });
+                .catch(error => showNotification('Error al eliminar producto: ' + error.message));
             }
         }
         
-        // Actualizar estado de pedido
+        // Actualizar estado de pedido (Genérico)
         function updateOrderStatus(orderId, status) {
             db.collection("orders").doc(orderId).update({ status })
-            .then(() => {
-                showNotification('Estado actualizado correctamente');
-                loadAdminOrders(); // Admin view refreshes
-                // Kitchen view is real-time, it will refresh automatically
-            })
-            .catch(error => {
-                console.error("Error actualizando estado: ", error);
-                showNotification('Error al actualizar estado');
-            });
+            .then(() => showNotification('Estado actualizado correctamente'))
+            .catch(error => showNotification('Error al actualizar estado: ' + error.message));
         }
         
         // Renderizar productos actuales en panel de administración
         function renderCurrentProducts() {
             currentProducts.innerHTML = '';
-            
             if (products.length === 0) {
                 currentProducts.innerHTML = '<p>No hay productos registrados.</p>';
                 return;
             }
-            
             const table = document.createElement('table');
-            table.style.width = '100%';
-            table.style.borderCollapse = 'collapse';
-            table.style.marginTop = '1rem';
-            
-            // Cabecera
-            thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Producto</th>
-                    <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Categoría</th>
-                    <th style="text-align: right; padding: 10px; border-bottom: 2px solid #ddd;">Precio</th>
-                    <th style="text-align: center; padding: 10px; border-bottom: 2px solid #ddd;">Acciones</th>
-                </tr>
-            `;
-            table.appendChild(thead);
-            
-            // Cuerpo
-            const tbody = document.createElement('tbody');
-            
-            products.forEach(product => {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = '1px solid #eee';
-                tr.innerHTML = `
-                    <td style="padding: 10px;">${product.name}</td>
-                    <td style="padding: 10px; text-transform: capitalize;">${product.category}</td>
-                    <td style="padding: 10px; text-align: right;">$${product.price.toFixed(2)}</td>
-                    <td style="padding: 10px; text-align: center;">
-                        <button class="delete-product" data-id="${product.id}" style="background: none; border: none; cursor: pointer;">
-                            <i class="fas fa-trash" style="color: var(--danger);"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            
-            table.appendChild(tbody);
+            table.className = "table table-striped";
+            table.innerHTML = `
+                <thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Acciones</th></tr></thead>
+                <tbody>
+                    ${products.map(p => `
+                        <tr>
+                            <td>${p.name}</td>
+                            <td>${p.category}</td>
+                            <td>$${p.price.toFixed(2)}</td>
+                            <td><button class="delete-product" data-id="${p.id}"><i class="fas fa-trash"></i></button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>`;
             currentProducts.appendChild(table);
             
-            // Event listeners para eliminar
-            document.querySelectorAll('.delete-product').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.delete-product').dataset.id;
-                    deleteProduct(productId);
-                });
+            currentProducts.querySelectorAll('.delete-product').forEach(button => {
+                button.addEventListener('click', (e) => deleteProduct(e.currentTarget.dataset.id));
             });
         }
         
-        // Cargar pedidos del cliente
-        function loadOrders() {
-            if (!currentUser) return;
-            
-            db.collection("orders")
-                .where("userId", "==", currentUser.uid)
-                .orderBy("date", "desc")
-                .onSnapshot(querySnapshot => { // Changed to onSnapshot for real-time updates
-                    orders = [];
-                    ordersTableBody.innerHTML = '';
-                    
-                    if (querySnapshot.empty) {
-                        ordersTableBody.innerHTML = `
-                            <tr>
-                                <td colspan="8" style="text-align: center;">No tienes pedidos registrados</td>
-                            </tr>
-                        `;
-                        return;
-                    }
-                    
-                    querySnapshot.forEach(doc => {
-                        const order = { id: doc.id, ...doc.data() };
-                        orders.push(order);
-                        const date = new Date(order.date);
-                        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-                        
-                        const productCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-                        
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${order.id.substring(0, 8)}</td>
-                            <td>${formattedDate}</td>
-                            <td>${productCount} producto${productCount !== 1 ? 's' : ''}</td>
-                            <td>$${order.total.toFixed(2)}</td>
-                            <td>${getPaymentMethodName(order.paymentMethod)}</td>
-                            <td>${order.paymentReference || 'N/A'}</td>
-                            <td><span class="order-status status-${order.status}">${getStatusText(order.status)}</span></td>
-                             <td>
-                                <button class="cancel-order btn btn-secondary" data-id="${order.id}" data-table="${order.table || ''}">Cancelar</button>
-                                <button class="paid-order btn" data-id="${order.id}" data-table="${order.table || ''}">Pagado</button>
-                            </td>
-                        `;
-                        ordersTableBody.appendChild(row);
-                    });
-                      document.querySelectorAll('.cancel-order').forEach(button => {
-                        button.addEventListener('click', (e) => {
-                            const orderId = e.target.dataset.id;
-                            const tableNumber = e.target.dataset.table;
-                            cancelOrder(orderId, tableNumber);
-                        });
-                    });
-                     document.querySelectorAll('.paid-order').forEach(button => {
-                        button.addEventListener('click', (e) => {
-                            const orderId = e.target.dataset.id;
-                            const tableNumber = e.target.dataset.table;
-                            markOrderPaid(orderId, tableNumber);
-                        });
-                    });
-                }, error => {
-                    console.error("Error cargando pedidos: ", error);
-                    ordersTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="8" style="text-align: center;">Error al cargar pedidos</td>
-                        </tr>
-                    `;
-                });
-        }
-
-         function cancelOrder(orderId, tableNumber) {
-             db.collection("orders").doc(orderId).update({ status: 'cancelled' })
-            .then(() => {
-                showNotification('Pedido cancelado correctamente');
-                // Views will update automatically via listeners
-            })
-            .catch(error => {
-                console.error("Error cancelando pedido: ", error);
-                showNotification('Error al cancelar pedido');
-            });
-        }
-
-          function markOrderPaid(orderId, tableNumber) {
-              db.collection("orders").doc(orderId).update({ status: 'paid' })
-            .then(() => {
-                showNotification('Pedido pagado correctamente');
-                // Views will update automatically via listeners
-            })
-            .catch(error => {
-                console.error("Error marcando pedido como pagado: ", error);
-                showNotification('Error al marcar pedido como pagado');
-            });
-        }
-        
-        // Cargar todos los pedidos (admin)
-        function loadAdminOrders() {
+        // Cargar datos para Admin
+        function loadAdminData() {
             if (currentUserRole !== 'admin') return;
-            
-            db.collection("orders")
-                .orderBy("date", "desc")
-                .onSnapshot(querySnapshot => { // Changed to onSnapshot for real-time updates
+            loadCustomers();
+            listenForAdminOrders();
+        }
+
+        function listenForAdminOrders() {
+            realtimeListener = db.collection("orders").orderBy("date", "desc")
+                .onSnapshot(querySnapshot => {
                     adminOrdersTableBody.innerHTML = '';
-                    
                     if (querySnapshot.empty) {
-                        adminOrdersTableBody.innerHTML = `
-                            <tr>
-                            <td colspan="8" style="text-align: center;">No hay pedidos registrados</td>
-                            </tr>
-                        `;
+                        adminOrdersTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center;">No hay pedidos registrados</td></tr>`;
                         return;
                     }
-                    
                     querySnapshot.forEach(doc => {
                         const order = { id: doc.id, ...doc.data() };
-                        const date = new Date(order.date);
-                        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-                        
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${order.id.substring(0, 8)}</td>
                             <td>${order.userName}</td>
-                            <td>${formattedDate}</td>
+                            <td>${new Date(order.date).toLocaleString()}</td>
                             <td>$${order.total.toFixed(2)}</td>
                             <td>${getPaymentMethodName(order.paymentMethod)}</td>
                             <td>${order.paymentReference || 'N/A'}</td>
                             <td>
                                 <select class="order-status-select" data-id="${order.id}">
-                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendiente</option>
-                                    <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>En preparación</option>
-                                    <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Listo</option>
-                                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Entregado</option>
-                                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
-                                    <option value="paid" ${order.status === 'paid' ? 'selected' : ''}>Pagado</option>
+                                    ${['pending', 'preparing', 'ready', 'delivered', 'cancelled', 'paid'].map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${getStatusText(s)}</option>`).join('')}
                                 </select>
                             </td>
-                            <td>
-                                <button class="view-order" data-id="${order.id}">Ver</button>
-                            </td>
-                        `;
+                            <td><button class="view-order" data-id="${order.id}">Ver</button></td>`;
                         adminOrdersTableBody.appendChild(row);
                     });
                     
-                    // Event listeners para cambiar estado
-                    document.querySelectorAll('.order-status-select').forEach(select => {
-                        select.addEventListener('change', (e) => {
-                            const orderId = e.target.dataset.id;
-                            const newStatus = e.target.value;
-                            updateOrderStatus(orderId, newStatus);
-                        });
+                    adminOrdersTableBody.querySelectorAll('.order-status-select').forEach(select => {
+                        select.addEventListener('change', (e) => updateOrderStatus(e.target.dataset.id, e.target.value));
                     });
-                }, error => {
-                     console.error("Error cargando pedidos de admin: ", error);
-                    adminOrdersTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="8" style="text-align: center;">Error al cargar pedidos</td>
-                        </tr>
-                    `;
-                });
+                }, error => console.error("Error cargando pedidos de admin: ", error));
         }
         
-        // Obtener nombre de método de pago
         function getPaymentMethodName(method) {
-            switch(method) {
-                case 'pos': return 'Punto de Venta';
-                case 'mobile': return 'Pago Móvil';
-                case 'usd': return 'Divisa USD';
-                case 'eur': return 'Divisa EUR';
-                case 'cash': return 'Efectivo';
-                default: return method;
-            }
+            const names = { 'pos': 'Punto de Venta', 'mobile': 'Pago Móvil', 'usd': 'Divisa USD', 'eur': 'Divisa EUR', 'cash': 'Efectivo' };
+            return names[method] || method;
         }
         
-        // Obtener texto de estado
         function getStatusText(status) {
-            switch(status) {
-                case 'pending': return 'Pendiente';
-                case 'preparing': return 'En preparación';
-                case 'ready': return 'Listo para entrega';
-                case 'delivered': return 'Entregado';
-                case 'cancelled': return 'Cancelado';
-                case 'paid': return 'Pagado';
-                default: return status;
-            }
+            const texts = { 'pending': 'Pendiente', 'preparing': 'En preparación', 'ready': 'Listo', 'delivered': 'Entregado', 'cancelled': 'Cancelado', 'paid': 'Pagado' };
+            return texts[status] || status;
         }
         
-        // Cargar clientes (admin)
         function loadCustomers() {
-            if (currentUserRole !== 'admin') return;
-            
             db.collection("customers").get()
                 .then(querySnapshot => {
-                    customersTableBody.innerHTML = '';
-                    
-                    if (querySnapshot.empty) {
-                        customersTableBody.innerHTML = `
-                            <tr>
-                                <td colspan="5" style="text-align: center;">No hay clientes registrados</td>
-                            </tr>
-                        `;
-                        return;
-                    }
-                    
-                    querySnapshot.forEach(doc => {
-                        const customer = { id: doc.id, ...doc.data() };
-                        const lastLogin = customer.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'Nunca';
-                        
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${customer.displayName}</td>
-                            <td>${customer.email}</td>
-                            <td>${customer.phone || 'N/A'}</td>
-                            <td>${customer.orderCount || 0}</td>
-                            <td>${lastLogin}</td>
-                        `;
-                        customersTableBody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error("Error cargando clientes: ", error);
-                    customersTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="5" style="text-align: center;">Error al cargar clientes</td>
-                        </tr>
-                    `;
-                });
+                    customersTableBody.innerHTML = querySnapshot.empty ? `<tr><td colspan="5" style="text-align: center;">No hay clientes registrados</td></tr>` :
+                    querySnapshot.docs.map(doc => {
+                        const customer = doc.data();
+                        return `<tr>
+                                    <td>${customer.displayName}</td><td>${customer.email}</td>
+                                    <td>${customer.phone || 'N/A'}</td><td>${customer.orderCount || 0}</td>
+                                    <td>${customer.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'Nunca'}</td>
+                                </tr>`;
+                    }).join('');
+                }).catch(error => console.error("Error cargando clientes: ", error));
         }
         
-        // Renderizar perfil
         function renderProfile() {
             if (!currentUser) return;
-
-            // Obtener la fecha de creación de la cuenta
-            const creationDate = currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime) : null;
-            const memberSince = creationDate ? creationDate.getFullYear() : 'N/A';
-
+            const creationDate = currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime).getFullYear() : 'N/A';
             profileContainer.innerHTML = `
                 <div class="profile-card">
                     <div class="profile-header">
-                        <div class="profile-avatar">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
+                        <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
                         <h3>${currentUser.displayName || "Cliente"}</h3>
                         <p>${currentUser.email}</p>
                     </div>
                     <div class="profile-stats">
-                        <div class="stat-item">
-                            <span class="stat-value">${memberSince}</span>
-                            <span class="stat-label">Miembro desde</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">${orders.length}</span>
-                            <span class="stat-label">Pedidos realizados</span>
-                        </div>
+                        <div class="stat-item"><span class="stat-value">${creationDate}</span><span class="stat-label">Miembro desde</span></div>
+                        <div class="stat-item"><span class="stat-value">${orders.length}</span><span class="stat-label">Pedidos</span></div>
                     </div>
                     <div class="profile-actions">
                         <button class="btn">Editar Perfil</button>
                         <button class="btn btn-secondary" id="viewHistoryBtn">Ver Historial</button>
                     </div>
-                </div>
-            `;
-
-            // Event listener para el botón de historial
-            document.getElementById('viewHistoryBtn').addEventListener('click', () => {
-                showSection('orders');
-            });
+                </div>`;
+            document.getElementById('viewHistoryBtn').addEventListener('click', () => showSection('orders'));
         }
         
-        // Mostrar sección
         function showSection(sectionId) {
-            // Verificar acceso a administración
-            if (sectionId === 'admin' && currentUserRole !== 'admin') {
-                showNotification('Acceso denegado: se requieren privilegios de administrador');
-                sectionId = 'menu';
-            }
-            
             sections.forEach(section => {
-                if (section.id === `${sectionId}Section`) {
-                    section.style.display = 'block';
-                } else {
-                    section.style.display = 'none';
-                }
+                section.style.display = section.id === `${sectionId}Section` ? 'block' : 'none';
             });
-            
-            // Actualizar navegación mágica activa
             magicNavItems.forEach(item => {
-                const targetSection = item.getAttribute('data-section');
-                if (targetSection === sectionId) {
-                    item.classList.add('active');
-                } else {
-                     item.classList.remove('active');
-                }
+                item.classList.toggle('active', item.dataset.section === sectionId);
             });
-             // Ensure waiter nav item is active when in waiter section
-            if(sectionId === 'waiter') {
-                const waiterNavItem = document.querySelector('.magic-nav-item[data-section="waiter"]');
-                if(waiterNavItem) waiterNavItem.classList.add('active');
-            }
-            
-            // Cargar datos específicos de la sección
-            if (sectionId === 'profile') {
-                renderProfile();
-            } else if (sectionId === 'orders') {
-                loadOrders();
-            } else if (sectionId === 'admin') {
-                loadAdminOrders();
-                loadCustomers();
-            } else if (sectionId === 'chef') {
-                listenForKitchenOrders();
-            } else if (sectionId === 'waiter') {
-                if (tableSelection) tableSelection.style.display = 'block';
-                if (waiterMenuSection) waiterMenuSection.style.display = 'block';
-                renderWaiterProducts(); 
-                setupTableSelection();
-                listenForTableLocks();
-            } 
         }
         
-        // Mostrar notificación
         function showNotification(message) {
-            // Crear elemento de notificación
             const notification = document.createElement('div');
             notification.className = 'notification';
             notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                bottom: 100px;
-                right: 20px;
-                background-color: var(--success);
-                color: white;
-                padding: 15px 25px;
-                border-radius: 5px;
-                box-shadow: var(--shadow-lg);
-                z-index: 1000;
-                transform: translateX(200%);
-                transition: transform 0.3s ease-in-out;
-            `;
-            
             document.body.appendChild(notification);
-            
-            // Animación de entrada
+            setTimeout(() => notification.classList.add('show'), 10);
             setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 10);
-            
-            // Eliminar después de 3 segundos
-            setTimeout(() => {
-                notification.style.transform = 'translateX(200%)';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
         
-        // Animación para icono del carrito
         function animateCart() {
-            const cartIcon = document.getElementById('mobileCartIcon');
-            if (!cartIcon) return;
-            
-            cartIcon.classList.add('pulse');
-            setTimeout(() => {
-                cartIcon.classList.remove('pulse');
-            }, 500);
+            mobileCartIcon.classList.add('pulse');
+            setTimeout(() => mobileCartIcon.classList.remove('pulse'), 500);
         }
         
-        // Función para abrir el menú lateral
         function openSidebar() {
             sidebar.classList.add('open');
             overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
         }
         
-        // Función para cerrar el menú lateral
         function closeSidebarFunc() {
             sidebar.classList.remove('open');
             overlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
         }
         
-        // Manejar cambio de método de pago
         function handlePaymentMethodChange() {
             const method = paymentMethod.value;
-            
-            // Ocultar todos los detalles
-            posDetails.classList.remove('active');
-            mobileDetails.classList.remove('active');
-            usdDetails.classList.remove('active');
-            eurDetails.classList.remove('active');
-            cashDetails.classList.remove('active');
-            
-            // Mostrar detalles del método seleccionado
-            switch(method) {
-                case 'pos':
-                    posDetails.classList.add('active');
-                    break;
-                case 'mobile':
-                    mobileDetails.classList.add('active');
-                    break;
-                case 'usd':
-                    usdDetails.classList.add('active');
-                    break;
-                case 'eur':
-                    eurDetails.classList.add('active');
-                    break;
-                case 'cash':
-                    cashDetails.classList.add('active');
-                    break;
+            document.querySelectorAll('.payment-detail').forEach(el => el.classList.remove('active'));
+            if(document.getElementById(`${method}Details`)) {
+                document.getElementById(`${method}Details`).classList.add('active');
             }
         }
         
         // =====================================
         // Funciones para Meseros
         // =====================================
-        
-        // Escuchar cambios en los pedidos para bloquear/desbloquear mesas en tiempo real
+        function listenForWaiterData() {
+            // Listen for own orders and for table locks
+            listenForWaiterOrders();
+            listenForTableLocks();
+        }
+
+        function listenForWaiterOrders() {
+            realtimeListener = db.collection("orders")
+                .where("waiterId", "==", currentUser.uid)
+                .orderBy("date", "desc")
+                .onSnapshot(querySnapshot => {
+                    ordersTableBody.innerHTML = '';
+                    if (querySnapshot.empty) {
+                        ordersTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No tienes pedidos registrados</td></tr>`;
+                        return;
+                    }
+                    querySnapshot.forEach(doc => {
+                        const order = { id: doc.id, ...doc.data() };
+                        const isFinalState = order.status === 'paid' || order.status === 'cancelled';
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${order.id.substring(0, 8)}</td>
+                            <td>${new Date(order.date).toLocaleString()}</td>
+                            <td>${order.items.reduce((sum, item) => sum + item.quantity, 0)} prod.</td>
+                            <td>$${order.total.toFixed(2)}</td>
+                            <td>Mesa ${order.table}</td>
+                            <td><span class="item-status status-${order.status}">${getStatusText(order.status)}</span></td>
+                            <td>
+                                ${!isFinalState ? `<button class="btn btn-secondary cancel-order" data-id="${order.id}">Cancelar</button>` : ''}
+                            </td>`;
+                        ordersTableBody.appendChild(row);
+                    });
+                    ordersTableBody.querySelectorAll('.cancel-order').forEach(button => {
+                        button.addEventListener('click', (e) => cancelOrder(e.currentTarget.dataset.id));
+                    });
+                }, error => console.error("Error escuchando pedidos de mesero: ", error));
+        }
+
         function listenForTableLocks() {
             db.collection("orders")
               .where("status", "in", ["pending", "preparing", "ready"])
               .onSnapshot(snapshot => {
-                const lockedTables = new Set();
-                snapshot.forEach(doc => {
-                    const order = doc.data();
-                    if (order.table) {
-                        lockedTables.add(order.table);
-                    }
-                });
-                
-                // Actualizar la UI de todas las mesas
-                const tableCards = document.querySelectorAll('.table-card');
-                tableCards.forEach(card => {
-                    const tableNumber = card.dataset.table;
-                    if (lockedTables.has(tableNumber)) {
-                        card.classList.add('locked');
-                    } else {
-                        card.classList.remove('locked');
-                    }
+                const lockedTables = new Set(snapshot.docs.map(doc => doc.data().table));
+                document.querySelectorAll('.table-card').forEach(card => {
+                    card.classList.toggle('locked', lockedTables.has(card.dataset.table));
                 });
             });
         }
 
-        // Seleccionar mesa
         function setupTableSelection() {
-            const tableCards = document.querySelectorAll('.table-card');
-            tableCards.forEach(card => {
+            document.querySelectorAll('.table-card').forEach(card => {
                 card.addEventListener('click', () => {
-                    const tableNumber = card.dataset.table;
-
-                    // La comprobación de 'locked' se hace visualmente y con el listener
                     if (card.classList.contains('locked')) {
                         showNotification('Esta mesa está ocupada.');
                         return;
                     }
-
-                    document.querySelectorAll('.table-card').forEach(c => c.classList.remove('active'));
+                    document.querySelectorAll('.table-card.active').forEach(c => c.classList.remove('active'));
                     card.classList.add('active');
-                    currentTable = tableNumber;
+                    currentTable = card.dataset.table;
                     showNotification(`Mesa ${currentTable} seleccionada.`);
                 });
             });
         }
         
-        // Renderizar productos para meseros
         function renderWaiterProducts() {
             if (!waiterProductsContainer) return;
-            waiterProductsContainer.innerHTML = '';
-            
-            let filteredProducts = products;
-            if (currentCategory !== 'all') {
-                filteredProducts = products.filter(product => product.category === currentCategory);
-            }
-
-            if (filteredProducts.length === 0) {
-                waiterProductsContainer.innerHTML = '<p class="empty-message">No hay productos disponibles en esta categoría.</p>';
-                return;
-            }
-
-            filteredProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
+            let filteredProducts = (currentCategory === 'all') ? products : products.filter(p => p.category === currentCategory);
+            waiterProductsContainer.innerHTML = filteredProducts.map(product => `
+                <div class="product-card">
                     <div class="product-badge">${product.category}</div>
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/300x200?text=${product.name.replace(/\s+/g, '+')}" alt="${product.name}">
-                    </div>
+                    <div class="product-image"><img src="https://via.placeholder.com/300x200?text=${product.name.replace(/\s+/g, '+')}" alt="${product.name}"></div>
                     <div class="product-info">
-                        <h3 class="product-title">
-                            <span>${product.name}</span>
-                            <span class="product-price">$${product.price.toFixed(2)}</span>
-                        </h3>
+                        <h3 class="product-title"><span>${product.name}</span><span class="product-price">$${product.price.toFixed(2)}</span></h3>
                         <p class="product-description">${product.description}</p>
-                        <div class="product-footer">
-                            <button class="add-to-cart" data-id="${product.id}">
-                                <i class="fas fa-plus"></i> <span>Añadir</span>
-                            </button>
-                        </div>
+                        <div class="product-footer"><button class="add-to-cart" data-id="${product.id}"><i class="fas fa-plus"></i> <span>Añadir</span></button></div>
                     </div>
-                `;
-                waiterProductsContainer.appendChild(productCard);
-            });
+                </div>`).join('');
             
-            // Event listeners para añadir al carrito
-            document.querySelectorAll('#waiterProductsContainer .add-to-cart').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.add-to-cart').dataset.id;
-                    addToCart(productId);
-                    animateCart();
-                });
+            waiterProductsContainer.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => addToCart(e.currentTarget.dataset.id));
             });
         }
         
-        // Procesar pedido de mesero
         async function processWaiterOrder() {
-            const active = getActiveCart();
-            if (!active || active.length === 0) {
-                showNotification('El carrito está vacío');
-                return;
-            }
+            const activeCart = getActiveCart();
+            if (!activeCart || activeCart.length === 0) return showNotification('El carrito está vacío');
+            if (!currentTable) return showNotification('Seleccione una mesa primero');
             
-            if (!currentTable) {
-                showNotification('Seleccione una mesa primero');
-                return;
-            }
-            
-            const subtotal = active.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const subtotal = activeCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const tax = subtotal * (taxRate / 100);
             const total = subtotal + tax;
             
             const order = {
-                date: new Date().toISOString(),
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                userName: `Mesa ${currentTable} (Mesero: ${currentUser.displayName || "Anónimo"})`,
-                items: active.map(item => ({
-                    productId: item.id,
-                    name: item.name,
-                    price: item.price,
-                    quantity: item.quantity,
-                    category: products.find(p => p.id === item.id)?.category || 'general',
-                    status: 'pending'
-                })),
-                subtotal,
-                tax,
-                total,
-                status: 'pending',
-                paymentMethod: 'cash',
-                paymentReference: `Mesa ${currentTable}`,
-                table: currentTable,
-                waiterId: currentUser.uid
+                date: new Date().toISOString(), userId: currentUser.uid, userEmail: currentUser.email,
+                userName: `Mesa ${currentTable}`, items: activeCart, subtotal, tax, total,
+                status: 'pending', paymentMethod: 'cash', paymentReference: `Mesa ${currentTable}`,
+                table: currentTable, waiterId: currentUser.uid
             };
             
-            // Guardar en Firebase
             try {
                 await db.collection("orders").add(order);
                 showNotification(`Pedido para Mesa ${currentTable} realizado con éxito!`);
-                
-                // Limpiar carrito de la mesa y des-seleccionar
                 cartByTable[currentTable] = [];
                 const activeCard = document.querySelector('.table-card.active');
                 if(activeCard) activeCard.classList.remove('active');
                 currentTable = null;
-
                 updateCartCount();
                 closeCartModal();
-                
             } catch (error) {
-                console.error("Error guardando pedido: ", error);
-                showNotification('Error al guardar el pedido');
+                showNotification('Error al guardar el pedido: ' + error.message);
             }
+        }
+
+        function cancelOrder(orderId) {
+            db.collection("orders").doc(orderId).update({ status: 'cancelled' })
+            .then(() => showNotification('Pedido cancelado correctamente'))
+            .catch(error => showNotification('Error al cancelar pedido: ' + error.message));
         }
         
         // =====================================
         // Funciones para Cocineros
         // =====================================
-        
-        // Escuchar nuevos pedidos en tiempo real
         function listenForKitchenOrders() {
-            if (currentUserRole !== 'empanada_chef' && currentUserRole !== 'general_chef') return;
-
-            if (realtimeOrdersListener) {
-                realtimeOrdersListener(); // Detener listener anterior
-            }
-            
-            realtimeOrdersListener = db.collection("orders")
+            realtimeListener = db.collection("orders")
                 .where("status", "in", ["pending", "preparing", "ready"])
                 .orderBy("date", "asc")
                 .onSnapshot(snapshot => {
-                    
-                    snapshot.docChanges().forEach(change => {
-                        if (change.type === "added") {
-                            const order = change.doc.data();
-                            notificationContent.textContent = `Mesa ${order.table || 'Llevar'} ha realizado un nuevo pedido`;
-                            orderNotification.classList.add('show');
-                            
-                            setTimeout(() => {
-                                orderNotification.classList.remove('show');
-                            }, 5000);
-                        }
-                    });
-                    
                     renderKitchenOrders(snapshot.docs);
-                }, error => {
-                     console.error("Error escuchando pedidos de cocina: ", error);
-                });
+                }, error => console.error("Error escuchando pedidos de cocina: ", error));
         }
         
-        // Renderizar pedidos para cocina
         function renderKitchenOrders(docs) {
-             const container = document.getElementById('kitchenOrdersContainer');
-            if (!container) return;
-            container.innerHTML = '';
+            if (!kitchenOrdersContainer) return;
+            kitchenOrdersContainer.innerHTML = '';
 
-            if (docs.length === 0) {
-                container.innerHTML = '<p class="muted" style="text-align:center; padding: 2rem;">No hay pedidos activos.</p>';
+            const relevantDocs = docs.filter(doc => {
+                const order = doc.data();
+                return order.items.some(it => {
+                    const cat = (it.category || '').toLowerCase();
+                    return currentUserRole === 'empanada_chef' ? (cat === 'empanadas' || cat === 'bebidas') : (cat !== 'empanadas');
+                });
+            });
+
+            if (relevantDocs.length === 0) {
+                kitchenOrdersContainer.innerHTML = '<p class="muted" style="text-align:center; padding: 2rem;">No hay pedidos para tu estación.</p>';
                 return;
             }
             
-            docs.forEach(doc => {
+            relevantDocs.forEach(doc => {
                 const order = { id: doc.id, ...doc.data() };
-
-                // Filtrar items dependiendo del rol del chef
-                const filteredItems = (order.items || []).filter(it => {
+                const filteredItems = order.items.filter(it => {
                     const cat = (it.category || '').toLowerCase();
-                    if (currentUserRole === 'empanada_chef') {
-                        return cat === 'empanadas' || cat === 'bebidas';
-                    }
-                    if (currentUserRole === 'general_chef') {
-                        return cat !== 'empanadas';
-                    }
-                    return true;
+                    return currentUserRole === 'empanada_chef' ? (cat === 'empanadas' || cat === 'bebidas') : (cat !== 'empanadas');
                 });
-
-                if (!filteredItems.length) return; // No renderizar tarjeta si no hay nada para este chef
-
+                
                 const el = document.createElement('div');
                 el.className = 'kitchen-order-card';
                 el.innerHTML = `
                     <div class="order-header">
                         <div>
-                            <div class="order-id">#${order.id.slice(-6)}</div>
-                            <div class="meta">Mesa: ${order.table || 'N/A'} • ${new Date(order.date).toLocaleTimeString()}</div>
+                            <div class="order-id">#${order.id.slice(-6)} | Mesa: ${order.table || 'N/A'}</div>
+                            <div class="meta">${new Date(order.date).toLocaleTimeString()}</div>
                         </div>
                         <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
                     </div>
-                    <div class="order-items">
-                        ${filteredItems.map(it => `
-                            <div class="order-item">
-                                <span>${it.quantity || 1}× ${it.name}</span>
-                                ${it.notes ? `<span class="notes">— ${it.notes}</span>` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
+                    <div class="order-items">${filteredItems.map(it => `<div class="order-item"><span>${it.quantity || 1}× ${it.name}</span></div>`).join('')}</div>
                     <div class="order-actions">
                         ${order.status === 'pending' ? `<button class="chef-btn mark-preparing-btn" data-id="${order.id}">Preparar</button>` : ''}
-                        <button class="chef-btn mark-ready-btn" data-id="${order.id}">Marcar como listo</button>
-                    </div>
-                `;
-                container.appendChild(el);
+                        ${order.status === 'preparing' ? `<button class="chef-btn mark-ready-btn" data-id="${order.id}">Listo</button>` : ''}
+                    </div>`;
+                kitchenOrdersContainer.appendChild(el);
             });
 
-            // Adjuntar manejadores para botones de chef
-            container.querySelectorAll('.mark-preparing-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.currentTarget.dataset.id;
-                    updateOrderStatus(id, 'preparing');
-                });
+            kitchenOrdersContainer.querySelectorAll('.mark-preparing-btn').forEach(btn => btn.addEventListener('click', e => updateOrderStatus(e.currentTarget.dataset.id, 'preparing')));
+            kitchenOrdersContainer.querySelectorAll('.mark-ready-btn').forEach(btn => btn.addEventListener('click', e => updateOrderStatus(e.currentTarget.dataset.id, 'ready')));
+        }
+
+        // =====================================
+        // Funciones para Cajero
+        // =====================================
+        function listenForCashierOrders() {
+            realtimeListener = db.collection("orders")
+                .where("status", "in", ["pending", "preparing", "ready"])
+                .orderBy("date", "asc")
+                .onSnapshot(snapshot => {
+                    renderCashierOrders(snapshot.docs);
+                }, error => console.error("Error escuchando pedidos para caja: ", error));
+        }
+
+        function renderCashierOrders(docs) {
+            if (!cashierOrdersContainer) return;
+            cashierOrdersContainer.innerHTML = '';
+
+            if (docs.length === 0) {
+                cashierOrdersContainer.innerHTML = '<p class="muted" style="text-align:center; padding: 2rem;">No hay pedidos por cobrar.</p>';
+                return;
+            }
+
+            docs.forEach(doc => {
+                const order = { id: doc.id, ...doc.data() };
+                const el = document.createElement('div');
+                el.className = 'cashier-order-card';
+                el.innerHTML = `
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">#${order.id.slice(-6)} | Mesa: ${order.table || 'N/A'}</div>
+                            <div class="meta">Total: <strong>$${order.total.toFixed(2)}</strong></div>
+                        </div>
+                        <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
+                    </div>
+                    <div class="order-actions">
+                        <button class="cashier-btn mark-paid-btn" data-id="${order.id}">Marcar como Pagado</button>
+                    </div>`;
+                cashierOrdersContainer.appendChild(el);
             });
-            container.querySelectorAll('.mark-ready-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.currentTarget.dataset.id;
-                    updateOrderStatus(id, 'ready');
-                });
+
+            cashierOrdersContainer.querySelectorAll('.mark-paid-btn').forEach(btn => {
+                btn.addEventListener('click', e => markOrderPaid(e.currentTarget.dataset.id));
             });
         }
         
-        // Aplicar filtros (ahora obsoleto, pero se mantiene por si se quiere reactivar)
-        function setupChefFilters() {
-            filterButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    chefFilter = button.id.replace('filter', '').toLowerCase();
-                    listenForKitchenOrders(); // Re-ejecutar la consulta con el nuevo filtro
-                });
-            });
+        function markOrderPaid(orderId) {
+            db.collection("orders").doc(orderId).update({ status: 'paid' })
+            .then(() => showNotification('Pedido marcado como pagado'))
+            .catch(error => showNotification('Error al procesar pago: ' + error.message));
         }
         
         // =====================================
         // Configuración de Event Listeners
         // =====================================
-        
         function setupEventListeners() {
             menuToggle.addEventListener('click', openSidebar);
             closeSidebar.addEventListener('click', closeSidebarFunc);
@@ -3251,62 +2670,40 @@
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
                     const section = item.getAttribute('data-section');
-                    if (item.id === 'mobileCartIcon') {
-                        openCartModal();
-                    } else if (section) {
-                        showSection(section);
-                    }
+                    if (item.id === 'mobileCartIcon') openCartModal();
+                    else if (section) showSection(section);
                 });
             });
 
-            if (desktopCartBtn) {
-                desktopCartBtn.addEventListener('click', openCartModal);
-            }
-
-            if (closeModal) {
-                closeModal.addEventListener('click', closeCartModal);
-            }
-            cartModal.addEventListener('click', function(e) {
-                if (e.target === cartModal) {
-                    closeCartModal();
-                }
-            });
+            desktopCartBtn.addEventListener('click', openCartModal);
+            closeModal.addEventListener('click', closeCartModal);
+            cartModal.addEventListener('click', e => { if (e.target === cartModal) closeCartModal(); });
 
             checkoutBtn.addEventListener('click', checkout);
             processOrderBtn.addEventListener('click', processWaiterOrder);
 
-            if (adminBtns.length > 0) {
-                adminBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const tab = btn.dataset.tab;
-                        adminBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        adminSections.forEach(sec => sec.classList.remove('active'));
-                        document.getElementById(`${tab}Admin`).classList.add('active');
-                    });
+            adminBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+                    adminBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    adminSections.forEach(sec => sec.classList.remove('active'));
+                    document.getElementById(`${tab}Admin`).classList.add('active');
                 });
-            }
+            });
 
-            if (productForm) {
-                productForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const name = document.getElementById('productName').value;
-                    const price = parseFloat(document.getElementById('productPrice').value);
-                    const description = document.getElementById('productDescription').value;
-                    const category = document.getElementById('productCategory').value;
-                    addProduct(name, price, description, category);
-                    productForm.reset();
-                });
-            }
+            productForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                addProduct(productName.value, productPrice.value, productDescription.value, productCategory.value);
+                productForm.reset();
+            });
 
-            if (settingsForm) {
-                settingsForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    taxRate = parseFloat(document.getElementById('taxRate').value);
-                    taxRateValue.textContent = taxRate;
-                    showNotification('Configuración guardada correctamente');
-                });
-            }
+            settingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                taxRate = parseFloat(document.getElementById('taxRate').value);
+                taxRateValue.textContent = taxRate;
+                showNotification('Configuración guardada');
+            });
 
             signUpLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('register'); });
             forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('forgot'); });
@@ -3314,38 +2711,23 @@
 
             paymentMethod.addEventListener('change', handlePaymentMethodChange);
             setupTableSelection();
-            setupChefFilters();
         }
 
     // Inicializar la aplicación
     document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         setAuthMode('login');
-        const brand = document.querySelector('.brand');
-        if (brand) {
-            setTimeout(() => {
-                brand.style.animation = "float 3s ease-in-out infinite";
-            }, 1000);
-        }
     });
 
-    // Función para abrir modal del carrito
     function openCartModal() {
         renderCart();
         cartModal.style.display = 'flex';
-        
-        if (currentUserRole === 'waiter') {
-            customerPaymentSection.style.display = 'none';
-            checkoutBtn.style.display = 'none';
-            processOrderBtn.style.display = 'block';
-        } else {
-            customerPaymentSection.style.display = 'block';
-            checkoutBtn.style.display = 'block';
-            processOrderBtn.style.display = 'none';
-        }
+        const isWaiter = currentUserRole === 'waiter';
+        customerPaymentSection.style.display = isWaiter ? 'none' : 'block';
+        checkoutBtn.style.display = isWaiter ? 'none' : 'block';
+        processOrderBtn.style.display = isWaiter ? 'block' : 'none';
     }
 
-    // Función para cerrar modal del carrito
     function closeCartModal() {
         cartModal.style.display = 'none';
     }
