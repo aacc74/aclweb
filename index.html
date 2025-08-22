@@ -770,16 +770,6 @@
         .table-card.active i {
             color: white;
         }
-         .table-card.locked {
-            background: var(--gray);
-            color: white;
-            border-color: var(--gray);
-            cursor: not-allowed;
-        }
-
-        .table-card.locked i {
-            color: white;
-        }
         
         .table-card span {
             font-weight: 600;
@@ -1050,6 +1040,15 @@
         .order-header {
             display: flex;
             justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content
+			space-between;
             padding: 8px 0;
             border-bottom: 1px solid #f5f5f5;
         }
@@ -1728,16 +1727,13 @@
         }
         
         // Actualizar contador de carrito
-function updateCartCount() {
-    const active = getActiveCart();
-    const count = active
-        ? active.reduce((sum, item) => sum + item.quantity, 0)
-        : 0;
-    document.querySelectorAll('.cart-count').forEach(span => {
-        span.textContent = count;
-    });
-}
-        
+        function updateCartCount() {
+            const active = getActiveCart();
+            const count = active ? active.reduce((sum, item) => sum + item.quantity, 0) : 0;
+            document.querySelectorAll('.cart-count').forEach(span => { 
+                span.textContent = count; 
+            });
+        }
         // Observador de autenticación
         auth.onAuthStateChanged(user => {
             currentUser = user;
@@ -2616,7 +2612,6 @@ function updateCartCount() {
         }
           function markOrderPaid(orderId) {
             // Aquí deberías agregar la lógica para marcar el pedido como pagado en Firebase
-            // Esto podría implicar cambiar el estado del pedido a "pagado" en Firebase
             // Esto podría implicar cambiar el estado del pedido a "pagado"
             // y posiblemente realizar otras acciones como liberar la mesa
             // Por ahora, simplemente mostraremos una alerta.
@@ -2720,7 +2715,7 @@ function updateCartCount() {
         // Obtener texto de estado
         function getStatusText(status) {
             switch(status) {
-			                case 'pending': return 'Pendiente';
+                case 'pending': return 'Pendiente';
                 case 'preparing': return 'En preparación';
                 case 'ready': return 'Listo para entrega';
                 case 'delivered': return 'Entregado';
