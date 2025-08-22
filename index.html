@@ -1876,7 +1876,7 @@
             const userIsAdmin = currentUserRole === 'admin';
             const userIsPremium = currentUserRole === 'premium';
             adminOnlyItems.forEach(el => el.style.display = userIsAdmin ? '' : 'none');
-            if (admin Menu) adminMenu.style.display = userIsAdmin ? '' : 'none';
+            if (adminMenu) adminMenu.style.display = userIsAdmin ? '' : 'none';
             if (adminMobileNavItem) adminMobileNavItem.style.display = userIsAdmin ? '' : 'none';
             if (premiumBadge) premiumBadge.style.display = userIsPremium ? '' : 'none';
             if (profileMenuItem) profileMenuItem.style.display = currentUser ? '' : 'none';
