@@ -1478,7 +1478,7 @@
                         </div>
                     </div>
                 </div>
-                 <section id="waiterMenuSection" style="display: none;">
+                 <section id="waiterMenuSection">
                     <h2 class="section-title">Menú para la Mesa</h2>
                     <div class="products-grid" id="waiterProductsContainer">
                         <!-- Productos cargados dinámicamente -->
@@ -1900,30 +1900,31 @@
 
             // Role-specific UI
             if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
-                // Show only Orders icon; route to chef section
                 if (navOrders) navOrders.style.display = '';
-                // Hide category bar and cart/profile/menu
                 if (menuToggle) menuToggle.style.display = 'none';
                 if (sidebar) sidebar.style.display = 'none';
                 if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = 'none';
                 if (mobileCartIcon) mobileCartIcon.style.display = 'none';
                 if (navMenu) navMenu.style.display = 'none';
                 if (navProfile) navProfile.style.display = 'none';
-                // Default section for chefs
                 showSection('chef');
             } else if (currentUserRole === 'waiter') {
-                // Waiter: Menu, Orders (read-only list), Profile, Cart
-                if (navMenu) navMenu.style.display = '';
+                if (navMenu) {
+                    navMenu.style.display = '';
+                    // Change data-section to 'waiter' so it re-renders the waiter view
+                    navMenu.dataset.section = 'waiter';
+                }
                 if (navOrders) navOrders.style.display = '';
                 if (mobileCartIcon) mobileCartIcon.style.display = '';
-                // Categories bar visible
                 if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
                 if (menuToggle) menuToggle.style.display = '';
-                // Default to waiter section so they can pick a table
                 showSection('waiter');
             } else {
-                // Customer (default): Menu, Orders (own status), Profile, Cart, Categories visible
-                if (navMenu) navMenu.style.display = '';
+                // Customer (default)
+                if (navMenu) {
+                    navMenu.style.display = '';
+                    navMenu.dataset.section = 'menu'; // Keep it as 'menu' for customers
+                }
                 if (navOrders) navOrders.style.display = '';
                 if (navProfile) navProfile.style.display = '';
                 if (mobileCartIcon) mobileCartIcon.style.display = '';
@@ -2138,6 +2139,7 @@
                 button.addEventListener('click', () => {
                     currentCategory = category;
                     renderProducts();
+                    renderWaiterProducts();
                     document.querySelectorAll('.category-btn').forEach(btn => {
                         btn.classList.remove('active');
                     });
@@ -2158,6 +2160,7 @@
             allButton.addEventListener('click', () => {
                 currentCategory = 'all';
                 renderProducts();
+                renderWaiterProducts();
                 document.querySelectorAll('.category-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
@@ -2169,6 +2172,7 @@
         
         // Renderizar productos
         function renderProducts() {
+            if (!productsContainer) return;
             productsContainer.innerHTML = '';
             
             // Filtrar productos por categoría
@@ -2853,7 +2857,9 @@
             
             // Actualizar navegación mágica activa
             magicNavItems.forEach(item => {
-                if (item.dataset.section === sectionId) {
+                // The waiter's menu button now points to 'waiter' section
+                const targetSection = item.getAttribute('data-section');
+                if (targetSection === sectionId) {
                     item.classList.add('active');
                 } else {
                     item.classList.remove('active');
@@ -2871,13 +2877,9 @@
             } else if (sectionId === 'chef') {
                 loadKitchenOrders();
             } else if (sectionId === 'waiter') {
-                if (currentTable) {
-                    if (tableSelection) tableSelection.style.display = 'none';
-                    if (waiterMenuSection) waiterMenuSection.style.display = 'block';
-                } else {
-                    if (tableSelection) tableSelection.style.display = 'block';
-                    if (waiterMenuSection) waiterMenuSection.style.display = 'none';
-                }
+                // Always show both table selection and menu for waiters
+                if (tableSelection) tableSelection.style.display = 'block';
+                if (waiterMenuSection) waiterMenuSection.style.display = 'block';
                 renderWaiterProducts(); 
                 setupTableSelection();
             } 
@@ -2994,11 +2996,7 @@
                     document.querySelectorAll('.table-card').forEach(c => c.classList.remove('active'));
                     card.classList.add('active');
                     currentTable = tableNumber;
-                    
-                    if (tableSelection) tableSelection.style.display = 'none';
-                    if (waiterMenuSection) waiterMenuSection.style.display = 'block';
-                    
-                    renderWaiterProducts();
+                    showNotification(`Mesa ${currentTable} seleccionada.`);
                 });
             });
         }
@@ -3008,7 +3006,17 @@
             if (!waiterProductsContainer) return;
             waiterProductsContainer.innerHTML = '';
             
-            products.forEach(product => {
+            let filteredProducts = products;
+            if (currentCategory !== 'all') {
+                filteredProducts = products.filter(product => product.category === currentCategory);
+            }
+
+            if (filteredProducts.length === 0) {
+                waiterProductsContainer.innerHTML = '<p class="empty-message">No hay productos disponibles en esta categoría.</p>';
+                return;
+            }
+
+            filteredProducts.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
                 productCard.innerHTML = `
@@ -3033,7 +3041,7 @@
             });
             
             // Event listeners para añadir al carrito
-            document.querySelectorAll('.add-to-cart').forEach(button => {
+            document.querySelectorAll('#waiterProductsContainer .add-to-cart').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const productId = e.target.closest('.add-to-cart').dataset.id;
                     addToCart(productId);
@@ -3086,17 +3094,20 @@
             try {
                 await db.collection("orders").add(order);
                 showNotification(`Pedido para Mesa ${currentTable} realizado con éxito!`);
-                cartByTable[currentTable] = [];
+                
                 lockTable(currentTable);
+                cartByTable[currentTable] = [];
+                
+                // Des-seleccionar mesa activa
+                const activeCard = document.querySelector('.table-card.active');
+                if(activeCard) activeCard.classList.remove('active');
+                currentTable = null;
+
                 updateCartCount();
                 closeCartModal();
                 loadAdminOrders();
                 loadKitchenOrders();
                 
-                // Reset waiter view
-                currentTable = null;
-                showSection('waiter');
-
             } catch (error) {
                 console.error("Error guardando pedido: ", error);
                 showNotification('Error al guardar el pedido');
