@@ -154,6 +154,8 @@
         }
         #mainHeader.visible { transform: translateY(0); }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .menu-toggle { background: none; border: none; font-size: 1.25rem; color: var(--dark); cursor: pointer; }
         .logo { font-family: var(--font-display); font-size: 1.5rem; color: var(--dark); text-decoration: none; }
         .header-actions { display: flex; align-items: center; gap: 1rem; }
         .cart-btn {
@@ -190,9 +192,39 @@
             font-size: 0.75rem; font-weight: 500;
             padding: 0.5rem; border-radius: var(--border-radius);
             transition: var(--transition); width: 64px;
+            position: relative;
         }
         .magic-nav-item.active { color: var(--primary); }
         .magic-nav-item i { font-size: 1.25rem; margin-bottom: 0.25rem; }
+        .magic-nav-item .cart-count { top: -2px; right: 12px; }
+
+        /* --- SIDEBAR DE CATEGORÍAS (NUEVO) --- */
+        .sidebar {
+            position: fixed; top: 0; left: -280px; width: 280px;
+            height: 100%; background: var(--lighter);
+            z-index: 1100; box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease-out;
+            display: flex; flex-direction: column;
+        }
+        .sidebar.open { transform: translateX(280px); }
+        .sidebar-header { padding: 1rem; border-bottom: 1px solid var(--gray-light); display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header h3 { font-size: 1.2rem; }
+        .close-sidebar { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); }
+        .categories-container { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .category-btn {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: var(--border-radius);
+            text-decoration: none; color: var(--dark); font-weight: 500;
+            transition: var(--transition);
+        }
+        .category-btn:hover { background-color: var(--light); }
+        .category-btn.active { background-color: var(--primary); color: white; }
+        .category-btn i { width: 20px; text-align: center; }
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4); z-index: 1050;
+        }
+        .overlay.active { display: block; }
 
         /* --- PRODUCT CARD --- */
         .products-grid {
@@ -270,6 +302,7 @@
         .order-actions { margin-top: 1rem; text-align: right; }
 
         /* --- WAITER TABLE VIEW --- */
+        .table-selection { margin-bottom: 2rem; }
         .tables-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 1rem;
@@ -305,6 +338,26 @@
         .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--gray-light); text-align: right; }
         .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); }
 
+        /* --- PROFILE CARD (NUEVO) --- */
+        .profile-card {
+            max-width: 500px; margin: 2rem auto; background: var(--lighter);
+            padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow);
+        }
+        .profile-header { text-align: center; margin-bottom: 1.5rem; }
+        .profile-avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: var(--primary); color: white;
+            margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem;
+        }
+        .profile-header h3 { font-size: 1.5rem; }
+        .profile-header p { color: var(--gray); }
+        .profile-details { display: flex; flex-direction: column; gap: 1rem; }
+        .detail-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--gray-light); }
+        .detail-item:last-child { border-bottom: none; }
+        .detail-item span:first-child { font-weight: 500; color: var(--dark); }
+        .detail-item span:last-child { color: var(--gray); }
+
         /* Notification */
         .notification {
             position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
@@ -326,7 +379,10 @@
     <!-- Header Fijo -->
     <header id="mainHeader">
         <div class="container header-content">
-            <a href="#" class="logo">Arcanos</a>
+            <div class="header-left">
+                <button id="menuToggle" class="menu-toggle" style="display: none;"><i class="fas fa-bars"></i></button>
+                <a href="#" class="logo">Arcanos</a>
+            </div>
             <div class="header-actions">
                 <button id="desktopCartBtn" class="cart-btn" style="display: none;">
                     <i class="fas fa-shopping-cart"></i>
@@ -338,6 +394,16 @@
             </div>
         </div>
     </header>
+
+    <!-- Sidebar de Categorías -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Categorías</h3>
+            <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="categories-container" id="categoriesContainer"></div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
     
     <!-- Contenido Principal -->
     <main class="container">
@@ -374,7 +440,7 @@
         <section id="ordersSection" style="display: none;"><h2 class="section-title">Mis Pedidos</h2><div class="order-filter-controls" id="waiterFilterControls"></div><div class="order-list-container" id="waiterOrdersContainer"></div></section>
         <section id="profileSection" style="display: none;"><h2 class="section-title">Mi Perfil</h2><div id="profileContainer"></div></section>
         <section id="adminSection" style="display: none;"><h2 class="section-title">Admin</h2></section>
-        <section id="waiterSection" style="display: none;"><div class="table-selection" id="tableSelection"></div><div class="products-grid" id="waiterMenuSection"></div></section>
+        <section id="waiterSection" style="display: none;"><div class="table-selection" id="tableSelection"></div><h2 class="section-title" id="waiterMenuTitle" style="display:none;"></h2><div class="products-grid" id="waiterProductsContainer"></div></section>
         <section id="chefSection" style="display: none;"><h2 class="section-title">Panel de Cocina</h2><div class="order-filter-controls" id="chefFilterControls"></div><div class="order-list-container" id="kitchenOrdersContainer"></div></section>
         <section id="cashierSection" style="display: none;"><h2 class="section-title">Panel de Caja</h2><div class="order-filter-controls" id="cashierFilterControls"></div><div class="order-list-container" id="cashierOrdersContainer"></div></section>
     </main>
@@ -409,7 +475,7 @@
         const db = firebase.firestore();
 
         // --- GLOBAL STATE ---
-        let currentUser = null, currentUserRole = 'customer';
+        let currentUser = null, currentUserRole = 'customer', currentCategory = 'all';
         let products = [], allOrders = [], cart = [], cartByTable = {};
         let currentTable = null, realtimeOrdersListener = null;
         let chefFilter = 'pending', cashierFilter = 'ready', waiterFilter = 'active';
@@ -431,6 +497,7 @@
         let authMode = 'login';
         const checkoutBtn = document.getElementById('checkoutBtn');
         const processOrderBtn = document.getElementById('processOrderBtn');
+        const sidebar = document.getElementById('sidebar'), overlay = document.getElementById('overlay'), menuToggle = document.getElementById('menuToggle'), closeSidebar = document.getElementById('closeSidebar'), categoriesContainer = document.getElementById('categoriesContainer');
 
         // --- AUTH LOGIC ---
         auth.onAuthStateChanged(user => {
@@ -519,6 +586,7 @@
             }));
 
             desktopCartBtn.style.display = ['customer', 'waiter'].includes(currentUserRole) ? 'block' : 'none';
+            menuToggle.style.display = currentUserRole === 'customer' ? 'block' : 'none';
             logoutBtn.style.display = 'block';
         }
 
@@ -530,7 +598,7 @@
                 chef: () => { showSection('chef'); listenForKitchenOrders(); },
                 cashier: () => { showSection('cashier'); listenForCashierOrders(); },
                 admin: () => showSection('admin'),
-                customer: () => { showSection('menu'); listenForWaiterOrders(); }
+                customer: () => { showSection('menu'); listenForWaiterOrders(); renderProfile(); }
             };
             const action = roleToAction[currentUserRole.includes('chef') ? 'chef' : currentUserRole] || roleToAction.customer;
             action();
@@ -541,13 +609,31 @@
         function loadProducts() {
             db.collection("products").get().then(snapshot => {
                 products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCategoryFilters();
                 renderProducts();
                 renderWaiterProducts();
             });
         }
+        function renderCategoryFilters() {
+            const categories = [...new Set(products.map(p => p.category))];
+            categoriesContainer.innerHTML = `<a href="#" class="category-btn active" data-category="all"><i class="fas fa-utensils"></i><span>Todos</span></a>` +
+                categories.map(cat => `<a href="#" class="category-btn" data-category="${cat}"><i class="fas fa-tag"></i><span>${cat}</span></a>`).join('');
+            categoriesContainer.querySelectorAll('.category-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                filterProductsByCategory(btn.dataset.category);
+            }));
+        }
+        function filterProductsByCategory(category) {
+            currentCategory = category;
+            renderProducts();
+            categoriesContainer.querySelector('.active').classList.remove('active');
+            categoriesContainer.querySelector(`[data-category="${category}"]`).classList.add('active');
+            closeSidebarFunc();
+        }
         function renderProducts() {
             if (!productsContainer) return;
-            productsContainer.innerHTML = products.map(createProductCard).join('');
+            let filtered = (currentCategory === 'all') ? products : products.filter(p => p.category === currentCategory);
+            productsContainer.innerHTML = filtered.map(createProductCard).join('');
             productsContainer.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.currentTarget.dataset.id)));
         }
         function createProductCard(p) {
@@ -668,19 +754,14 @@
             const activeCart = getActiveCart();
             if (!container || !activeCart) return;
 
-            if (activeCart.length === 0) {
+            if (!activeCart || activeCart.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color: var(--gray);">Tu carrito está vacío.</p>';
                 return;
             }
             container.innerHTML = activeCart.map(item => `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem 0;">
-                    <div>
-                        <p style="font-weight:600;">${item.name}</p>
-                        <p style="font-size:0.875rem; color:var(--gray);">$${item.price.toFixed(2)}</p>
-                    </div>
-                    <div>${item.quantity}</div>
-                </div>
-            `).join('');
+                    <div><p style="font-weight:600;">${item.name}</p><p style="font-size:0.875rem; color:var(--gray);">$${item.price.toFixed(2)}</p></div><div>${item.quantity}</div>
+                </div>`).join('');
         }
         async function processWaiterOrder() {
             const activeCart = getActiveCart();
@@ -722,7 +803,7 @@
         function listenForTableLocks() {
             const tableContainer = document.getElementById('tableSelection');
             if(!tableContainer) return;
-            tableContainer.innerHTML = '<h3>Seleccione una Mesa:</h3><div class="tables-grid">' + 
+            tableContainer.innerHTML = '<h2 class="section-title">Seleccione una Mesa</h2><div class="tables-grid">' + 
             [...Array(10)].map((_, i) => `<div class="table-card" data-table="${i+1}"><i class="fas fa-utensils"></i><span>Mesa ${i+1}</span></div>`).join('') + '</div>';
 
             tableContainer.addEventListener('click', e => {
@@ -731,6 +812,9 @@
                 tableContainer.querySelector('.active')?.classList.remove('active');
                 card.classList.add('active');
                 currentTable = card.dataset.table;
+                const menuTitle = document.getElementById('waiterMenuTitle');
+                menuTitle.textContent = `Menú para la Mesa ${currentTable}`;
+                menuTitle.style.display = 'block';
             });
 
             db.collection("orders").where("status", "in", ["pending", "preparing", "ready"]).onSnapshot(snapshot => {
@@ -739,10 +823,32 @@
             });
         }
         function renderWaiterProducts() {
-            const container = document.getElementById('waiterMenuSection');
+            const container = document.getElementById('waiterProductsContainer');
             if (!container) return;
             container.innerHTML = products.map(createProductCard).join('');
             container.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.currentTarget.dataset.id)));
+        }
+
+        // --- PROFILE ---
+        function renderProfile() {
+            const container = document.getElementById('profileContainer');
+            if (!container || !currentUser) return;
+            const creationDate = currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime).toLocaleDateString() : 'N/A';
+            container.innerHTML = `
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">${(currentUser.displayName || 'C').charAt(0)}</div>
+                        <h3>${currentUser.displayName || 'Cliente'}</h3>
+                        <p>${currentUser.email}</p>
+                    </div>
+                    <div class="profile-details">
+                        <div class="detail-item"><span>Miembro desde</span> <span>${creationDate}</span></div>
+                        <div class="detail-item"><span>Pedidos totales</span> <span id="profileOrderCount">0</span></div>
+                    </div>
+                </div>`;
+            db.collection('orders').where('userId', '==', currentUser.uid).get().then(s => {
+                document.getElementById('profileOrderCount').textContent = s.size;
+            });
         }
         
         // --- UTILS & HELPERS ---
@@ -756,6 +862,8 @@
             notification.classList.add('show');
             setTimeout(() => notification.classList.remove('show'), 3000);
         }
+        function openSidebarFunc() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+        function closeSidebarFunc() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
         
         // --- EVENT LISTENERS (Setup once) ---
         function setupFilterControls() {
@@ -811,6 +919,9 @@
             logoutBtn.addEventListener('click', () => auth.signOut());
             checkoutBtn.addEventListener('click', checkout);
             processOrderBtn.addEventListener('click', processWaiterOrder);
+            menuToggle.addEventListener('click', openSidebarFunc);
+            closeSidebar.addEventListener('click', closeSidebarFunc);
+            overlay.addEventListener('click', closeSidebarFunc);
         });
 
     </script>
