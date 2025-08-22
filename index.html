@@ -1878,7 +1878,8 @@
             const menuToggle = document.getElementById('menuToggle');
 
             // Hide all customizable navitems by default; then enable per role
-            [navMenu, navOrders, navProfile, mobileCartIcon, adminMenu, adminMobileNavItem].forEach(el => { if (el) el.style.display = 'none'; });
+            [navOrders, navProfile, mobileCartIcon, adminMenu, adminMobileNavItem].forEach(el => { if (el) el.style.display = 'none'; });
+            if (navMenu) navMenu.style.display = ''; // Menu is almost always visible
 
             // Reset categories / sidebar visibility
             if (sidebar) sidebar.style.display = '';
@@ -1909,11 +1910,8 @@
                 if (navProfile) navProfile.style.display = 'none';
                 showSection('chef');
             } else if (currentUserRole === 'waiter') {
-                if (navMenu) {
-                    navMenu.style.display = '';
-                    // Change data-section to 'waiter' so it re-renders the waiter view
-                    navMenu.dataset.section = 'waiter';
-                }
+                 // The menu button should now always point to the waiter section
+                if (navMenu) navMenu.dataset.section = 'waiter';
                 if (navOrders) navOrders.style.display = '';
                 if (mobileCartIcon) mobileCartIcon.style.display = '';
                 if (categoriesContainer && categoriesContainer.parentElement) categoriesContainer.parentElement.style.display = '';
@@ -1921,10 +1919,7 @@
                 showSection('waiter');
             } else {
                 // Customer (default)
-                if (navMenu) {
-                    navMenu.style.display = '';
-                    navMenu.dataset.section = 'menu'; // Keep it as 'menu' for customers
-                }
+                if (navMenu) navMenu.dataset.section = 'menu';
                 if (navOrders) navOrders.style.display = '';
                 if (navProfile) navProfile.style.display = '';
                 if (mobileCartIcon) mobileCartIcon.style.display = '';
@@ -2583,7 +2578,7 @@
                             <td>${order.paymentReference || 'N/A'}</td>
                             <td><span class="order-status status-${order.status}">${getStatusText(order.status)}</span></td>
                              <td>
-                                <button class="cancel-order btn btn-secondary" data-id="${order.id}">Cancelar</button>
+                                <button class="cancel-order btn btn-secondary" data-id="${order.id}" data-table="${order.table || ''}">Cancelar</button>
                                 <button class="paid-order btn" data-id="${order.id}" data-table="${order.table || ''}">Pagado</button>
                             </td>
                         `;
@@ -2592,7 +2587,8 @@
                       document.querySelectorAll('.cancel-order').forEach(button => {
                         button.addEventListener('click', (e) => {
                             const orderId = e.target.dataset.id;
-                            cancelOrder(orderId);
+                            const tableNumber = e.target.dataset.table;
+                            cancelOrder(orderId, tableNumber);
                         });
                     });
                      document.querySelectorAll('.paid-order').forEach(button => {
@@ -2612,12 +2608,15 @@
                     `;
                 });
         }
-         function cancelOrder(orderId) {
+         function cancelOrder(orderId, tableNumber) {
              db.collection("orders").doc(orderId).update({ status: 'cancelled' })
             .then(() => {
                 showNotification('Pedido cancelado correctamente');
                 loadOrders();
                 loadAdminOrders();
+                if (tableNumber) {
+                    unlockTable(tableNumber);
+                }
             })
             .catch(error => {
                 console.error("Error cancelando pedido: ", error);
@@ -2857,14 +2856,18 @@
             
             // Actualizar navegación mágica activa
             magicNavItems.forEach(item => {
-                // The waiter's menu button now points to 'waiter' section
                 const targetSection = item.getAttribute('data-section');
                 if (targetSection === sectionId) {
                     item.classList.add('active');
                 } else {
-                    item.classList.remove('active');
+                     item.classList.remove('active');
                 }
             });
+             // Ensure waiter nav item is active when in waiter section
+            if(sectionId === 'waiter') {
+                const waiterNavItem = document.querySelector('.magic-nav-item[data-section="waiter"]');
+                if(waiterNavItem) waiterNavItem.classList.add('active');
+            }
             
             // Cargar datos específicos de la sección
             if (sectionId === 'profile') {
@@ -2877,7 +2880,6 @@
             } else if (sectionId === 'chef') {
                 loadKitchenOrders();
             } else if (sectionId === 'waiter') {
-                // Always show both table selection and menu for waiters
                 if (tableSelection) tableSelection.style.display = 'block';
                 if (waiterMenuSection) waiterMenuSection.style.display = 'block';
                 renderWaiterProducts(); 
