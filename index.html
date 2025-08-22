@@ -1844,56 +1844,74 @@
         }
         
         // Función para actualizar la UI según el rol
-        function updateUIForRole() {
-    const adminOnlyItems        = document.querySelectorAll('.admin-only');
-    const premiumBadge          = document.getElementById('premiumBadge');
-    const profileMenuItem       = document.getElementById('profileMenuItem');
-    const logoutBtn             = document.getElementById('logoutBtn');
-    const paymentSection        = document.getElementById('paymentSection');
-    const adminMenu             = document.getElementById('adminMenu');
-    const adminMobileNavItem    = document.getElementById('adminMobileNavItem');
+// Función corregida: updateUIForRole sin errores de sintaxis
+function updateUIForRole() {
+  const adminOnlyItems     = document.querySelectorAll('.admin-only');
+  const premiumBadge       = document.getElementById('premiumBadge');
+  const profileMenuItem    = document.getElementById('profileMenuItem');
+  const logoutBtn          = document.getElementById('logoutBtn');
+  const paymentSection     = document.getElementById('paymentSection');
+  const adminMenu          = document.getElementById('adminMenu');
+  const adminMobileNavItem = document.getElementById('adminMobileNavItem');
 
-    // Magic nav items
-    const navMenu    = document.querySelector('#magicNav .magic-nav-item[data-section="menu"]');
-    const navOrders  = document.querySelector('#magicNav .magic-nav-item[data-section="orders"]');
-    const navProfile = document.querySelector('#magicNav .magic-nav-item[data-section="profile"]');
-    const mobileCart = document.getElementById('mobileCartIcon');
+  const navMenu    = document.querySelector('#magicNav .magic-nav-item[data-section="menu"]');
+  const navOrders  = document.querySelector('#magicNav .magic-nav-item[data-section="orders"]');
+  const navProfile = document.querySelector('#magicNav .magic-nav-item[data-section="profile"]');
+  const mobileCart = document.getElementById('mobileCartIcon');
 
-    // Ocultar todo por defecto
-    [navMenu, navOrders, navProfile, mobileCart, adminMenu, adminMobileNavItem].forEach(el => {
-        if (el) el.style.display = 'none';
-    });
+  // Ocultar todos los ítems de navegación y admin por defecto
+  [navMenu, navOrders, navProfile, mobileCart, adminMenu, adminMobileNavItem]
+    .forEach(el => { if (el) el.style.display = 'none'; });
 
-    const userIsAdmin   = currentUserRole === 'admin';
-    const userIsPremium = currentUserRole === 'premium';
+  const userIsAdmin   = (currentUserRole === 'admin');
+  const userIsPremium = (currentUserRole === 'premium');
 
-    // Mostrar/ocultar elementos de administrador
-    adminOnlyItems.forEach(el => el.style.display = userIsAdmin ? '' : 'none');
-    if (adminMenu)          adminMenu.style.display = userIsAdmin ? '' : 'none';
-    if (adminMobileNavItem) adminMobileNavItem.style.display = userIsAdmin ? '' : 'none';
+  // Mostrar/ocultar elementos solo-admin
+  adminOnlyItems.forEach(el => {
+    el.style.display = userIsAdmin ? '' : 'none';
+  });
 
-    // Mostrar/ocultar badge premium
-    if (premiumBadge)       premiumBadge.style.display = userIsPremium ? '' : 'none';
-    // Mostrar/ocultar perfil & logout
-    if (profileMenuItem)    profileMenuItem.style.display = currentUser ? '' : 'none';
-    if (logoutBtn)          logoutBtn.style.display = currentUser ? '' : 'none';
+  // Mostrar/ocultar menú de admin
+  if (adminMenu) {
+    adminMenu.style.display = userIsAdmin ? '' : 'none';
+  }
+  if (adminMobileNavItem) {
+    adminMobileNavItem.style.display = userIsAdmin ? '' : 'none';
+  }
 
-    // Sección de pago solo para clientes
-    if (paymentSection)     paymentSection.style.display = (currentUserRole === 'customer') ? '' : 'none';
+  // Premium badge
+  if (premiumBadge) {
+    premiumBadge.style.display = userIsPremium ? '' : 'none';
+  }
 
-    // Mostrar íconos de la navegación según rol
-    if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
-        if (navOrders) navOrders.style.display = '';
-    } else if (currentUserRole === 'waiter') {
-        if (navMenu)    navMenu.style.display = '';
-        if (navOrders)  navOrders.style.display = '';
-        if (mobileCart) mobileCart.style.display = '';
-    } else {
-        if (navMenu)    navMenu.style.display = '';
-        if (navOrders)  navOrders.style.display = '';
-        if (navProfile) navProfile.style.display = '';
-        if (mobileCart) mobileCart.style.display = '';
-    }
+  // Perfil y logout
+  if (profileMenuItem) {
+    profileMenuItem.style.display = currentUser ? '' : 'none';
+  }
+  if (logoutBtn) {
+    logoutBtn.style.display = currentUser ? '' : 'none';
+  }
+
+  // Sección de pago solo para clientes
+  if (paymentSection) {
+    paymentSection.style.display = (currentUserRole === 'customer') ? '' : 'none';
+  }
+
+  // Mostrar íconos de la navegación según rol
+  if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
+    if (navOrders) navOrders.style.display = '';
+  }
+  else if (currentUserRole === 'waiter') {
+    if (navMenu)    navMenu.style.display = '';
+    if (navOrders)  navOrders.style.display = '';
+    if (mobileCart) mobileCart.style.display = '';
+  }
+  else {  // customer u otros
+    if (navMenu)    navMenu.style.display = '';
+    if (navOrders)  navOrders.style.display = '';
+    if (navProfile) navProfile.style.display = '';
+    if (mobileCart) mobileCart.style.display = '';
+  }
 }
         
         // Guardar datos del cliente en Firebase
