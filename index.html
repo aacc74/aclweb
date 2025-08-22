@@ -109,13 +109,32 @@
         .separator::before, .separator::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
         .separator:not(:empty)::before { margin-right: .5em; }
         .separator:not(:empty)::after { margin-left: .5em; }
-        .auth-btn {
-            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-            padding: 0.75rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);
-            font-weight: 600; cursor: pointer; transition: var(--transition);
-            background-color: var(--bg-light); color: var(--text-dark);
+        
+        /* --- NUEVO ESTILO DE BOTONES SOCIALES --- */
+        .auth-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
         }
-        .auth-btn:hover { background-color: var(--bg-off-white); }
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.5rem;
+        }
+        .social-btn:hover {
+            border-color: var(--text-gray);
+            background-color: var(--bg-off-white);
+        }
+        .fa-google { color: #DB4437; }
+        .fa-apple { color: #1F2937; }
+        /* --- FIN NUEVO ESTILO --- */
         
         /* --- HEADER & NAV --- */
         #mainHeader {
@@ -337,10 +356,11 @@
                     <div class="auth-links">
                         <a href="#" id="signUpLink">Crear cuenta</a><span id="linkSeparator" style="margin:0 .5rem">·</span><a href="#" id="forgotPasswordLink">Olvidé contraseña</a><a href="#" id="loginLink" style="display:none">Volver a login</a>
                     </div>
-                    <div class="separator">o</div>
+                    <div class="separator">o continúa con</div>
+                    <!-- NUEVA ESTRUCTURA DE BOTONES SOCIALES -->
                     <div class="auth-options">
-                        <button class="auth-btn" id="googleLogin"><i class="fab fa-google"></i><span>Google</span></button>
-                        <button class="auth-btn" id="appleLogin"><i class="fab fa-apple"></i><span>Apple</span></button>
+                        <button class="social-btn" id="googleLogin" title="Continuar con Google"><i class="fab fa-google"></i></button>
+                        <button class="social-btn" id="appleLogin" title="Continuar con Apple"><i class="fab fa-apple"></i></button>
                     </div>
                 </div>
             </div>
