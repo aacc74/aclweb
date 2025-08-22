@@ -755,6 +755,17 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
         }
+
+        .table-card.locked {
+            background: var(--gray);
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .table-card.locked::before {
+             background: var(--dark);
+        }
         
         .table-card.active::before {
             background: white;
@@ -767,7 +778,7 @@
             transition: var(--transition);
         }
         
-        .table-card.active i {
+        .table-card.active i, .table-card.locked i {
             color: white;
         }
         
@@ -1580,7 +1591,11 @@
                         <p>El pago se realizará al momento de recibir el pedido.</p>
                     </div>
                 </div>
-  </div>
+            </div>
+            <div class="cart-footer" style="text-align: right; margin-top: 20px;">
+                <button id="checkoutBtn" class="btn">Finalizar Compra</button>
+                <button id="processOrderBtn" class="btn" style="display: none;">Procesar Pedido</button>
+            </div>
         </div>
     </div>
     
@@ -1710,8 +1725,7 @@
         const desktopCartBtn = document.getElementById('desktopCartBtn');
          const waiterMenuSection = document.getElementById('waiterMenuSection');
         const processOrderBtn = document.getElementById('processOrderBtn');
-        const cancelOrderBtn = document.getElementById('cancelOrderBtn');
-         const tableSelection = document.getElementById('tableSelection');
+        const tableSelection = document.getElementById('tableSelection');
         
         // Función para obtener el carrito activo (cliente o mesa de mesero)
         function getActiveCart() {
@@ -1730,10 +1744,11 @@
         function updateCartCount() {
             const active = getActiveCart();
             const count = active ? active.reduce((sum, item) => sum + item.quantity, 0) : 0;
-            document.querySelectorAll('.cart-count').forEach(span => { 
-                span.textContent = count; 
+            document.querySelectorAll('.cart-count').forEach(span => {
+                span.textContent = count;
             });
         }
+        
         // Observador de autenticación
         auth.onAuthStateChanged(user => {
             currentUser = user;
@@ -2402,8 +2417,7 @@
                 showNotification('¡Pedido realizado con éxito!');
                 if (currentUserRole === 'waiter') {
                     cartByTable[currentTable] = [];
-                      // Unlock the table after the order is successfully placed
-                    unlockTable(currentTable);
+                    lockTable(currentTable);
                 } else {
                     cart = [];
                 }
@@ -2565,8 +2579,8 @@
                             <td>${order.paymentReference || 'N/A'}</td>
                             <td><span class="order-status status-${order.status}">${getStatusText(order.status)}</span></td>
                              <td>
-                                <button class="cancel-order" data-id="${order.id}">Cancelar</button>
-                                <button class="paid-order" data-id="${order.id}">Pago</button>
+                                <button class="cancel-order btn btn-secondary" data-id="${order.id}">Cancelar</button>
+                                <button class="paid-order btn" data-id="${order.id}" data-table="${order.table || ''}">Pagado</button>
                             </td>
                         `;
                         ordersTableBody.appendChild(row);
@@ -2580,7 +2594,8 @@
                      document.querySelectorAll('.paid-order').forEach(button => {
                         button.addEventListener('click', (e) => {
                             const orderId = e.target.dataset.id;
-                            markOrderPaid(orderId);
+                            const tableNumber = e.target.dataset.table;
+                            markOrderPaid(orderId, tableNumber);
                         });
                     });
                 })
@@ -2594,11 +2609,6 @@
                 });
         }
          function cancelOrder(orderId) {
-            // Aquí deberías agregar la lógica para cancelar el pedido en Firebase
-            // Esto podría implicar cambiar el estado del pedido a "cancelado"
-            // y posiblemente realizar otras acciones como notificar al restaurante
-            // o al cliente.
-            // Por ahora, simplemente mostraremos una alerta.
              db.collection("orders").doc(orderId).update({ status: 'cancelled' })
             .then(() => {
                 showNotification('Pedido cancelado correctamente');
@@ -2610,20 +2620,14 @@
                 showNotification('Error al cancelar pedido');
             });
         }
-          function markOrderPaid(orderId) {
-            // Aquí deberías agregar la lógica para marcar el pedido como pagado en Firebase
-            // Esto podría implicar cambiar el estado del pedido a "pagado"
-            // y posiblemente realizar otras acciones como liberar la mesa
-            // Por ahora, simplemente mostraremos una alerta.
+          function markOrderPaid(orderId, tableNumber) {
               db.collection("orders").doc(orderId).update({ status: 'paid' })
             .then(() => {
                 showNotification('Pedido pagado correctamente');
                 loadOrders();
                 loadAdminOrders();
-                // Unlock the table after the order is marked as paid
-                const order = orders.find(order => order.id === orderId);
-                if (order && order.table) {
-                    unlockTable(order.table);
+                if (tableNumber) {
+                    unlockTable(tableNumber);
                 }
             })
             .catch(error => {
@@ -2867,19 +2871,15 @@
             } else if (sectionId === 'chef') {
                 loadKitchenOrders();
             } else if (sectionId === 'waiter') {
-                  // Show or hide the table selection based on whether a table is currently selected
                 if (currentTable) {
                     if (tableSelection) tableSelection.style.display = 'none';
+                    if (waiterMenuSection) waiterMenuSection.style.display = 'block';
                 } else {
                     if (tableSelection) tableSelection.style.display = 'block';
+                    if (waiterMenuSection) waiterMenuSection.style.display = 'none';
                 }
                 renderWaiterProducts(); 
-                loadOrders(); 
                 setupTableSelection();
-                const dcb = document.getElementById("desktopCartBtn"); 
-                if (dcb) {
-                    dcb.addEventListener("click", openCartModal);
-                } 
             } 
         }
         
@@ -2986,24 +2986,18 @@
                 card.addEventListener('click', () => {
                      const tableNumber = card.dataset.table;
 
-                    // Check if the table is locked
                     if (lockedTables[tableNumber]) {
-                        showNotification('Esta mesa está bloqueada.');
+                        showNotification('Esta mesa está ocupada.');
                         return;
                     }
-                    document.querySelectorAll('.table-card').forEach(c => {
-                        c.classList.remove('active');
-                    });
-                    card.classList.add('active');
-                    currentTable = card.dataset.table;
-                    
-                     // Ocultar la sección de selección de mesa
-                    if (tableSelection) tableSelection.style.display = 'none';
 
-                    // Habilitar el menú
-                    waiterMenuSection.style.display = 'block';
+                    document.querySelectorAll('.table-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    currentTable = tableNumber;
                     
-                    // Cargar productos
+                    if (tableSelection) tableSelection.style.display = 'none';
+                    if (waiterMenuSection) waiterMenuSection.style.display = 'block';
+                    
                     renderWaiterProducts();
                 });
             });
@@ -3093,30 +3087,20 @@
                 await db.collection("orders").add(order);
                 showNotification(`Pedido para Mesa ${currentTable} realizado con éxito!`);
                 cartByTable[currentTable] = [];
-                  // Lock the table after the order is successfully placed
                 lockTable(currentTable);
                 updateCartCount();
-                cartModal.style.display = 'none';
+                closeCartModal();
                 loadAdminOrders();
                 loadKitchenOrders();
-                waiterMenuSection.style.display = 'none';
+                
+                // Reset waiter view
+                currentTable = null;
+                showSection('waiter');
+
             } catch (error) {
                 console.error("Error guardando pedido: ", error);
                 showNotification('Error al guardar el pedido');
             }
-        }
-
-        // Cancelar pedido de mesero
-        function cancelWaiterOrder() {
-            if (!currentTable) {
-                showNotification('Seleccione una mesa primero');
-                return;
-            }
-
-            cartByTable[currentTable] = [];
-            updateCartCount();
-            showNotification(`Pedido para Mesa ${currentTable} cancelado`);
-            waiterMenuSection.style.display = 'none';
         }
         
         // =====================================
@@ -3251,135 +3235,84 @@
         // =====================================
         
         function setupEventListeners() {
-        // Toggle del menú lateral
-        menuToggle.addEventListener('click', openSidebar);
-        closeSidebar.addEventListener('click', closeSidebarFunc);
-        overlay.addEventListener('click', closeSidebarFunc);
+            menuToggle.addEventListener('click', openSidebar);
+            closeSidebar.addEventListener('click', closeSidebarFunc);
+            overlay.addEventListener('click', closeSidebarFunc);
 
-        // Barra de navegación mágica - CORREGIDO
-        magicNavItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const section = item.getAttribute('data-section');
-                // Carrito: se muestra el modal
-                if (item.id === 'mobileCartIcon') {
-                    renderCart();
-                    cartModal.style.display = 'flex';
-                    cartModal.classList.add('open');
-                } else if (section) {
-                    showSection(section);
-                }
-                // Actualizar clase activa visualmente
-                magicNavItems.forEach(nav => {
-                    nav.classList.remove('active');
+            magicNavItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = item.getAttribute('data-section');
+                    if (item.id === 'mobileCartIcon') {
+                        openCartModal();
+                    } else if (section) {
+                        showSection(section);
+                    }
                 });
-                // Solo poner activo si no es el carrito (el carrito es modal, no sección)
-                if (section && section !== '') {
-                    item.classList.add('active');
-                }
             });
-        });
 
-        // Carrito: icono desktop
-        if (desktopCartBtn) {
-            desktopCartBtn.addEventListener('click', () => {
-                renderCart();
-                cartModal.style.display = 'flex';
-                cartModal.classList.add('open');
-            });
-        }
-
-        // Cerrar modal del carrito
-        if (closeModal) {
-            closeModal.addEventListener('click', closeCartModal);
-        }
-        cartModal.addEventListener('click', function(e) {
-            if (e.target === cartModal) {
-                closeCartModal();
+            if (desktopCartBtn) {
+                desktopCartBtn.addEventListener('click', openCartModal);
             }
-        });
 
-        // Checkout
-        checkoutBtn.addEventListener('click', () => {
-           checkout();
-        });
-
-        // Panel de administración
-        if (adminBtns.length > 0) {
-            adminBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const tab = btn.dataset.tab;
-                    adminBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    adminSections.forEach(sec => {
-                        sec.classList.remove('active');
-                    });
-                    document.getElementById(`${tab}Admin`).classList.add('active');
-                });
+            if (closeModal) {
+                closeModal.addEventListener('click', closeCartModal);
+            }
+            cartModal.addEventListener('click', function(e) {
+                if (e.target === cartModal) {
+                    closeCartModal();
+                }
             });
-        }
 
-        // Formulario de producto
-        if (productForm) {
-            productForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const name = document.getElementById('productName').value;
-                const price = parseFloat(document.getElementById('productPrice').value);
-                const description = document.getElementById('productDescription').value;
-                const category = document.getElementById('productCategory').value;
-                addProduct(name, price, description, category);
-                productForm.reset();
-            });
-        }
-
-        // Formulario de configuración
-        if (settingsForm) {
-            settingsForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                taxRate = parseFloat(document.getElementById('taxRate').value);
-                taxRateValue.textContent = taxRate;
-                showNotification('Configuración guardada correctamente');
-            });
-        }
-
-        // Enlaces de autenticación
-        signUpLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            setAuthMode('register');
-        });
-        forgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            setAuthMode('forgot');
-        });
-        loginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            setAuthMode('login');
-        });
-
-        // Cambio de método de pago
-        paymentMethod.addEventListener('change', handlePaymentMethodChange);
-
-        // Configurar selección de mesa
-        setupTableSelection();
-
-        // Configurar filtros de cocina
-        setupChefFilters();
-
-         // Botones de acción para meseros
-        if (processOrderBtn) {
+            checkoutBtn.addEventListener('click', checkout);
             processOrderBtn.addEventListener('click', processWaiterOrder);
-        }
 
-        if (cancelOrderBtn) {
-            cancelOrderBtn.addEventListener('click', cancelWaiterOrder);
+            if (adminBtns.length > 0) {
+                adminBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tab = btn.dataset.tab;
+                        adminBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        adminSections.forEach(sec => sec.classList.remove('active'));
+                        document.getElementById(`${tab}Admin`).classList.add('active');
+                    });
+                });
+            }
+
+            if (productForm) {
+                productForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('productName').value;
+                    const price = parseFloat(document.getElementById('productPrice').value);
+                    const description = document.getElementById('productDescription').value;
+                    const category = document.getElementById('productCategory').value;
+                    addProduct(name, price, description, category);
+                    productForm.reset();
+                });
+            }
+
+            if (settingsForm) {
+                settingsForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    taxRate = parseFloat(document.getElementById('taxRate').value);
+                    taxRateValue.textContent = taxRate;
+                    showNotification('Configuración guardada correctamente');
+                });
+            }
+
+            signUpLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('register'); });
+            forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('forgot'); });
+            loginLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('login'); });
+
+            paymentMethod.addEventListener('change', handlePaymentMethodChange);
+            setupTableSelection();
+            setupChefFilters();
         }
-    }
 
     // Inicializar la aplicación
     document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         setAuthMode('login');
-        // Animación al logo
         const brand = document.querySelector('.brand');
         if (brand) {
             setTimeout(() => {
@@ -3388,86 +3321,27 @@
         }
     });
 
-    // Función para mostrar una sección y actualizar el nav activo
-    function showSection(sectionId) {
-        // Verificar acceso a administración
-        if (sectionId === 'admin' && currentUserRole !== 'admin') {
-            showNotification('Acceso denegado: se requieren privilegios de administrador');
-            sectionId = 'menu';
-        }
-        sections.forEach(section => {
-            if (section.id === `${sectionId}Section`) {
-                section.style.display = 'block';
-            } else {
-                section.style.display = 'none';
-            }
-        });
-        // Actualizar el nav activo SOLO para los íconos de sección (no el carrito)
-        magicNavItems.forEach(item => {
-            if (item.getAttribute('data-section') === sectionId) {
-                item.classList.add('active');
-            } else if (item.getAttribute('data-section')) {
-                item.classList.remove('active');
-            }
-        });
-        // Cargar datos específicos de la sección
-        if (sectionId === 'profile') {
-            renderProfile();
-        } else if (sectionId === 'orders') {
-            loadOrders();
-        } else if (sectionId === 'admin') {
-            loadAdminOrders();
-            loadCustomers();
-        } else if (sectionId === 'chef') {
-            loadKitchenOrders();
-        } else if (sectionId === 'waiter') {
-              // Show or hide the table selection based on whether a table is currently selected
-            if (currentTable) {
-                if (tableSelection) tableSelection.style.display = 'none';
-            } else {
-                if (tableSelection) tableSelection.style.display = 'block';
-            }
-            renderWaiterProducts();
-            loadOrders();
-            setupTableSelection();
-            const dcb = document.getElementById("desktopCartBtn");
-            if (dcb) {
-                dcb.addEventListener("click", openCartModal);
-            }
-        }
-    }
-
     // Función para abrir modal del carrito
     function openCartModal() {
-        cartModal.style.display = 'flex';
-        cartModal.classList.add('open');
         renderCart();
-         // Ocultar la sección de pago si el usuario es un mesero
+        cartModal.style.display = 'flex';
+        
         if (currentUserRole === 'waiter') {
-            document.getElementById('customerPaymentSection').style.display = 'none';
-            document.getElementById('checkoutBtn').style.display = 'none';
+            customerPaymentSection.style.display = 'none';
+            checkoutBtn.style.display = 'none';
+            processOrderBtn.style.display = 'block';
         } else {
-            document.getElementById('customerPaymentSection').style.display = 'block';
-             document.getElementById('checkoutBtn').style.display = 'block';
+            customerPaymentSection.style.display = 'block';
+            checkoutBtn.style.display = 'block';
+            processOrderBtn.style.display = 'none';
         }
     }
 
     // Función para cerrar modal del carrito
     function closeCartModal() {
-        cartModal.classList.remove('open');
         cartModal.style.display = 'none';
     }
 
-        // Event listeners para cerrar modal
-        document.addEventListener('click', (e) => {
-            if (e.target && e.target.classList && e.target.classList.contains('close-modal')) {
-                closeCartModal();
-            }
-            const m = document.getElementById('cartModal');
-            if (m && e.target === m) { // click outside content
-                closeCartModal();
-            }
-        });
     </script>
 </body>
 </html>
