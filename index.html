@@ -1770,7 +1770,6 @@
                     updateUIForRole();
                     setupRoleSpecificListeners();
                     loadProducts();
-                    renderProfile();
                 })
                 .catch(error => {
                     console.error("Error obteniendo datos de usuario: ", error);
@@ -1809,13 +1808,14 @@
 
             // Mostrar items según el rol
             if (currentUserRole === 'admin') {
-                adminMobileNavItem.style.display = 'flex';
+                document.querySelector('.magic-nav-item[data-section="admin"]').style.display = 'flex';
                 showSection('admin');
             } else if (currentUserRole === 'cajero') {
-                cashierMobileNavItem.style.display = 'flex';
+                document.querySelector('.magic-nav-item[data-section="cashier"]').style.display = 'flex';
                 showSection('cashier');
             } else if (currentUserRole === 'waiter') {
-                ['menu', 'orders'].forEach(s => document.querySelector(`.magic-nav-item[data-section="${s}"]`).style.display = 'flex');
+                document.querySelector('.magic-nav-item[data-section="menu"]').style.display = 'flex';
+                document.querySelector('.magic-nav-item[data-section="orders"]').style.display = 'flex';
                 [mobileCartIcon, desktopCartBtn].forEach(el => el.style.display = 'flex');
                 document.querySelector('.magic-nav-item[data-section="menu"]').dataset.section = 'waiter';
                 showSection('waiter');
@@ -1985,7 +1985,7 @@
             if (!product || !activeCart) return;
             const existingItem = activeCart.find(item => item.id === productId);
             if (existingItem) existingItem.quantity++;
-            else activeCart.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+            else activeCart.push({ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category });
             showNotification(`${product.name} añadido al carrito!`);
             updateCartCount();
             animateCart();
@@ -2339,7 +2339,7 @@
                 return currentUserRole === 'empanada_chef' ? (cat === 'empanadas' || cat === 'bebidas') : (cat !== 'empanadas');
             }));
 
-            kitchenOrdersContainer.innerHTML = relevantDocs.length === 0 ? '<p class="muted">No hay pedidos para tu estación.</p>' :
+            kitchenOrdersContainer.innerHTML = relevantDocs.length === 0 ? '<p class="muted" style="text-align:center; padding: 2rem;">No hay pedidos para tu estación.</p>' :
                 relevantDocs.map(doc => {
                     const order = { id: doc.id, ...doc.data() };
                     const filteredItems = order.items.filter(it => {
@@ -2373,7 +2373,7 @@
 
         function renderCashierOrders(docs) {
             if (!cashierOrdersContainer) return;
-            cashierOrdersContainer.innerHTML = docs.length === 0 ? '<p class="muted">No hay pedidos por cobrar.</p>' :
+            cashierOrdersContainer.innerHTML = docs.length === 0 ? '<p class="muted" style="text-align:center; padding: 2rem;">No hay pedidos por cobrar.</p>' :
                 docs.map(doc => {
                     const order = { id: doc.id, ...doc.data() };
                     return `<div class="cashier-order-card">
