@@ -396,7 +396,7 @@
         
         .section-title {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             color: var(--dark);
             position: relative;
             padding-top: 1rem;
@@ -1024,53 +1024,63 @@
             background: var(--secondary-dark);
         }
 
-        /* Columnas de Pedidos (Kanban) */
-        .order-columns-container {
+        /* Estilos para Filtros de Pedidos */
+        .order-filter-controls {
             display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            padding-bottom: 15px;
-            scrollbar-width: thin;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .order-category-column {
-            background-color: var(--lighter);
-            border-radius: 12px;
-            padding: 15px;
-            min-width: 300px;
-            flex: 1;
+        .filter-btn {
+            padding: 8px 15px;
+            background: var(--gray-light);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--primary);
+            color: white;
             box-shadow: var(--shadow);
         }
-
-        .order-category-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--gray-light);
+        
+        .order-list-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
         }
 
-        .empty-column-message {
+        .empty-list-message {
             color: var(--gray);
             text-align: center;
             padding: 2rem 0;
             font-style: italic;
+            grid-column: 1 / -1; /* Ocupar todo el ancho */
         }
         
-        .kitchen-order-card {
+        .order-card {
             background: white;
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 15px;
             box-shadow: var(--shadow);
             border-left: 5px solid var(--gray);
+            transition: var(--transition);
+        }
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
 
-        .kitchen-order-card.status-pending { border-left-color: var(--warning); }
-        .kitchen-order-card.status-preparing { border-left-color: var(--google); }
-        .kitchen-order-card.status-ready { border-left-color: var(--success); }
-        .kitchen-order-card.status-paid { border-left-color: var(--primary); }
-        .kitchen-order-card.status-cancelled { border-left-color: var(--gray); }
+        .order-card.status-pending { border-left-color: var(--warning); }
+        .order-card.status-preparing { border-left-color: var(--google); }
+        .order-card.status-ready { border-left-color: var(--success); }
+        .order-card.status-paid { border-left-color: var(--primary); }
+        .order-card.status-cancelled { border-left-color: var(--gray); }
 
         .order-header {
             display: flex;
@@ -1115,7 +1125,7 @@
             justify-content: flex-end;
         }
 
-        .chef-btn {
+        .action-btn {
             border: none;
             padding: 8px 15px;
             border-radius: 5px;
@@ -1124,7 +1134,7 @@
             transition: var(--transition);
             color: white;
         }
-        .chef-btn:hover {
+        .action-btn:hover {
             transform: scale(1.05);
         }
         
@@ -1163,17 +1173,13 @@
         }
         
         /* Responsive */
-        @media (max-width: 992px) {
-             .order-columns-container {
-                flex-direction: column;
-            }
-        }
-
         @media (max-width: 768px) {
             .brand {
                 font-size: 1.8rem;
             }
-            
+            .order-list-container {
+                grid-template-columns: 1fr; /* Una columna en móviles */
+            }
             .tables-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
@@ -1310,11 +1316,15 @@
             </div>
         </section>
         
-        <!-- Orders Section (Waiter History) -->
+        <!-- Orders Section (Waiter and Customer History) -->
         <section id="ordersSection" style="display: none;" class="for-customer for-waiter">
             <h2 class="section-title">Mis Pedidos</h2>
-            <div class="order-columns-container" id="waiterOrdersContainer">
-                <!-- Columnas de pedidos para mesero cargadas dinámicamente -->
+            <div class="order-filter-controls" id="waiterFilterControls">
+                <button class="filter-btn active" data-status="active">Activos</button>
+                <button class="filter-btn" data-status="history">Historial</button>
+            </div>
+            <div class="order-list-container" id="waiterOrdersContainer">
+                <!-- Pedidos para mesero/cliente cargados dinámicamente -->
             </div>
         </section>
         
@@ -1520,16 +1530,25 @@
         <!-- Nueva Sección para Cocineros -->
         <section id="chefSection" style="display: none;" class="for-chef">
             <h2 class="section-title">Panel de Cocina</h2>
-            <div class="order-columns-container" id="kitchenOrdersContainer">
-                 <!-- Columnas de pedidos para cocina cargadas dinámicamente -->
+            <div class="order-filter-controls" id="chefFilterControls">
+                <button class="filter-btn active" data-status="pending">Entrantes</button>
+                <button class="filter-btn" data-status="preparing">En Preparación</button>
+                <button class="filter-btn" data-status="ready">Listos</button>
+            </div>
+            <div class="order-list-container" id="kitchenOrdersContainer">
+                 <!-- Pedidos para cocina cargados dinámicamente -->
             </div>
         </section>
 
         <!-- Nueva Sección para Cajero -->
         <section id="cashierSection" style="display: none;" class="for-cashier">
             <h2 class="section-title">Panel de Caja</h2>
-            <div class="order-columns-container" id="cashierOrdersContainer">
-                <!-- Columnas de pedidos para el cajero cargadas dinámicamente -->
+            <div class="order-filter-controls" id="cashierFilterControls">
+                <button class="filter-btn active" data-status="ready">Listos para Pagar</button>
+                <button class="filter-btn" data-status="paid">Pagados (Hoy)</button>
+            </div>
+            <div class="order-list-container" id="cashierOrdersContainer">
+                <!-- Pedidos para el cajero cargados dinámicamente -->
             </div>
         </section>
     </main>
@@ -1647,6 +1666,9 @@
             <i class="fas fa-cog"></i>
             <span>Admin</span>
         </a>
+        <a href="#" class="magic-nav-item" data-section="chef" style="display: none;">
+             <!-- El contenido se inyecta desde JS -->
+        </a>
         <a href="#" class="magic-nav-item" data-section="cashier" id="cashierMobileNavItem" style="display: none;">
             <i class="fas fa-cash-register"></i>
             <span>Caja</span>
@@ -1683,17 +1705,20 @@
         // Variables globales
         let cart = [];
         let products = [];
-        let orders = [];
-        let customers = [];
+        let allOrders = []; // Almacenará todos los pedidos relevantes para la vista actual
         let currentUser = null;
         let currentUserRole = 'customer';
         let taxRate = 10.5;
         let authMode = 'login';
         let currentCategory = 'all';
-        let paymentReceiptFile = null;
         let currentTable = null;
         let realtimeOrdersListener = null;
         let cartByTable = {};
+
+        // Filtros activos
+        let chefFilter = 'pending';
+        let cashierFilter = 'ready';
+        let waiterFilter = 'active';
         
         // Referencias DOM
         const mainHeader = document.getElementById('mainHeader');
@@ -1731,8 +1756,6 @@
         const authMessage = document.getElementById('authMessage');
         const confirmPasswordField = document.getElementById('confirmPasswordField');
         const magicNavItems = document.querySelectorAll('.magic-nav-item');
-        const adminMobileNavItem = document.getElementById('adminMobileNavItem');
-        const cashierMobileNavItem = document.getElementById('cashierMobileNavItem');
         const mobileCartIcon = document.getElementById('mobileCartIcon');
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
@@ -1740,15 +1763,6 @@
         const overlay = document.getElementById('overlay');
         const categoriesContainer = document.getElementById('categoriesContainer');
         const paymentMethod = document.getElementById('paymentMethod');
-        const posDetails = document.getElementById('posDetails');
-        const mobileDetails = document.getElementById('mobileDetails');
-        const usdDetails = document.getElementById('usdDetails');
-        const eurDetails = document.getElementById('eurDetails');
-        const cashDetails = document.getElementById('cashDetails');
-        const mobileReference = document.getElementById('mobileReference');
-        const waiterSection = document.getElementById('waiterSection');
-        const chefSection = document.getElementById('chefSection');
-        const cashierSection = document.getElementById('cashierSection');
         const cashierOrdersContainer = document.getElementById('cashierOrdersContainer');
         const waiterProductsContainer = document.getElementById('waiterProductsContainer');
         const kitchenOrdersContainer = document.getElementById('kitchenOrdersContainer');
@@ -1757,15 +1771,13 @@
         const customerPaymentSection = document.getElementById('customerPaymentSection');
         const magicNav = document.getElementById('magicNav');
         const desktopCartBtn = document.getElementById('desktopCartBtn');
-        const waiterMenuSection = document.getElementById('waiterMenuSection');
         const processOrderBtn = document.getElementById('processOrderBtn');
-        const tableSelection = document.getElementById('tableSelection');
         
         // Función para obtener el carrito activo (cliente o mesa de mesero)
         function getActiveCart() {
             if (currentUserRole === 'waiter') {
                 if (!currentTable) {
-                    showNotification('Seleccione una mesa antes de agregar al carrito');
+                    showNotification('Seleccione una mesa antes de agregar al carrito', 'error');
                     return null;
                 }
                 if (!cartByTable[currentTable]) cartByTable[currentTable] = [];
@@ -1787,427 +1799,215 @@
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
-                // Mostrar header animado
-                setTimeout(() => {
-                    mainHeader.classList.add('visible');
-                    
-                    // Añadir efecto de scroll después de mostrar
-                    setTimeout(() => {
-                        window.addEventListener('scroll', handleHeaderScroll);
-                        handleHeaderScroll(); // Ejecutar al inicio
-                    }, 100);
-                }, 300);
-                
-                // Ocultar sección de autenticación
+                mainHeader.classList.add('visible');
+                window.addEventListener('scroll', handleHeaderScroll);
+                handleHeaderScroll();
                 authSection.style.display = 'none';
-                
-                // Mostrar barra mágica
                 magicNav.classList.add('visible');
                 
-                // Obtener datos del cliente
                 db.collection("customers").doc(user.uid).get()
                 .then(doc => {
                     if (doc.exists) {
-                        const userData = doc.data();
-                        currentUserRole = userData.role || 'customer';
-                        updateUIForRole();
+                        currentUserRole = doc.data().role || 'customer';
                     } else {
                         saveCustomerData(user);
                         currentUserRole = 'customer';
-                        updateUIForRole();
                     }
-                    
-                    // Determinar vista según rol
-                    if (currentUserRole === 'waiter') {
-                        showSection('waiter');
-                        document.body.classList.add('role-waiter');
-                        mobileCartIcon.style.display = 'flex';
-                        desktopCartBtn.style.display = 'flex';
-                        listenForTableLocks();
-                    } 
-                    else if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
-                        showSection('chef');
-                        document.body.classList.add('role-chef');
-                        listenForKitchenOrders();
-                    }
-                    else if (currentUserRole === 'cashier') {
-                        showSection('cashier');
-                        document.body.classList.add('role-cashier');
-                        listenForCashierOrders();
-                    }
-                    else {
-                        document.body.classList.add('role-customer');
-                        showSection('menu');
-                        mobileCartIcon.style.display = 'flex';
-                        desktopCartBtn.style.display = 'flex';
-                    }
+                    updateUIForRole();
+                    loadInitialDataForRole();
                 })
                 .catch(error => {
                     console.error("Error obteniendo datos de usuario: ", error);
                     currentUserRole = 'customer';
                     updateUIForRole();
+                    loadInitialDataForRole();
                 });
                 
-                // Cargar datos
                 loadProducts();
-                loadOrders(); // Carga pedidos para cliente y mesero
-                loadAdminOrders();
-                loadCustomers();
-                renderProfile();
+                loadAdminData();
             } else {
-                // Ocultar header
                 mainHeader.classList.remove('visible', 'scrolled');
                 window.removeEventListener('scroll', handleHeaderScroll);
-                
-                // Usuario no autenticado
                 authSection.style.display = 'block';
                 currentUserRole = 'customer';
-                document.body.className = ''; // Limpiar todas las clases de rol del body
+                document.body.className = '';
                 magicNav.classList.remove('visible');
-                
-                // Ocultar todas las secciones excepto autenticación
-                sections.forEach(section => {
-                    if (section.id !== 'authSection') {
-                        section.style.display = 'none';
-                    }
-                });
-                
-                // Detener listeners si existen
+                sections.forEach(s => s.style.display = 'none');
+                authSection.style.display = 'block';
                 if (realtimeOrdersListener) realtimeOrdersListener();
-
-                // Resetear formulario de autenticación
                 authForm.reset();
                 setAuthMode('login');
             }
         });
-        
-        // Manejar scroll para efecto en header
-        function handleHeaderScroll() {
-            if (window.scrollY > 30) {
-                mainHeader.classList.add('scrolled');
-            } else {
-                mainHeader.classList.remove('scrolled');
-            }
-        }
-        
-        // Función para actualizar la UI según el rol
-        function updateUIForRole() {
-            // Ocultar todos los elementos de navegación específicos de rol por defecto
-            ['adminMobileNavItem', 'cashierMobileNavItem', 'mobileCartIcon'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = 'none';
-            });
-            document.querySelectorAll('.for-customer, .for-waiter, .for-chef, .for-cashier, .for-admin').forEach(el => {
-                el.style.display = 'none';
-            });
 
-            // Configuración común
-            logoutBtn.style.display = currentUser ? '' : 'none';
-            document.querySelector('.magic-nav-item[data-section="profile"]').style.display = (currentUserRole === 'customer') ? '' : 'none';
-            
-            // Lógica específica por rol
+        function loadInitialDataForRole() {
+            if (realtimeOrdersListener) realtimeOrdersListener();
             switch(currentUserRole) {
-                case 'admin':
-                    adminMobileNavItem.style.display = '';
-                    break;
                 case 'waiter':
-                    document.querySelector('.magic-nav-item[data-section="menu"]').style.display = '';
-                    document.querySelector('.magic-nav-item[data-section="orders"]').style.display = '';
-                    mobileCartIcon.style.display = '';
-                    desktopCartBtn.style.display = '';
+                    showSection('waiter');
+                    listenForTableLocks();
+                    listenForWaiterOrders();
                     break;
                 case 'empanada_chef':
                 case 'general_chef':
-                    document.querySelector('.magic-nav-item[data-section="menu"]').style.display = 'none';
-                    document.querySelector('.magic-nav-item[data-section="orders"]').style.display = 'none';
+                    showSection('chef');
+                    listenForKitchenOrders();
                     break;
                 case 'cashier':
-                    cashierMobileNavItem.style.display = '';
-                    document.querySelector('.magic-nav-item[data-section="menu"]').style.display = 'none';
-                    document.querySelector('.magic-nav-item[data-section="orders"]').style.display = 'none';
+                    showSection('cashier');
+                    listenForCashierOrders();
                     break;
-                case 'customer':
-                default:
-                    document.querySelector('.magic-nav-item[data-section="menu"]').style.display = '';
-                    document.querySelector('.magic-nav-item[data-section="orders"]').style.display = '';
-                    mobileCartIcon.style.display = '';
-                    desktopCartBtn.style.display = '';
+                case 'admin':
+                    showSection('admin');
+                    break;
+                default: // customer
+                    showSection('menu');
+                    listenForWaiterOrders();
+                    renderProfile();
                     break;
             }
         }
         
-        // Guardar datos del cliente en Firebase
+        function handleHeaderScroll() {
+            mainHeader.classList.toggle('scrolled', window.scrollY > 30);
+        }
+        
+        function updateUIForRole() {
+            document.querySelectorAll('.magic-nav-item').forEach(item => item.style.display = 'none');
+            document.querySelectorAll('.cart-btn').forEach(item => item.style.display = 'none');
+            logoutBtn.style.display = currentUser ? 'flex' : 'none';
+            
+            const rolesConfig = {
+                admin: ['admin'],
+                waiter: ['menu', 'orders', 'mobileCartIcon', 'desktopCartBtn'],
+                chef: ['chef'],
+                cashier: ['cashier'],
+                customer: ['menu', 'orders', 'profile', 'mobileCartIcon', 'desktopCartBtn']
+            };
+            
+            const roleKey = currentUserRole.includes('chef') ? 'chef' : currentUserRole;
+            const navItemsToShow = rolesConfig[roleKey] || rolesConfig.customer;
+
+            navItemsToShow.forEach(itemKey => {
+                const el = document.querySelector(`[data-section="${itemKey}"]`) || document.getElementById(itemKey);
+                if(el) el.style.display = 'flex';
+            });
+
+            if (currentUserRole.includes('chef')) {
+                magicNav.querySelector('[data-section="chef"]').innerHTML = '<i class="fas fa-hat-chef"></i><span>Cocina</span>';
+            }
+        }
+        
         function saveCustomerData(user) {
             const customerRef = db.collection("customers").doc(user.uid);
             customerRef.get().then(doc => {
                 const currentData = doc.exists ? doc.data() : {};
                 const customerData = {
-                    uid: user.uid,
-                    email: user.email,
+                    uid: user.uid, email: user.email,
                     displayName: user.displayName || "Cliente",
                     photoURL: user.photoURL || "",
                     lastLogin: new Date().toISOString(),
                     createdAt: doc.exists ? currentData.createdAt : firebase.firestore.FieldValue.serverTimestamp(),
                     role: currentData.role || 'customer'
                 };
-                customerRef.set(customerData, { merge: true })
-                .then(() => {
-                    console.log("Datos del cliente guardados correctamente");
-                })
-                .catch(error => {
-                    console.error("Error guardando datos del cliente: ", error);
-                });
-            }).catch(error => {
-                console.error("Error obteniendo datos del cliente: ", error);
+                customerRef.set(customerData, { merge: true });
             });
         }
         
-        // Establecer modo de autenticación
         function setAuthMode(mode) {
             authMode = mode;
-            switch(mode) {
-                case 'login':
-                    authMessage.textContent = "Inicia sesión para continuar";
-                    authSubmitBtn.textContent = "Iniciar Sesión";
-                    confirmPasswordField.style.display = 'none';
-                    signUpLink.style.display = 'inline';
-                    forgotPasswordLink.style.display = 'inline';
-                    loginLink.style.display = 'none';
-                    break;
-                case 'register':
-                    authMessage.textContent = "Crea una cuenta";
-                    authSubmitBtn.textContent = "Registrarse";
-                    confirmPasswordField.style.display = 'block';
-                    signUpLink.style.display = 'none';
-                    forgotPasswordLink.style.display = 'none';
-                    loginLink.style.display = 'inline';
-                    break;
-                case 'forgot':
-                    authMessage.textContent = "Recuperar contraseña";
-                    authSubmitBtn.textContent = "Enviar Correo";
-                    confirmPasswordField.style.display = 'none';
-                    signUpLink.style.display = 'none';
-                    forgotPasswordLink.style.display = 'none';
-                    loginLink.style.display = 'inline';
-                    break;
+            confirmPasswordField.style.display = (mode === 'register') ? 'block' : 'none';
+            loginLink.style.display = (mode !== 'login') ? 'inline' : 'none';
+            signUpLink.style.display = (mode === 'login') ? 'inline' : 'none';
+            forgotPasswordLink.style.display = (mode === 'login') ? 'inline' : 'none';
+
+            if (mode === 'login') {
+                authMessage.textContent = "Inicia sesión para continuar";
+                authSubmitBtn.textContent = "Iniciar Sesión";
+            } else if (mode === 'register') {
+                authMessage.textContent = "Crea una cuenta";
+                authSubmitBtn.textContent = "Registrarse";
+            } else { // forgot
+                authMessage.textContent = "Recuperar contraseña";
+                authSubmitBtn.textContent = "Enviar Correo";
             }
         }
         
-        // Manejar envío de formulario de autenticación
         authForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = authEmail.value;
-            const password = authPassword.value;
-            const confirmPassword = authConfirmPassword.value;
-            
-            switch(authMode) {
-                case 'login': loginWithEmail(email, password); break;
-                case 'register': 
-                    if (password !== confirmPassword) {
-                        showNotification("Las contraseñas no coinciden");
-                        return;
-                    }
-                    signUpWithEmail(email, password); 
-                    break;
-                case 'forgot': resetPassword(email); break;
+            const email = authEmail.value, password = authPassword.value;
+            if (authMode === 'login') auth.signInWithEmailAndPassword(email, password).catch(err => showNotification(err.message, 'error'));
+            else if (authMode === 'register') {
+                if (password !== authConfirmPassword.value) return showNotification("Las contraseñas no coinciden", "error");
+                auth.createUserWithEmailAndPassword(email, password).catch(err => showNotification(err.message, 'error'));
+            } else if (authMode === 'forgot') {
+                auth.sendPasswordResetEmail(email).then(() => showNotification("Correo de recuperación enviado.")).catch(err => showNotification(err.message, 'error'));
             }
         });
         
-        // Iniciar sesión con correo/contraseña
-        function loginWithEmail(email, password) {
-            auth.signInWithEmailAndPassword(email, password)
-            .then(() => showNotification("Sesión iniciada correctamente"))
-            .catch(error => {
-                console.error("Error de autenticación: ", error);
-                showNotification(`Error al iniciar sesión: ${error.message}`);
-            });
-        }
+        googleLoginBtn.addEventListener('click', () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => showNotification(err.message, 'error')));
+        appleLoginBtn.addEventListener('click', () => auth.signInWithPopup(new firebase.auth.OAuthProvider('apple.com')).catch(err => showNotification(err.message, 'error')));
+        logoutBtn.addEventListener('click', () => auth.signOut());
         
-        // Registrar nuevo usuario
-        function signUpWithEmail(email, password) {
-            auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                db.collection("customers").doc(user.uid).set({
-                    email: email,
-                    displayName: "Cliente",
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    role: 'customer'
-                }, { merge: true })
-                .then(() => showNotification("¡Cuenta creada correctamente!"));
-            })
-            .catch(error => {
-                console.error("Error registrando usuario: ", error);
-                showNotification(`Error al registrar: ${error.message}`);
-            });
-        }
-        
-        // Recuperar contraseña
-        function resetPassword(email) {
-            auth.sendPasswordResetEmail(email)
-            .then(() => {
-                showNotification("Correo de recuperación enviado. Revisa tu bandeja de entrada.");
-                setAuthMode('login');
-            })
-            .catch(error => {
-                console.error("Error enviando correo de recuperación: ", error);
-                showNotification(`Error: ${error.message}`);
-            });
-        }
-        
-        // Iniciar sesión con Google
-        googleLoginBtn.addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(error => {
-                console.error("Error de autenticación: ", error);
-                showNotification(`Error al iniciar sesión: ${error.message}`);
-            });
-        });
-        
-        // Iniciar sesión con Apple
-        appleLoginBtn.addEventListener('click', () => {
-            const provider = new firebase.auth.OAuthProvider('apple.com');
-            auth.signInWithPopup(provider).catch(error => {
-                console.error("Error de autenticación: ", error);
-                showNotification(`Error al iniciar sesión: ${error.message}`);
-            });
-        });
-        
-        // Cerrar sesión
-        logoutBtn.addEventListener('click', () => {
-            mainHeader.classList.remove('scrolled');
-            mainHeader.style.transition = 'transform 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
-            mainHeader.style.transform = 'translateY(-100%)';
-            
-            setTimeout(() => {
-                auth.signOut().then(() => showNotification('Sesión cerrada correctamente'))
-                .catch(error => showNotification(`Error al cerrar sesión: ${error.message}`));
-                mainHeader.style.transition = '';
-            }, 400);
-        });
-        
-        // Cargar productos desde Firebase
         function loadProducts() {
-            db.collection("products").get().then(querySnapshot => {
-                products = [];
-                querySnapshot.forEach(doc => {
-                    products.push({ id: doc.id, ...doc.data() });
-                });
+            db.collection("products").get().then(snapshot => {
+                products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCategoryFilters();
                 renderProducts();
                 renderWaiterProducts();
-                renderCurrentProducts();
-                renderCategoryFilters();
-            }).catch(error => {
-                console.error("Error cargando productos: ", error);
+                if (currentUserRole === 'admin') renderCurrentProducts();
             });
         }
         
-        // Renderizar los botones de categorías
         function renderCategoryFilters() {
-            const categories = [...new Set(products.map(product => product.category))];
-            categoriesContainer.innerHTML = '';
-            
-            const allButton = document.createElement('div');
-            allButton.className = `category-btn active`;
-            allButton.dataset.category = 'all';
-            allButton.innerHTML = `<i class="fas fa-utensils"></i><span>Todos</span>`;
-            allButton.addEventListener('click', () => filterProductsByCategory('all'));
-            categoriesContainer.appendChild(allButton);
-
-            categories.forEach(category => {
-                const button = document.createElement('div');
-                button.className = `category-btn`;
-                button.dataset.category = category;
-                
-                let iconClass = 'fas fa-utensils';
-                switch(category) {
-                    case 'empanadas': iconClass = 'fas fa-pizza-slice'; break;
-                    case 'bebidas': iconClass = 'fas fa-glass-martini-alt'; break;
-                    case 'postres': iconClass = 'fas fa-ice-cream'; break;
-                }
-                
-                button.innerHTML = `<i class="${iconClass}"></i><span>${category}</span>`;
-                button.addEventListener('click', () => filterProductsByCategory(category));
-                categoriesContainer.appendChild(button);
-            });
+            const categories = [...new Set(products.map(p => p.category))];
+            categoriesContainer.innerHTML = `<div class="category-btn active" data-category="all"><i class="fas fa-utensils"></i><span>Todos</span></div>` +
+                categories.map(cat => `<div class="category-btn" data-category="${cat}"><i class="fas fa-tag"></i><span>${cat}</span></div>`).join('');
+            categoriesContainer.querySelectorAll('.category-btn').forEach(btn => btn.addEventListener('click', () => filterProductsByCategory(btn.dataset.category)));
         }
 
         function filterProductsByCategory(category) {
             currentCategory = category;
             renderProducts();
             renderWaiterProducts();
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.category === category);
-            });
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.category === category));
             closeSidebarFunc();
         }
         
-        // Renderizar productos
         function renderProducts() {
             if (!productsContainer) return;
-            productsContainer.innerHTML = '';
-            
-            let filteredProducts = (currentCategory === 'all') ? products : products.filter(p => p.category === currentCategory);
-            
-            if (filteredProducts.length === 0) {
-                productsContainer.innerHTML = '<p class="empty-message">No hay productos en esta categoría.</p>';
-                return;
-            }
-            
-            filteredProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <div class="product-badge">${product.category}</div>
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/300x200?text=${product.name.replace(/\s+/g, '+')}" alt="${product.name}">
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">
-                            <span>${product.name}</span>
-                            <span class="product-price">$${product.price.toFixed(2)}</span>
-                        </h3>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-footer">
-                            <button class="add-to-cart" data-id="${product.id}">
-                                <i class="fas fa-plus"></i> <span>Añadir</span>
-                            </button>
+            let filtered = (currentCategory === 'all') ? products : products.filter(p => p.category === currentCategory);
+            productsContainer.innerHTML = filtered.length === 0 ? '<p class="empty-list-message">No hay productos.</p>' :
+                filtered.map(p => `
+                    <div class="product-card">
+                        <div class="product-badge">${p.category}</div>
+                        <div class="product-image"><img src="https://via.placeholder.com/300x200?text=${p.name.replace(/\s+/g, '+')}" alt="${p.name}"></div>
+                        <div class="product-info">
+                            <h3 class="product-title"><span>${p.name}</span><span class="product-price">$${p.price.toFixed(2)}</span></h3>
+                            <p class="product-description">${p.description}</p>
+                            <div class="product-footer"><button class="add-to-cart" data-id="${p.id}"><i class="fas fa-plus"></i> Añadir</button></div>
                         </div>
-                    </div>
-                `;
-                productsContainer.appendChild(productCard);
-            });
-            
-            // Añadir event listeners
-            document.querySelectorAll('#productsContainer .add-to-cart').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.add-to-cart').dataset.id;
-                    addToCart(productId);
-                    animateCart();
-                });
-            });
+                    </div>`).join('');
+            productsContainer.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => {
+                addToCart(e.currentTarget.dataset.id);
+                animateCart();
+            }));
         }
         
-        // Añadir al carrito
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
-            const active = getActiveCart();
-            if (!product || !active) return;
-            const existingItem = active.find(item => item.id === productId);
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                active.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
-            }
-            showNotification(`${product.name} añadida al carrito!`);
+            const activeCart = getActiveCart();
+            if (!product || !activeCart) return;
+            const item = activeCart.find(i => i.id === productId);
+            if (item) item.quantity++;
+            else activeCart.push({ ...product, quantity: 1 });
+            showNotification(`${product.name} añadido!`);
             updateCartCount();
         }
         
-        // Renderizar carrito
         function renderCart() {
-            const active = getActiveCart();
-            cartItems.innerHTML = '';
-            if (!active || active.length === 0) {
+            const activeCart = getActiveCart();
+            if (!activeCart || activeCart.length === 0) {
                 cartItems.innerHTML = '<p class="empty-cart">Tu carrito está vacío</p>';
                 cartSubtotal.textContent = '$0.00';
                 cartTax.textContent = '$0.00';
@@ -2215,517 +2015,198 @@
                 return;
             }
             let subtotal = 0;
-            active.forEach(item => {
-                const itemTotal = item.price * item.quantity;
-                subtotal += itemTotal;
-                const cartItem = document.createElement('div');
-                cartItem.className = 'cart-item';
-                cartItem.innerHTML = `
-                    <div style="display: flex; align-items: center;">
-                        <i class="fas fa-drumstick-bite" style="font-size: 1.5rem;"></i>
-                        <div class="item-info">
-                            <div class="item-title">${item.name}</div>
-                            <div class="item-price">$${item.price.toFixed(2)} c/u</div>
-                        </div>
-                    </div>
+            cartItems.innerHTML = activeCart.map(item => {
+                subtotal += item.price * item.quantity;
+                return `<div class="cart-item">
+                    <div class="item-info"><div class="item-title">${item.name}</div><div class="item-price">$${item.price.toFixed(2)} c/u</div></div>
                     <div class="item-actions">
-                        <button class="quantity-btn minus" data-id="${item.id}">-</button>
-                        <span class="quantity">${item.quantity}</span>
-                        <button class="quantity-btn plus" data-id="${item.id}">+</button>
-                        <button class="remove-item" data-id="${item.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>`;
-                cartItems.appendChild(cartItem);
-            });
+                        <button class="quantity-btn minus" data-id="${item.id}">-</button><span>${item.quantity}</span><button class="quantity-btn plus" data-id="${item.id}">+</button>
+                        <button class="remove-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+                    </div></div>`;
+            }).join('');
             const tax = subtotal * (taxRate / 100);
-            const total = subtotal + tax;
             cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
             cartTax.textContent = `$${tax.toFixed(2)}`;
-            cartTotal.textContent = `$${total.toFixed(2)}`;
-            document.querySelectorAll('.quantity-btn.minus').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.quantity-btn').dataset.id;
-                    updateQuantity(productId, -1);
-                });
-            });
-            document.querySelectorAll('.quantity-btn.plus').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.quantity-btn').dataset.id;
-                    updateQuantity(productId, 1);
-                });
-            });
-            document.querySelectorAll('.remove-item').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.remove-item').dataset.id;
-                    removeFromCart(productId);
-                });
-            });
+            cartTotal.textContent = `$${(subtotal + tax).toFixed(2)}`;
+            cartItems.querySelectorAll('.quantity-btn.minus').forEach(b => b.addEventListener('click', e => updateQuantity(e.currentTarget.dataset.id, -1)));
+            cartItems.querySelectorAll('.quantity-btn.plus').forEach(b => b.addEventListener('click', e => updateQuantity(e.currentTarget.dataset.id, 1)));
+            cartItems.querySelectorAll('.remove-item').forEach(b => b.addEventListener('click', e => removeFromCart(e.currentTarget.dataset.id)));
         }
         
-        // Actualizar cantidad en carrito
         function updateQuantity(productId, change) {
-            const active = getActiveCart();
-            if (!active) return;
-            const item = active.find(i => i.id === productId);
+            let item = getActiveCart().find(i => i.id === productId);
             if (!item) return;
             item.quantity += change;
-            if (item.quantity <= 0) {
-                const idx = active.findIndex(i => i.id === productId);
-                if (idx !== -1) active.splice(idx, 1);
-            }
-            renderCart();
-            updateCartCount();
+            if (item.quantity <= 0) removeFromCart(productId);
+            else { renderCart(); updateCartCount(); }
         }
         
-        // Eliminar del carrito
         function removeFromCart(productId) {
-            const active = getActiveCart();
-            if (!active) return;
-            const idx = active.findIndex(i => i.id === productId);
-            if (idx !== -1) active.splice(idx, 1);
+            const activeCart = getActiveCart();
+            const index = activeCart.findIndex(i => i.id === productId);
+            if (index > -1) activeCart.splice(index, 1);
             renderCart();
             updateCartCount();
         }
         
-        // Subir comprobante a Firebase Storage
-        function uploadReceipt(file) {
-            return new Promise((resolve, reject) => {
-                if (!currentUser) {
-                    reject('Usuario no autenticado');
-                    return;
-                }
-                
-                const storageRef = storage.ref();
-                const receiptRef = storageRef.child(`receipts/${currentUser.uid}/${Date.now()}_${file.name}`);
-                
-                receiptRef.put(file)
-                .then(snapshot => {
-                    snapshot.ref.getDownloadURL().then(url => {
-                        resolve(url);
-                    });
-                })
-                .catch(error => {
-                    reject(error);
-                });
-            });
-        }
-        
-        // Finalizar compra
         async function checkout() {
-            const active = getActiveCart();
-            if (!active || active.length === 0) return;
-            
-            const method = document.getElementById('paymentMethod').value;
-            let reference = '';
-            let receiptUrl = '';
-            
-            // Obtener referencia según el método
-            switch(method) {
-                case 'pos':
-                    reference = 'POS';
-                    break;
-                case 'mobile':
-                    reference = document.getElementById('mobileReference').value || 'N/A';
-                    break;
-                case 'usd':
-                    reference = document.getElementById('usdReference').value;
-                    const usdReceipt = document.getElementById('usdReceipt').files[0];
-                    if (usdReceipt) {
-                        try {
-                            receiptUrl = await uploadReceipt(usdReceipt);
-                        } catch (error) {
-                            showNotification('Error al subir el comprobante: ' + error);
-                            return;
-                        }
-                    }
-                    break;
-                case 'eur':
-                    reference = document.getElementById('eurReference').value;
-                    const eurReceipt = document.getElementById('eurReceipt').files[0];
-                    if (eurReceipt) {
-                        try {
-                            receiptUrl = await uploadReceipt(eurReceipt);
-                        } catch (error) {
-                            showNotification('Error al subir el comprobante: ' + error);
-                            return;
-                        }
-                    }
-                    break;
-                case 'cash':
-                    reference = 'EFECTIVO';
-                    break;
-            }
-            
-            const subtotal = active.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const tax = subtotal * (taxRate / 100);
-            const total = subtotal + tax;
-            
+            if (cart.length === 0) return;
+            const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
             const order = {
-                date: new Date().toISOString(),
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                userName: currentUser.displayName || "Cliente",
-                items: active.map(item => ({
-                    productId: item.id,
-                    name: item.name,
-                    price: item.price,
-                    quantity: item.quantity,
-                    category: products.find(p => p.id === item.id)?.category || 'general',
-                    status: 'pending'
-                })),
-                subtotal,
-                tax,
-                total,
+                date: new Date().toISOString(), userId: currentUser.uid, userEmail: currentUser.email,
+                userName: currentUser.displayName || "Cliente", items: cart,
+                subtotal, tax: subtotal * (taxRate / 100), total: subtotal * (1 + taxRate / 100),
                 status: 'pending',
-                paymentMethod: method,
-                paymentReference: reference,
-                paymentReceipt: receiptUrl
             };
-            
-            // Guardar en Firebase
-            db.collection("orders").add(order)
-            .then(() => {
-                showNotification('¡Pedido realizado con éxito!');
+            try {
+                await db.collection("orders").add(order);
+                showNotification('¡Pedido realizado!');
                 cart = [];
                 updateCartCount();
-                cartModal.style.display = 'none';
-                loadOrders();
-            })
-            .catch(error => {
-                console.error("Error guardando pedido: ", error);
-                showNotification('Error al guardar el pedido');
-            });
+                closeCartModal();
+            } catch (error) { showNotification('Error al guardar el pedido', 'error'); }
         }
         
-        // Agregar nuevo producto
-        function addProduct(name, price, description, category) {
-            const newProduct = {
-                name,
-                price: parseFloat(price),
-                description,
-                category,
-                createdAt: new Date().toISOString()
-            };
-            
-            db.collection("products").add(newProduct)
-            .then(() => {
-                showNotification('¡Producto agregado con éxito!');
-                loadProducts();
-            })
-            .catch(error => {
-                console.error("Error agregando producto: ", error);
-                showNotification('Error al agregar producto');
-            });
-        }
-        
-        // Eliminar producto
-        function deleteProduct(productId) {
-            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-                db.collection("products").doc(productId).delete()
-                .then(() => {
-                    showNotification('Producto eliminado');
-                    loadProducts();
-                })
-                .catch(error => {
-                    console.error("Error eliminando producto: ", error);
-                    showNotification('Error al eliminar producto');
-                });
-            }
-        }
-        
-        // Actualizar estado de pedido
-        function updateOrderStatus(orderId, status) {
-            db.collection("orders").doc(orderId).update({ status })
-            .then(() => {
-                showNotification('Estado actualizado correctamente');
-            })
-            .catch(error => {
-                console.error("Error actualizando estado: ", error);
-                showNotification('Error al actualizar estado');
-            });
-        }
-        
-        // Renderizar productos actuales en panel de administración
-        function renderCurrentProducts() {
-            currentProducts.innerHTML = '';
-            
-            if (products.length === 0) {
-                currentProducts.innerHTML = '<p>No hay productos registrados.</p>';
-                return;
-            }
-            
-            const table = document.createElement('table');
-            table.style.width = '100%';
-            table.style.borderCollapse = 'collapse';
-            table.style.marginTop = '1rem';
-            
-            thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Producto</th>
-                    <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Categoría</th>
-                    <th style="text-align: right; padding: 10px; border-bottom: 2px solid #ddd;">Precio</th>
-                    <th style="text-align: center; padding: 10px; border-bottom: 2px solid #ddd;">Acciones</th>
-                </tr>
-            `;
-            table.appendChild(thead);
-            
-            const tbody = document.createElement('tbody');
-            
-            products.forEach(product => {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = '1px solid #eee';
-                tr.innerHTML = `
-                    <td style="padding: 10px;">${product.name}</td>
-                    <td style="padding: 10px; text-transform: capitalize;">${product.category}</td>
-                    <td style="padding: 10px; text-align: right;">$${product.price.toFixed(2)}</td>
-                    <td style="padding: 10px; text-align: center;">
-                        <button class="delete-product" data-id="${product.id}" style="background: none; border: none; cursor: pointer;">
-                            <i class="fas fa-trash" style="color: var(--danger);"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            
-            table.appendChild(tbody);
-            currentProducts.appendChild(table);
-            
-            document.querySelectorAll('.delete-product').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.delete-product').dataset.id;
-                    deleteProduct(productId);
-                });
-            });
-        }
-        
-        // Cargar pedidos para Cliente y Mesero y renderizarlos en columnas
-        function loadOrders() {
-            if (!currentUser || (currentUserRole !== 'customer' && currentUserRole !== 'waiter')) return;
-
-            let query = db.collection("orders");
-            if (currentUserRole === 'customer') {
-                query = query.where("userId", "==", currentUser.uid);
-            } else if (currentUserRole === 'waiter') {
-                query = query.where("waiterId", "==", currentUser.uid);
-            }
-            
-            query.orderBy("date", "desc").onSnapshot(querySnapshot => {
-                renderOrderColumns(waiterOrdersContainer, querySnapshot.docs);
-            }, error => {
-                console.error("Error cargando pedidos: ", error);
-                waiterOrdersContainer.innerHTML = `<p>Error al cargar pedidos.</p>`;
-            });
-        }
-
-        // Cargar todos los pedidos (admin)
-        function loadAdminOrders() {
+        function loadAdminData() {
             if (currentUserRole !== 'admin') return;
-            
-            db.collection("orders").orderBy("date", "desc").onSnapshot(querySnapshot => {
-                adminOrdersTableBody.innerHTML = '';
-                if (querySnapshot.empty) {
-                    adminOrdersTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center;">No hay pedidos</td></tr>`;
-                    return;
-                }
-                querySnapshot.forEach(doc => {
-                    const order = { id: doc.id, ...doc.data() };
-                    const date = new Date(order.date);
-                    const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${order.id.substring(0, 8)}</td>
-                        <td>${order.userName}</td>
-                        <td>${formattedDate}</td>
-                        <td>$${order.total.toFixed(2)}</td>
-                        <td>${getPaymentMethodName(order.paymentMethod)}</td>
-                        <td>${order.paymentReference || 'N/A'}</td>
-                        <td>
-                            <select class="order-status-select" data-id="${order.id}">
-                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendiente</option>
-                                <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>En preparación</option>
-                                <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Listo</option>
-                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Entregado</option>
-                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
-                                <option value="paid" ${order.status === 'paid' ? 'selected' : ''}>Pagado</option>
-                            </select>
-                        </td>
-                        <td><button class="view-order" data-id="${order.id}">Ver</button></td>
-                    `;
-                    adminOrdersTableBody.appendChild(row);
-                });
-                
-                document.querySelectorAll('.order-status-select').forEach(select => {
-                    select.addEventListener('change', (e) => {
-                        updateOrderStatus(e.target.dataset.id, e.target.value);
-                    });
-                });
-            }, error => {
-                 console.error("Error cargando pedidos de admin: ", error);
-                 adminOrdersTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Error al cargar</td></tr>`;
-            });
+            // Admin data loading functions would be called here
         }
         
-        function getPaymentMethodName(method) {
-            const names = { pos: 'Punto de Venta', mobile: 'Pago Móvil', usd: 'Divisa USD', eur: 'Divisa EUR', cash: 'Efectivo' };
-            return names[method] || method;
-        }
-        
-        function getStatusText(status) {
-            const texts = { pending: 'Pendiente', preparing: 'En preparación', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado', paid: 'Pagado' };
-            return texts[status] || status;
-        }
-        
-        // Cargar clientes (admin)
-        function loadCustomers() {
-            if (currentUserRole !== 'admin') return;
-            
-            db.collection("customers").get().then(querySnapshot => {
-                customersTableBody.innerHTML = '';
-                if (querySnapshot.empty) {
-                    customersTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No hay clientes</td></tr>`;
-                    return;
-                }
-                querySnapshot.forEach(doc => {
-                    const customer = { id: doc.id, ...doc.data() };
-                    const lastLogin = customer.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'Nunca';
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${customer.displayName}</td>
-                        <td>${customer.email}</td>
-                        <td>${customer.phone || 'N/A'}</td>
-                        <td>${customer.orderCount || 0}</td>
-                        <td>${lastLogin}</td>
-                    `;
-                    customersTableBody.appendChild(row);
-                });
-            }).catch(error => {
-                console.error("Error cargando clientes: ", error);
-                customersTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Error al cargar</td></tr>`;
-            });
-        }
-        
-        // Renderizar perfil
         function renderProfile() {
             if (!currentUser) return;
-            const creationDate = currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime) : null;
-            const memberSince = creationDate ? creationDate.getFullYear() : 'N/A';
-
-            profileContainer.innerHTML = `
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
-                        <h3>${currentUser.displayName || "Cliente"}</h3>
-                        <p>${currentUser.email}</p>
-                    </div>
-                    <div class="profile-stats">
-                        <div class="stat-item">
-                            <span class="stat-value">${memberSince}</span>
-                            <span class="stat-label">Miembro desde</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">${orders.length}</span>
-                            <span class="stat-label">Pedidos</span>
-                        </div>
-                    </div>
-                    <div class="profile-actions">
-                        <button class="btn">Editar Perfil</button>
-                        <button class="btn btn-secondary" id="viewHistoryBtn">Ver Historial</button>
-                    </div>
-                </div>
-            `;
-            document.getElementById('viewHistoryBtn').addEventListener('click', () => showSection('orders'));
+            const creationDate = currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime).toLocaleDateString() : 'N/A';
+            profileContainer.innerHTML = `<div class="profile-card">
+                <div class="profile-header"><div class="profile-avatar"><i class="fas fa-user-circle"></i></div><h3>${currentUser.displayName || "Cliente"}</h3><p>${currentUser.email}</p></div>
+                <div class="profile-stats">
+                    <div class="stat-item"><span class="stat-value">${creationDate}</span><span class="stat-label">Miembro</span></div>
+                    <div class="stat-item"><span class="stat-value" id="profileOrderCount">0</span><span class="stat-label">Pedidos</span></div>
+                </div></div>`;
+            db.collection('orders').where('userId', '==', currentUser.uid).get().then(s => document.getElementById('profileOrderCount').textContent = s.size);
         }
         
-        // Mostrar sección
         function showSection(sectionId) {
-            if (sectionId === 'admin' && currentUserRole !== 'admin') {
-                showNotification('Acceso denegado');
+            if (sectionId === 'admin' && currentUserRole !== 'admin') return;
+            sections.forEach(s => s.style.display = 'none');
+            const target = document.getElementById(`${sectionId}Section`);
+            if (target) target.style.display = 'block';
+            magicNavItems.forEach(item => {
+                let iSection = item.dataset.section;
+                if (currentUserRole === 'waiter' && iSection === 'menu') iSection = 'waiter';
+                if (currentUserRole.includes('chef')) iSection = 'chef';
+                item.classList.toggle('active', iSection === sectionId);
+            });
+        }
+        
+        function showNotification(message, type = 'success') {
+            const el = document.createElement('div');
+            el.className = 'notification';
+            el.textContent = message;
+            el.style.backgroundColor = type === 'error' ? 'var(--danger)' : 'var(--success)';
+            document.body.appendChild(el);
+            setTimeout(() => el.classList.add('show'), 10);
+            setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3000);
+        }
+        
+        function animateCart() {
+            document.querySelectorAll('.cart-btn, #mobileCartIcon').forEach(i => { i.classList.add('pulse'); setTimeout(() => i.classList.remove('pulse'), 500); });
+        }
+        
+        function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+        function closeSidebarFunc() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+        
+        function createOrderCard(order) {
+            const card = document.createElement('div');
+            card.className = `order-card status-${order.status}`;
+            card.dataset.id = order.id;
+            let actions = '';
+            if (currentUserRole.includes('chef')) {
+                if (order.status === 'pending') actions = `<button class="action-btn mark-preparing-btn" data-id="${order.id}">Preparar</button>`;
+                if (order.status === 'preparing') actions = `<button class="action-btn mark-ready-btn" data-id="${order.id}">Listo</button>`;
+            } else if (currentUserRole === 'cashier' && order.status === 'ready') {
+                actions = `<button class="action-btn mark-paid-btn" data-id="${order.id}">Marcar Pagado</button>`;
+            } else if (['waiter', 'customer'].includes(currentUserRole) && ['pending', 'preparing'].includes(order.status)) {
+                actions = `<button class="btn btn-secondary" style="padding:5px 10px;font-size:0.8rem;" onclick="cancelOrder('${order.id}')">Cancelar</button>`;
+            }
+            card.innerHTML = `
+                <div class="order-header">
+                    <div><strong>#${order.id.slice(-6)}</strong> (${order.table ? `Mesa ${order.table}` : (order.userName||'Cliente')})<div style="font-size:0.8rem">${new Date(order.date).toLocaleTimeString()}</div></div>
+                    <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
+                </div>
+                <div class="order-items">${(order.items || []).map(it => `<div class="order-item">${it.quantity}× ${it.name}</div>`).join('')}</div>
+                ${actions ? `<div class="order-actions">${actions}</div>` : ''}`;
+            return card;
+        }
+
+        function cancelOrder(orderId) {
+            if (confirm('¿Seguro que quieres cancelar este pedido?')) updateOrderStatus(orderId, 'cancelled');
+        }
+
+        function setupCardActions(container) {
+            container.querySelectorAll('.mark-preparing-btn').forEach(b => b.addEventListener('click', e => updateOrderStatus(e.target.dataset.id, 'preparing')));
+            container.querySelectorAll('.mark-ready-btn').forEach(b => b.addEventListener('click', e => updateOrderStatus(e.target.dataset.id, 'ready')));
+            container.querySelectorAll('.mark-paid-btn').forEach(b => b.addEventListener('click', e => updateOrderStatus(e.target.dataset.id, 'paid')));
+        }
+
+        function renderFilteredOrders(container, filter) {
+            container.innerHTML = '';
+            const statusMap = { active: ['pending', 'preparing', 'ready'], history: ['paid', 'cancelled'] };
+            const targetStatuses = statusMap[filter] || [filter];
+            const filtered = allOrders.filter(order => targetStatuses.includes(order.status));
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="empty-list-message">No hay pedidos en esta categoría.</p>';
                 return;
             }
-            
-            sections.forEach(s => s.style.display = 'none');
-            const targetSection = document.getElementById(`${sectionId}Section`);
-            if (targetSection) {
-                targetSection.style.display = 'block';
-            }
-            
-            magicNavItems.forEach(item => {
-                let itemSection = item.dataset.section;
-                // El ícono de menú para el mesero debe activar la sección 'waiter'
-                if (currentUserRole === 'waiter' && itemSection === 'menu') {
-                    itemSection = 'waiter';
-                }
-                item.classList.toggle('active', itemSection === sectionId);
+            filtered.forEach(order => container.appendChild(createOrderCard(order)));
+            setupCardActions(container);
+        }
+
+        function listenForWaiterOrders() {
+            const query = db.collection("orders").where(currentUserRole === 'waiter' ? 'waiterId' : 'userId', "==", currentUser.uid).orderBy("date", "desc");
+            realtimeOrdersListener = query.onSnapshot(snapshot => {
+                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderFilteredOrders(waiterOrdersContainer, waiterFilter);
             });
         }
-        
-        // Mostrar notificación
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
-        }
-        
-        // Animación para icono del carrito
-        function animateCart() {
-            document.querySelectorAll('.fa-shopping-cart').forEach(icon => {
-                const parent = icon.parentElement;
-                parent.classList.add('pulse');
-                setTimeout(() => parent.classList.remove('pulse'), 500);
+
+        function listenForKitchenOrders() {
+            const query = db.collection("orders").where("status", "in", ["pending", "preparing", "ready"]).orderBy("date", "asc");
+            realtimeOrdersListener = query.onSnapshot(snapshot => {
+                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(order => 
+                    order.items.some(it => {
+                        const cat = (it.category || '').toLowerCase();
+                        if (currentUserRole === 'empanada_chef') return cat === 'empanadas' || cat === 'bebidas';
+                        if (currentUserRole === 'general_chef') return cat !== 'empanadas';
+                        return true;
+                    })
+                );
+                renderFilteredOrders(kitchenOrdersContainer, chefFilter);
             });
         }
-        
-        function openSidebar() {
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
+
+        function listenForCashierOrders() {
+            const query = db.collection("orders").where("status", "in", ["ready", "paid"]).orderBy("date", "desc");
+            realtimeOrdersListener = query.onSnapshot(snapshot => {
+                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderFilteredOrders(cashierOrdersContainer, cashierFilter);
+            });
         }
-        
-        function closeSidebarFunc() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
+
+        function updateOrderStatus(orderId, status) {
+            db.collection("orders").doc(orderId).update({ status }).catch(err => showNotification('Error al actualizar', 'error'));
         }
-        
-        function handlePaymentMethodChange() {
-            const method = paymentMethod.value;
-            document.querySelectorAll('.payment-detail').forEach(el => el.classList.remove('active'));
-            const detailEl = document.getElementById(`${method}Details`);
-            if (detailEl) detailEl.classList.add('active');
-        }
-        
-        // =====================================
-        // Funciones para Meseros
-        // =====================================
-        
+
         function listenForTableLocks() {
             db.collection("orders").where("status", "in", ["pending", "preparing", "ready"]).onSnapshot(snapshot => {
                 const lockedTables = new Set(snapshot.docs.map(doc => doc.data().table));
-                document.querySelectorAll('.table-card').forEach(card => {
-                    card.classList.toggle('locked', lockedTables.has(card.dataset.table));
-                });
+                document.querySelectorAll('.table-card').forEach(card => card.classList.toggle('locked', lockedTables.has(card.dataset.table)));
             });
         }
 
         function setupTableSelection() {
             document.querySelectorAll('.table-card').forEach(card => {
                 card.addEventListener('click', () => {
-                    if (card.classList.contains('locked')) {
-                        showNotification('Esta mesa está ocupada.');
-                        return;
-                    }
-                    document.querySelectorAll('.table-card').forEach(c => c.classList.remove('active'));
+                    if (card.classList.contains('locked')) return showNotification('Esta mesa está ocupada.', 'error');
+                    document.querySelector('.table-card.active')?.classList.remove('active');
                     card.classList.add('active');
                     currentTable = card.dataset.table;
                     showNotification(`Mesa ${currentTable} seleccionada.`);
@@ -2735,292 +2216,65 @@
         
         function renderWaiterProducts() {
             if (!waiterProductsContainer) return;
-            waiterProductsContainer.innerHTML = '';
-            let filteredProducts = (currentCategory === 'all') ? products : products.filter(p => p.category === currentCategory);
-            if (filteredProducts.length === 0) {
-                waiterProductsContainer.innerHTML = '<p class="empty-message">No hay productos</p>';
-                return;
-            }
-            filteredProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <div class="product-info" style="padding:1rem;">
-                        <h3 class="product-title" style="font-size:1rem;">
-                            <span>${product.name}</span>
-                            <span class="product-price">$${product.price.toFixed(2)}</span>
-                        </h3>
-                        <div class="product-footer">
-                            <button class="add-to-cart" data-id="${product.id}"><i class="fas fa-plus"></i></button>
-                        </div>
-                    </div>`;
-                waiterProductsContainer.appendChild(productCard);
-            });
-            
-            document.querySelectorAll('#waiterProductsContainer .add-to-cart').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    addToCart(e.currentTarget.dataset.id);
-                    animateCart();
-                });
-            });
+            let filtered = (currentCategory === 'all') ? products : products.filter(p => p.category === currentCategory);
+            waiterProductsContainer.innerHTML = filtered.length === 0 ? '<p class="empty-list-message">No hay productos</p>' :
+                filtered.map(p => `<div class="product-card"><div class="product-info" style="padding:1rem;"><h3 class="product-title" style="font-size:1rem;"><span>${p.name}</span><span class="product-price">$${p.price.toFixed(2)}</span></h3><div class="product-footer"><button class="add-to-cart" data-id="${p.id}"><i class="fas fa-plus"></i></button></div></div></div>`).join('');
+            waiterProductsContainer.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => { addToCart(e.currentTarget.dataset.id); animateCart(); }));
         }
         
         async function processWaiterOrder() {
-            const active = getActiveCart();
-            if (!active || active.length === 0 || !currentTable) {
-                showNotification('Seleccione una mesa y añada productos.');
-                return;
-            }
-            
-            const subtotal = active.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const tax = subtotal * (taxRate / 100);
-            const total = subtotal + tax;
-            
+            const activeCart = getActiveCart();
+            if (!activeCart || activeCart.length === 0 || !currentTable) return showNotification('Seleccione mesa y añada productos.', 'error');
+            const subtotal = activeCart.reduce((s, i) => s + (i.price * i.quantity), 0);
             const order = {
-                date: new Date().toISOString(),
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                userName: `Mesa ${currentTable}`,
-                items: active.map(item => ({
-                    ...item,
-                    category: products.find(p => p.id === item.id)?.category || 'general',
-                    status: 'pending'
-                })),
-                subtotal, tax, total,
-                status: 'pending',
-                paymentMethod: 'cash',
-                paymentReference: `Mesa ${currentTable}`,
-                table: currentTable,
-                waiterId: currentUser.uid
+                date: new Date().toISOString(), userId: currentUser.uid, waiterId: currentUser.uid,
+                userEmail: currentUser.email, userName: `Mesa ${currentTable}`, items: activeCart,
+                subtotal, tax: subtotal * (taxRate / 100), total: subtotal * (1 + taxRate / 100),
+                status: 'pending', paymentMethod: 'cash', paymentReference: `Mesa ${currentTable}`, table: currentTable
             };
-            
             try {
                 await db.collection("orders").add(order);
                 showNotification(`Pedido para Mesa ${currentTable} enviado.`);
                 cartByTable[currentTable] = [];
-                const activeCard = document.querySelector('.table-card.active');
-                if(activeCard) activeCard.classList.remove('active');
+                document.querySelector('.table-card.active')?.classList.remove('active');
                 currentTable = null;
                 updateCartCount();
                 closeCartModal();
-            } catch (error) {
-                console.error("Error guardando pedido: ", error);
-                showNotification('Error al guardar el pedido');
-            }
+            } catch (error) { showNotification('Error al guardar el pedido', 'error'); }
         }
-        
-        // =====================================
-        // Funciones para Cocina, Cajero y Roles con Columnas
-        // =====================================
-
-        function createOrderCard(order) {
-            const card = document.createElement('div');
-            card.className = `kitchen-order-card status-${order.status}`;
-            card.dataset.id = order.id;
-
-            let actions = '';
-            if (currentUserRole.includes('chef')) {
-                if (order.status === 'pending') actions += `<button class="chef-btn mark-preparing-btn" data-id="${order.id}">Preparar</button>`;
-                if (order.status === 'preparing') actions += `<button class="chef-btn mark-ready-btn" data-id="${order.id}">Listo</button>`;
-            }
-            if (currentUserRole === 'cashier' && order.status === 'ready') {
-                actions = `<button class="chef-btn mark-paid-btn" data-id="${order.id}">Marcar Pagado</button>`;
-            }
-            if ((currentUserRole === 'waiter' || currentUserRole === 'customer') && ['pending', 'preparing'].includes(order.status)) {
-                actions = `<button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;" onclick="cancelOrder('${order.id}')">Cancelar</button>`;
-            }
-
-            card.innerHTML = `
-                <div class="order-header">
-                    <div>
-                        <strong>#${order.id.slice(-6)}</strong> (${order.table ? `Mesa ${order.table}` : 'Llevar'})
-                        <div style="font-size:0.8rem">${new Date(order.date).toLocaleTimeString()}</div>
-                    </div>
-                    <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
-                </div>
-                <div class="order-items">
-                    ${(order.items || []).map(it => `
-                        <div class="order-item">${it.quantity}× ${it.name}</div>`).join('')}
-                </div>
-                <div class="order-actions">${actions}</div>
-            `;
-            return card;
-        }
-        
-        function cancelOrder(orderId) {
-            if (confirm('¿Seguro que quieres cancelar este pedido?')) {
-                updateOrderStatus(orderId, 'cancelled');
-            }
-        }
-        
-        function setupCardActions(container) {
-            container.querySelectorAll('.mark-preparing-btn').forEach(btn => btn.addEventListener('click', e => updateOrderStatus(e.target.dataset.id, 'preparing')));
-            container.querySelectorAll('.mark-ready-btn').forEach(btn => btn.addEventListener('click', e => updateOrderStatus(e.target.dataset.id, 'ready')));
-            container.querySelectorAll('.mark-paid-btn').forEach(btn => btn.addEventListener('click', e => updateOrderStatus(e.target.dataset.id, 'paid')));
-        }
-
-        function renderOrderColumns(container, docs) {
-            if (!container) return;
-            
-            const columns = {
-                pending: [], preparing: [], ready: [], history: []
-            };
-
-            docs.forEach(doc => {
-                const order = { id: doc.id, ...doc.data() };
-                switch(order.status) {
-                    case 'pending': columns.pending.push(order); break;
-                    case 'preparing': columns.preparing.push(order); break;
-                    case 'ready': columns.ready.push(order); break;
-                    default: columns.history.push(order); break;
-                }
-            });
-
-            container.innerHTML = `
-                <div class="order-category-column">
-                    <h3 class="order-category-title">Entrantes</h3>
-                    <div id="${container.id}-pending"></div>
-                </div>
-                <div class="order-category-column">
-                    <h3 class="order-category-title">En Preparación</h3>
-                    <div id="${container.id}-preparing"></div>
-                </div>
-                <div class="order-category-column">
-                    <h3 class="order-category-title">Listos</h3>
-                    <div id="${container.id}-ready"></div>
-                </div>
-                <div class="order-category-column">
-                    <h3 class="order-category-title">Historial</h3>
-                    <div id="${container.id}-history"></div>
-                </div>
-            `;
-            
-            const pendingCol = document.getElementById(`${container.id}-pending`);
-            if (columns.pending.length > 0) columns.pending.forEach(o => pendingCol.appendChild(createOrderCard(o)));
-            else pendingCol.innerHTML = '<p class="empty-column-message">No hay pedidos.</p>';
-
-            const preparingCol = document.getElementById(`${container.id}-preparing`);
-            if (columns.preparing.length > 0) columns.preparing.forEach(o => preparingCol.appendChild(createOrderCard(o)));
-            else preparingCol.innerHTML = '<p class="empty-column-message">No hay pedidos.</p>';
-
-            const readyCol = document.getElementById(`${container.id}-ready`);
-            if (columns.ready.length > 0) columns.ready.forEach(o => readyCol.appendChild(createOrderCard(o)));
-            else readyCol.innerHTML = '<p class="empty-column-message">No hay pedidos.</p>';
-
-            const historyCol = document.getElementById(`${container.id}-history`);
-            if (columns.history.length > 0) columns.history.forEach(o => historyCol.appendChild(createOrderCard(o)));
-            else historyCol.innerHTML = '<p class="empty-column-message">No hay historial.</p>';
-            
-            setupCardActions(container);
-        }
-        
-        function listenForKitchenOrders() {
-            if (!currentUserRole.includes('chef')) return;
-
-            if (realtimeOrdersListener) realtimeOrdersListener();
-            
-            realtimeOrdersListener = db.collection("orders")
-                .where("status", "in", ["pending", "preparing", "ready"])
-                .orderBy("date", "asc")
-                .onSnapshot(snapshot => {
-                    snapshot.docChanges().forEach(change => {
-                        if (change.type === "added") {
-                            const order = change.doc.data();
-                            notificationContent.textContent = `Nuevo pedido para ${order.table ? `Mesa ${order.table}`: 'Llevar'}`;
-                            orderNotification.classList.add('show');
-                            setTimeout(() => orderNotification.classList.remove('show'), 5000);
-                        }
-                    });
-                    
-                    // Filter orders to only show items relevant to the chef
-                    const relevantDocs = snapshot.docs.filter(doc => {
-                        const items = doc.data().items || [];
-                        return items.some(it => {
-                            const cat = (it.category || '').toLowerCase();
-                            if (currentUserRole === 'empanada_chef') return cat === 'empanadas' || cat === 'bebidas';
-                            if (currentUserRole === 'general_chef') return cat !== 'empanadas';
-                            return true; // Should not happen, but as a fallback
-                        });
-                    });
-                    renderOrderColumns(kitchenOrdersContainer, relevantDocs);
-                }, error => {
-                     console.error("Error escuchando pedidos de cocina: ", error);
-                });
-        }
-        
-        function listenForCashierOrders() {
-            if (currentUserRole !== 'cashier') return;
-            if (realtimeOrdersListener) realtimeOrdersListener();
-            
-            realtimeOrdersListener = db.collection("orders")
-                .orderBy("date", "desc")
-                .onSnapshot(snapshot => {
-                    renderOrderColumns(cashierOrdersContainer, snapshot.docs);
-                }, error => {
-                    console.error("Error escuchando pedidos para caja: ", error);
-                    cashierOrdersContainer.innerHTML = '<p>Error al cargar pedidos.</p>';
-                });
-        }
-
-        // =====================================
-        // Configuración de Event Listeners
-        // =====================================
         
         function setupEventListeners() {
             menuToggle.addEventListener('click', openSidebar);
             closeSidebar.addEventListener('click', closeSidebarFunc);
             overlay.addEventListener('click', closeSidebarFunc);
-
-            magicNavItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = item.getAttribute('data-section');
-                    if (item.id === 'mobileCartIcon') {
-                        openCartModal();
-                    } else if (section) {
-                        showSection(section);
-                    }
-                });
-            });
-
+            magicNavItems.forEach(item => item.addEventListener('click', e => {
+                e.preventDefault();
+                if (item.id === 'mobileCartIcon') openCartModal();
+                else if (item.dataset.section) {
+                    let section = item.dataset.section;
+                    if(currentUserRole.includes('chef')) section = 'chef';
+                    showSection(section);
+                }
+            }));
             desktopCartBtn.addEventListener('click', openCartModal);
             closeModal.addEventListener('click', closeCartModal);
             cartModal.addEventListener('click', e => { if (e.target === cartModal) closeCartModal(); });
-
             checkoutBtn.addEventListener('click', checkout);
             processOrderBtn.addEventListener('click', processWaiterOrder);
-
-            if (productForm) {
-                productForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    addProduct(
-                        document.getElementById('productName').value,
-                        parseFloat(document.getElementById('productPrice').value),
-                        document.getElementById('productDescription').value,
-                        document.getElementById('productCategory').value
-                    );
-                    productForm.reset();
-                });
-            }
-
-            if (settingsForm) {
-                settingsForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    taxRate = parseFloat(document.getElementById('taxRate').value);
-                    taxRateValue.textContent = taxRate;
-                    showNotification('Configuración guardada');
-                });
-            }
-
-            signUpLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('register'); });
-            forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('forgot'); });
-            loginLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('login'); });
-
-            paymentMethod.addEventListener('change', handlePaymentMethodChange);
             setupTableSelection();
+            ['chef', 'cashier', 'waiter'].forEach(role => {
+                document.querySelectorAll(`#${role}FilterControls .filter-btn`).forEach(btn => btn.addEventListener('click', e => {
+                    const status = e.target.dataset.status;
+                    if (role === 'chef') chefFilter = status;
+                    else if (role === 'cashier') cashierFilter = status;
+                    else waiterFilter = status;
+                    document.querySelectorAll(`#${role}FilterControls .filter-btn`).forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderFilteredOrders(document.getElementById(`${role === 'waiter' ? 'waiter' : role}OrdersContainer`), status);
+                }));
+            });
         }
 
-    // Inicializar la aplicación
     document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         setAuthMode('login');
@@ -3037,6 +2291,11 @@
 
     function closeCartModal() {
         cartModal.style.display = 'none';
+    }
+    
+    function getStatusText(status) {
+        const texts = { pending: 'Entrante', preparing: 'En preparación', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado', paid: 'Pagado' };
+        return texts[status] || status;
     }
 
     </script>
