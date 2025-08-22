@@ -1278,27 +1278,24 @@
             </div>
         </section>
         
-        <!-- Orders Section -->
-        <section id="ordersSection" style="display: none;" class="for-waiter">
+        <!-- Orders Section (para waiter y customer) -->
+        <section id="ordersSection" style="display: none;">
             <h2 class="section-title">Historial de Pedidos</h2>
             
             <div class="orders-container" id="ordersContainer">
-                <table class="orders-table">
+                <table class="orders-table" style="width:100%">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Fecha</th>
-                            <th>Productos</th>
+                            <th>Info</th>
                             <th>Total</th>
-                            <th>Referencia</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
-                        <tr>
-                            <td colspan="7" style="text-align: center;">Cargando pedidos...</td>
-                        </tr>
+                        <!-- Pedidos cargados dinámicamente -->
                     </tbody>
                 </table>
             </div>
@@ -1670,14 +1667,11 @@
         // Variables globales
         let cart = [];
         let products = [];
-        let orders = [];
-        let customers = [];
         let currentUser = null;
         let currentUserRole = 'customer';
         let taxRate = 10.5;
         let authMode = 'login';
         let currentCategory = 'all';
-        let paymentReceiptFile = null;
         let currentTable = null;
         let realtimeListener = null; // Listener genérico
         let cartByTable = {};
@@ -1727,15 +1721,6 @@
         const overlay = document.getElementById('overlay');
         const categoriesContainer = document.getElementById('categoriesContainer');
         const paymentMethod = document.getElementById('paymentMethod');
-        const posDetails = document.getElementById('posDetails');
-        const mobileDetails = document.getElementById('mobileDetails');
-        const usdDetails = document.getElementById('usdDetails');
-        const eurDetails = document.getElementById('eurDetails');
-        const cashDetails = document.getElementById('cashDetails');
-        const mobileReference = document.getElementById('mobileReference');
-        const waiterSection = document.getElementById('waiterSection');
-        const chefSection = document.getElementById('chefSection');
-        const cashierSection = document.getElementById('cashierSection');
         const waiterProductsContainer = document.getElementById('waiterProductsContainer');
         const kitchenOrdersContainer = document.getElementById('kitchenOrdersContainer');
         const cashierOrdersContainer = document.getElementById('cashierOrdersContainer');
@@ -1744,9 +1729,7 @@
         const customerPaymentSection = document.getElementById('customerPaymentSection');
         const magicNav = document.getElementById('magicNav');
         const desktopCartBtn = document.getElementById('desktopCartBtn');
-        const waiterMenuSection = document.getElementById('waiterMenuSection');
         const processOrderBtn = document.getElementById('processOrderBtn');
-        const tableSelection = document.getElementById('tableSelection');
         
         // Función para obtener el carrito activo (cliente o mesa de mesero)
         function getActiveCart() {
@@ -1763,8 +1746,8 @@
         
         // Actualizar contador de carrito
         function updateCartCount() {
-            const active = getActiveCart();
-            const count = active ? active.reduce((sum, item) => sum + item.quantity, 0) : 0;
+            const activeCart = getActiveCart();
+            const count = activeCart ? activeCart.reduce((sum, item) => sum + item.quantity, 0) : 0;
             document.querySelectorAll('.cart-count').forEach(span => {
                 span.textContent = count;
             });
@@ -1774,74 +1757,57 @@
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
-                // Mostrar header animado
-                setTimeout(() => {
-                    mainHeader.classList.add('visible');
-                    setTimeout(() => {
-                        window.addEventListener('scroll', handleHeaderScroll);
-                        handleHeaderScroll();
-                    }, 100);
-                }, 300);
-                
+                mainHeader.classList.add('visible');
+                window.addEventListener('scroll', handleHeaderScroll);
                 authSection.style.display = 'none';
                 magicNav.classList.add('visible');
                 
-                // Obtener rol del usuario
                 db.collection("customers").doc(user.uid).get()
                 .then(doc => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        currentUserRole = userData.role || 'customer';
-                    } else {
-                        saveCustomerData(user);
-                        currentUserRole = 'customer';
-                    }
+                    currentUserRole = (doc.exists && doc.data().role) ? doc.data().role : 'customer';
+                    if (!doc.exists) saveCustomerData(user);
+                    
                     updateUIForRole();
                     setupRoleSpecificListeners();
+                    loadProducts();
+                    renderProfile();
                 })
                 .catch(error => {
                     console.error("Error obteniendo datos de usuario: ", error);
                     currentUserRole = 'customer';
                     updateUIForRole();
                 });
-                
-                // Cargar datos iniciales
-                loadProducts();
-                loadAdminData(); // Carga clientes y pedidos para admin
-                renderProfile();
             } else {
                 // Limpieza al cerrar sesión
                 mainHeader.classList.remove('visible', 'scrolled');
                 window.removeEventListener('scroll', handleHeaderScroll);
-                
                 authSection.style.display = 'block';
-                currentUserRole = 'customer';
                 magicNav.classList.remove('visible');
                 
                 sections.forEach(section => {
                     if (section.id !== 'authSection') section.style.display = 'none';
                 });
                 
-                if (realtimeListener) realtimeListener(); // Detener listener
-                
+                if (realtimeListener) realtimeListener();
+                currentUserRole = 'customer';
                 authForm.reset();
                 setAuthMode('login');
             }
         });
         
-        // Manejar scroll para efecto en header
         function handleHeaderScroll() {
             if (window.scrollY > 30) mainHeader.classList.add('scrolled');
             else mainHeader.classList.remove('scrolled');
         }
         
-        // Función para actualizar la UI según el rol
         function updateUIForRole() {
             document.body.className = `role-${currentUserRole}`;
             
             // Ocultar todos los items de navegación específicos de rol
-            [adminMobileNavItem, cashierMobileNavItem].forEach(el => { if(el) el.style.display = 'none'; });
+            [adminMobileNavItem, cashierMobileNavItem, mobileCartIcon, desktopCartBtn].forEach(el => { if(el) el.style.display = 'none'; });
+            document.querySelectorAll('.magic-nav-item[data-section]').forEach(el => el.style.display = 'none');
 
+            // Mostrar items según el rol
             if (currentUserRole === 'admin') {
                 adminMobileNavItem.style.display = 'flex';
                 showSection('admin');
@@ -1849,160 +1815,111 @@
                 cashierMobileNavItem.style.display = 'flex';
                 showSection('cashier');
             } else if (currentUserRole === 'waiter') {
+                ['menu', 'orders'].forEach(s => document.querySelector(`.magic-nav-item[data-section="${s}"]`).style.display = 'flex');
+                [mobileCartIcon, desktopCartBtn].forEach(el => el.style.display = 'flex');
+                document.querySelector('.magic-nav-item[data-section="menu"]').dataset.section = 'waiter';
                 showSection('waiter');
             } else if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
+                document.querySelector('.magic-nav-item[data-section="menu"]').dataset.section = 'chef';
+                document.querySelector('.magic-nav-item[data-section="menu"]').style.display = 'flex';
                 showSection('chef');
             } else { // customer
+                ['menu', 'orders', 'profile'].forEach(s => document.querySelector(`.magic-nav-item[data-section="${s}"]`).style.display = 'flex');
+                [mobileCartIcon, desktopCartBtn].forEach(el => el.style.display = 'flex');
+                document.querySelector('.magic-nav-item[data-section="menu"]').dataset.section = 'menu';
                 showSection('menu');
             }
         }
 
-        // Configurar listeners específicos para cada rol
         function setupRoleSpecificListeners() {
-            if (realtimeListener) realtimeListener(); // Detener listener anterior
+            if (realtimeListener) realtimeListener();
 
             if (currentUserRole === 'waiter') {
-                listenForWaiterData();
+                listenForWaiterOrders();
+                listenForTableLocks();
             } else if (currentUserRole === 'cajero') {
                 listenForCashierOrders();
             } else if (currentUserRole === 'empanada_chef' || currentUserRole === 'general_chef') {
                 listenForKitchenOrders();
             } else if (currentUserRole === 'customer') {
                 listenForCustomerOrders();
+            } else if (currentUserRole === 'admin') {
+                listenForAdminOrders();
+                loadCustomers();
             }
         }
         
-        // Guardar datos del cliente en Firebase
         function saveCustomerData(user) {
             const customerRef = db.collection("customers").doc(user.uid);
             customerRef.get().then(doc => {
-                const currentData = doc.exists ? doc.data() : {};
-                const customerData = {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName || "Cliente",
-                    photoURL: user.photoURL || "",
-                    lastLogin: new Date().toISOString(),
-                    createdAt: doc.exists ? currentData.createdAt : firebase.firestore.FieldValue.serverTimestamp(),
-                    role: currentData.role || 'customer'
-                };
-                customerRef.set(customerData, { merge: true });
+                if (!doc.exists) {
+                    customerRef.set({
+                        uid: user.uid, email: user.email, displayName: user.displayName || "Cliente",
+                        photoURL: user.photoURL || "", lastLogin: new Date().toISOString(),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(), role: 'customer'
+                    });
+                }
             });
         }
         
-        // Establecer modo de autenticación
         function setAuthMode(mode) {
             authMode = mode;
-            switch(mode) {
-                case 'login':
-                    authMessage.textContent = "Inicia sesión para continuar";
-                    authSubmitBtn.textContent = "Iniciar Sesión";
-                    confirmPasswordField.style.display = 'none';
-                    signUpLink.style.display = 'inline';
-                    forgotPasswordLink.style.display = 'inline';
-                    loginLink.style.display = 'none';
-                    break;
-                case 'register':
-                    authMessage.textContent = "Crea una cuenta";
-                    authSubmitBtn.textContent = "Registrarse";
-                    confirmPasswordField.style.display = 'block';
-                    signUpLink.style.display = 'none';
-                    forgotPasswordLink.style.display = 'none';
-                    loginLink.style.display = 'inline';
-                    break;
-                case 'forgot':
-                    authMessage.textContent = "Recuperar contraseña";
-                    authSubmitBtn.textContent = "Enviar Correo";
-                    confirmPasswordField.style.display = 'none';
-                    signUpLink.style.display = 'none';
-                    forgotPasswordLink.style.display = 'none';
-                    loginLink.style.display = 'inline';
-                    break;
-            }
+            const modes = {
+                login: { msg: "Inicia sesión para continuar", btn: "Iniciar Sesión", fields: [false, true, true, false] },
+                register: { msg: "Crea una cuenta", btn: "Registrarse", fields: [true, false, false, true] },
+                forgot: { msg: "Recuperar contraseña", btn: "Enviar Correo", fields: [false, false, false, true] }
+            };
+            const config = modes[mode];
+            authMessage.textContent = config.msg;
+            authSubmitBtn.textContent = config.btn;
+            confirmPasswordField.style.display = config.fields[0] ? 'block' : 'none';
+            signUpLink.style.display = config.fields[1] ? 'inline' : 'none';
+            forgotPasswordLink.style.display = config.fields[2] ? 'inline' : 'none';
+            loginLink.style.display = config.fields[3] ? 'inline' : 'none';
         }
         
-        // Manejar envío de formulario de autenticación
         authForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = authEmail.value;
             const password = authPassword.value;
-            const confirmPassword = authConfirmPassword.value;
             
-            switch(authMode) {
-                case 'login': loginWithEmail(email, password); break;
-                case 'register': 
-                    if (password !== confirmPassword) {
-                        showNotification("Las contraseñas no coinciden");
-                        return;
-                    }
-                    signUpWithEmail(email, password); 
-                    break;
-                case 'forgot': resetPassword(email); break;
-            }
+            if (authMode === 'login') loginWithEmail(email, password);
+            else if (authMode === 'register') {
+                if (password !== authConfirmPassword.value) return showNotification("Las contraseñas no coinciden");
+                signUpWithEmail(email, password);
+            } else if (authMode === 'forgot') resetPassword(email);
         });
         
-        // Iniciar sesión con correo/contraseña
         function loginWithEmail(email, password) {
             auth.signInWithEmailAndPassword(email, password)
-            .then(() => showNotification("Sesión iniciada correctamente"))
-            .catch(error => showNotification(`Error al iniciar sesión: ${error.message}`));
+            .catch(error => showNotification(`Error: ${error.message}`));
         }
         
-        // Registrar nuevo usuario
         function signUpWithEmail(email, password) {
             auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                db.collection("customers").doc(user.uid).set({
-                    email: email,
-                    displayName: "Cliente",
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    role: 'customer'
-                }, { merge: true })
-                .then(() => showNotification("¡Cuenta creada correctamente!"));
-            })
-            .catch(error => showNotification(`Error al registrar: ${error.message}`));
+            .catch(error => showNotification(`Error: ${error.message}`));
         }
         
-        // Recuperar contraseña
         function resetPassword(email) {
             auth.sendPasswordResetEmail(email)
             .then(() => {
-                showNotification("Correo de recuperación enviado. Revisa tu bandeja de entrada.");
+                showNotification("Correo de recuperación enviado.");
                 setAuthMode('login');
             })
             .catch(error => showNotification(`Error: ${error.message}`));
         }
         
-        googleLoginBtn.addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(error => showNotification(`Error al iniciar sesión: ${error.message}`));
-        });
-        
-        appleLoginBtn.addEventListener('click', () => {
-            const provider = new firebase.auth.OAuthProvider('apple.com');
-            auth.signInWithPopup(provider).catch(error => showNotification(`Error al iniciar sesión: ${error.message}`));
-        });
+        googleLoginBtn.addEventListener('click', () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => showNotification(`Error: ${e.message}`)));
+        appleLoginBtn.addEventListener('click', () => auth.signInWithPopup(new firebase.auth.OAuthProvider('apple.com')).catch(e => showNotification(`Error: ${e.message}`)));
         
         logoutBtn.addEventListener('click', () => {
-            mainHeader.classList.remove('scrolled');
-            mainHeader.style.transition = 'transform 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
             mainHeader.style.transform = 'translateY(-100%)';
-            
-            setTimeout(() => {
-                auth.signOut().then(() => showNotification('Sesión cerrada correctamente'))
-                .catch(error => showNotification(`Error al cerrar sesión: ${error.message}`));
-                mainHeader.style.transition = '';
-            }, 400);
+            setTimeout(() => auth.signOut(), 400);
         });
         
-        // Cargar productos desde Firebase
         function loadProducts() {
             db.collection("products").get().then(querySnapshot => {
-                products = [];
-                querySnapshot.forEach(doc => {
-                    products.push({ id: doc.id, ...doc.data() });
-                });
+                products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderProducts();
                 renderWaiterProducts();
                 renderCurrentProducts();
@@ -2010,7 +1927,6 @@
             }).catch(error => console.error("Error cargando productos: ", error));
         }
         
-        // Renderizar los botones de categorías
         function renderCategoryFilters() {
             const categories = [...new Set(products.map(product => product.category))];
             categoriesContainer.innerHTML = '';
@@ -2041,74 +1957,42 @@
 
             categoriesContainer.appendChild(createCategoryButton('all', 'fas fa-utensils', 'Todos'));
             categories.forEach(cat => {
-                categoriesContainer.appendChild(createCategoryButton(cat, iconMap[cat] || 'fas fa-utensils', cat));
+                categoriesContainer.appendChild(createCategoryButton(cat, iconMap[cat] || 'fas fa-utensils', cat.charAt(0).toUpperCase() + cat.slice(1)));
             });
         }
         
-        // Renderizar productos
         function renderProducts() {
             if (!productsContainer) return;
-            productsContainer.innerHTML = '';
-            
             let filteredProducts = (currentCategory === 'all') ? products : products.filter(p => p.category === currentCategory);
-            
-            if (filteredProducts.length === 0) {
-                productsContainer.innerHTML = '<p class="empty-message">No hay productos disponibles en esta categoría.</p>';
-                return;
-            }
-            
-            filteredProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <div class="product-badge">${product.category}</div>
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/300x200?text=${product.name.replace(/\s+/g, '+')}" alt="${product.name}">
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">
-                            <span>${product.name}</span>
-                            <span class="product-price">$${product.price.toFixed(2)}</span>
-                        </h3>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-footer">
-                            <button class="add-to-cart" data-id="${product.id}">
-                                <i class="fas fa-plus"></i> <span>Añadir</span>
-                            </button>
+            productsContainer.innerHTML = filteredProducts.length === 0 ? '<p class="empty-message">No hay productos en esta categoría.</p>' :
+                filteredProducts.map(product => `
+                    <div class="product-card">
+                        <div class="product-badge">${product.category}</div>
+                        <div class="product-image"><img src="https://via.placeholder.com/300x200?text=${product.name.replace(/\s+/g, '+')}" alt="${product.name}"></div>
+                        <div class="product-info">
+                            <h3 class="product-title"><span>${product.name}</span><span class="product-price">$${product.price.toFixed(2)}</span></h3>
+                            <p class="product-description">${product.description}</p>
+                            <div class="product-footer"><button class="add-to-cart" data-id="${product.id}"><i class="fas fa-plus"></i> <span>Añadir</span></button></div>
                         </div>
-                    </div>
-                `;
-                productsContainer.appendChild(productCard);
-            });
+                    </div>`).join('');
             
-            document.querySelectorAll('#productsContainer .add-to-cart').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productId = e.target.closest('.add-to-cart').dataset.id;
-                    addToCart(productId);
-                    animateCart();
-                });
-            });
+            productsContainer.querySelectorAll('.add-to-cart').forEach(button => button.addEventListener('click', e => addToCart(e.currentTarget.dataset.id)));
         }
         
-        // Añadir al carrito
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             const activeCart = getActiveCart();
             if (!product || !activeCart) return;
             const existingItem = activeCart.find(item => item.id === productId);
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                activeCart.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
-            }
+            if (existingItem) existingItem.quantity++;
+            else activeCart.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
             showNotification(`${product.name} añadido al carrito!`);
             updateCartCount();
+            animateCart();
         }
         
-        // Renderizar carrito
         function renderCart() {
             const activeCart = getActiveCart();
-            cartItems.innerHTML = '';
             if (!activeCart || activeCart.length === 0) {
                 cartItems.innerHTML = '<p class="empty-cart">Tu carrito está vacío</p>';
                 cartSubtotal.textContent = '$0.00';
@@ -2117,117 +2001,86 @@
                 return;
             }
             let subtotal = 0;
-            activeCart.forEach(item => {
-                const itemTotal = item.price * item.quantity;
-                subtotal += itemTotal;
-                const cartItem = document.createElement('div');
-                cartItem.className = 'cart-item';
-                cartItem.innerHTML = `
-                    <div style="display: flex; align-items: center;">
-                        <i class="fas fa-drumstick-bite" style="font-size: 1.5rem;"></i>
-                        <div class="item-info">
-                            <div class="item-title">${item.name}</div>
-                            <div class="item-price">$${item.price.toFixed(2)} c/u</div>
-                        </div>
+            cartItems.innerHTML = activeCart.map(item => {
+                subtotal += item.price * item.quantity;
+                return `<div class="cart-item">
+                    <div class="item-info">
+                        <div class="item-title">${item.name}</div>
+                        <div class="item-price">$${item.price.toFixed(2)} c/u</div>
                     </div>
                     <div class="item-actions">
                         <button class="quantity-btn minus" data-id="${item.id}">-</button>
                         <span class="quantity">${item.quantity}</span>
                         <button class="quantity-btn plus" data-id="${item.id}">+</button>
                         <button class="remove-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
-                    </div>`;
-                cartItems.appendChild(cartItem);
-            });
+                    </div></div>`;
+            }).join('');
+
             const tax = subtotal * (taxRate / 100);
-            const total = subtotal + tax;
             cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
             cartTax.textContent = `$${tax.toFixed(2)}`;
-            cartTotal.textContent = `$${total.toFixed(2)}`;
+            cartTotal.textContent = `$${(subtotal + tax).toFixed(2)}`;
 
-            document.querySelectorAll('.quantity-btn.minus').forEach(button => button.addEventListener('click', e => updateQuantity(e.currentTarget.dataset.id, -1)));
-            document.querySelectorAll('.quantity-btn.plus').forEach(button => button.addEventListener('click', e => updateQuantity(e.currentTarget.dataset.id, 1)));
-            document.querySelectorAll('.remove-item').forEach(button => button.addEventListener('click', e => removeFromCart(e.currentTarget.dataset.id)));
+            cartItems.querySelectorAll('.quantity-btn.minus').forEach(button => button.addEventListener('click', e => updateQuantity(e.currentTarget.dataset.id, -1)));
+            cartItems.querySelectorAll('.quantity-btn.plus').forEach(button => button.addEventListener('click', e => updateQuantity(e.currentTarget.dataset.id, 1)));
+            cartItems.querySelectorAll('.remove-item').forEach(button => button.addEventListener('click', e => removeFromCart(e.currentTarget.dataset.id)));
         }
         
-        // Actualizar cantidad en carrito
         function updateQuantity(productId, change) {
             const activeCart = getActiveCart();
             if (!activeCart) return;
             const item = activeCart.find(i => i.id === productId);
-            if (!item) return;
-            item.quantity += change;
-            if (item.quantity <= 0) {
-                const idx = activeCart.findIndex(i => i.id === productId);
-                if (idx !== -1) activeCart.splice(idx, 1);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) activeCart.splice(activeCart.indexOf(item), 1);
+                renderCart();
+                updateCartCount();
             }
-            renderCart();
-            updateCartCount();
         }
         
-        // Eliminar del carrito
         function removeFromCart(productId) {
             const activeCart = getActiveCart();
             if (!activeCart) return;
-            const idx = activeCart.findIndex(i => i.id === productId);
-            if (idx !== -1) activeCart.splice(idx, 1);
-            renderCart();
-            updateCartCount();
+            const index = activeCart.findIndex(i => i.id === productId);
+            if (index > -1) {
+                activeCart.splice(index, 1);
+                renderCart();
+                updateCartCount();
+            }
         }
         
-        // Subir comprobante a Firebase Storage
         async function uploadReceipt(file) {
             if (!currentUser) throw new Error('Usuario no autenticado');
-            const storageRef = storage.ref();
-            const receiptRef = storageRef.child(`receipts/${currentUser.uid}/${Date.now()}_${file.name}`);
+            const receiptRef = storage.ref(`receipts/${currentUser.uid}/${Date.now()}_${file.name}`);
             const snapshot = await receiptRef.put(file);
             return await snapshot.ref.getDownloadURL();
         }
         
-        // Finalizar compra (Cliente)
         async function checkout() {
             const activeCart = getActiveCart();
             if (!activeCart || activeCart.length === 0) return;
             
-            const method = document.getElementById('paymentMethod').value;
-            let reference = '';
-            let receiptUrl = '';
+            const method = paymentMethod.value;
+            let reference = '', receiptUrl = '';
             
             try {
-                switch(method) {
-                    case 'mobile': reference = document.getElementById('mobileReference').value || 'N/A'; break;
-                    case 'usd':
-                        reference = document.getElementById('usdReference').value;
-                        const usdReceipt = document.getElementById('usdReceipt').files[0];
-                        if (usdReceipt) receiptUrl = await uploadReceipt(usdReceipt);
-                        break;
-                    case 'eur':
-                        reference = document.getElementById('eurReference').value;
-                        const eurReceipt = document.getElementById('eurReceipt').files[0];
-                        if (eurReceipt) receiptUrl = await uploadReceipt(eurReceipt);
-                        break;
-                    case 'pos': reference = 'POS'; break;
-                    case 'cash': reference = 'EFECTIVO'; break;
+                if (method === 'usd' || method === 'eur') {
+                    reference = document.getElementById(`${method}Reference`).value;
+                    const file = document.getElementById(`${method}Receipt`).files[0];
+                    if (file) receiptUrl = await uploadReceipt(file);
+                } else if (method === 'mobile') {
+                    reference = document.getElementById('mobileReference').value || 'N/A';
                 }
-            } catch (error) {
-                showNotification('Error al subir el comprobante: ' + error.message);
-                return;
-            }
+            } catch (error) { return showNotification('Error al subir comprobante: ' + error.message); }
             
             const subtotal = activeCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const tax = subtotal * (taxRate / 100);
-            const total = subtotal + tax;
+            const total = subtotal * (1 + taxRate / 100);
             
             const order = {
-                date: new Date().toISOString(),
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                userName: currentUser.displayName || "Cliente",
-                items: activeCart.map(item => ({
-                    productId: item.id, name: item.name, price: item.price, quantity: item.quantity,
-                    category: products.find(p => p.id === item.id)?.category || 'general', status: 'pending'
-                })),
-                subtotal, tax, total, status: 'pending',
-                paymentMethod: method, paymentReference: reference, paymentReceipt: receiptUrl
+                date: new Date().toISOString(), userId: currentUser.uid, userEmail: currentUser.email,
+                userName: currentUser.displayName || "Cliente", items: activeCart, subtotal, 
+                tax: total - subtotal, total, status: 'pending', paymentMethod: method, 
+                paymentReference: reference, paymentReceipt: receiptUrl
             };
             
             db.collection("orders").add(order)
@@ -2235,105 +2088,67 @@
                 showNotification('¡Pedido realizado con éxito!');
                 cart = [];
                 updateCartCount();
-                cartModal.style.display = 'none';
+                closeCartModal();
             })
             .catch(error => showNotification('Error al guardar el pedido: ' + error.message));
         }
         
-        // Agregar nuevo producto (Admin)
         function addProduct(name, price, description, category) {
             db.collection("products").add({ name, price: parseFloat(price), description, category, createdAt: new Date().toISOString() })
             .then(() => {
-                showNotification('¡Producto agregado con éxito!');
-                loadProducts();
+                showNotification('¡Producto agregado!');
+                productForm.reset();
             })
-            .catch(error => showNotification('Error al agregar producto: ' + error.message));
+            .catch(error => showNotification('Error: ' + error.message));
         }
         
-        // Eliminar producto (Admin)
         function deleteProduct(productId) {
-            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+            if (confirm('¿Eliminar este producto?')) {
                 db.collection("products").doc(productId).delete()
-                .then(() => {
-                    showNotification('Producto eliminado');
-                    loadProducts();
-                })
-                .catch(error => showNotification('Error al eliminar producto: ' + error.message));
+                .then(() => showNotification('Producto eliminado'))
+                .catch(error => showNotification('Error: ' + error.message));
             }
         }
         
-        // Actualizar estado de pedido (Genérico)
         function updateOrderStatus(orderId, status) {
             db.collection("orders").doc(orderId).update({ status })
-            .then(() => showNotification('Estado actualizado correctamente'))
-            .catch(error => showNotification('Error al actualizar estado: ' + error.message));
+            .then(() => showNotification('Estado actualizado'))
+            .catch(error => showNotification('Error: ' + error.message));
         }
         
-        // Renderizar productos actuales en panel de administración
         function renderCurrentProducts() {
-            currentProducts.innerHTML = '';
-            if (products.length === 0) {
-                currentProducts.innerHTML = '<p>No hay productos registrados.</p>';
-                return;
-            }
-            const table = document.createElement('table');
-            table.className = "table table-striped";
-            table.innerHTML = `
-                <thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Acciones</th></tr></thead>
-                <tbody>
-                    ${products.map(p => `
+            if (currentUserRole !== 'admin' || !currentProducts) return;
+            currentProducts.innerHTML = products.length === 0 ? '<p>No hay productos.</p>' :
+                `<table class="table table-striped" style="width:100%">
+                    <thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Acciones</th></tr></thead>
+                    <tbody>${products.map(p => `
                         <tr>
-                            <td>${p.name}</td>
-                            <td>${p.category}</td>
-                            <td>$${p.price.toFixed(2)}</td>
-                            <td><button class="delete-product" data-id="${p.id}"><i class="fas fa-trash"></i></button></td>
-                        </tr>
-                    `).join('')}
-                </tbody>`;
-            currentProducts.appendChild(table);
-            
-            currentProducts.querySelectorAll('.delete-product').forEach(button => {
-                button.addEventListener('click', (e) => deleteProduct(e.currentTarget.dataset.id));
-            });
+                            <td>${p.name}</td><td>${p.category}</td><td>$${p.price.toFixed(2)}</td>
+                            <td><button class="delete-product btn-danger" data-id="${p.id}"><i class="fas fa-trash"></i></button></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+            currentProducts.querySelectorAll('.delete-product').forEach(button => button.addEventListener('click', e => deleteProduct(e.currentTarget.dataset.id)));
         }
         
-        // Cargar datos para Admin
-        function loadAdminData() {
-            if (currentUserRole !== 'admin') return;
-            loadCustomers();
-            listenForAdminOrders();
-        }
-
         function listenForAdminOrders() {
+            if (currentUserRole !== 'admin') return;
             realtimeListener = db.collection("orders").orderBy("date", "desc")
                 .onSnapshot(querySnapshot => {
-                    adminOrdersTableBody.innerHTML = '';
-                    if (querySnapshot.empty) {
-                        adminOrdersTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center;">No hay pedidos registrados</td></tr>`;
-                        return;
-                    }
-                    querySnapshot.forEach(doc => {
-                        const order = { id: doc.id, ...doc.data() };
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${order.id.substring(0, 8)}</td>
-                            <td>${order.userName}</td>
-                            <td>${new Date(order.date).toLocaleString()}</td>
-                            <td>$${order.total.toFixed(2)}</td>
-                            <td>${getPaymentMethodName(order.paymentMethod)}</td>
-                            <td>${order.paymentReference || 'N/A'}</td>
-                            <td>
-                                <select class="order-status-select" data-id="${order.id}">
+                    adminOrdersTableBody.innerHTML = querySnapshot.empty ? `<tr><td colspan="8">No hay pedidos</td></tr>` :
+                        querySnapshot.docs.map(doc => {
+                            const order = { id: doc.id, ...doc.data() };
+                            return `<tr>
+                                <td>${order.id.substring(0, 6)}</td><td>${order.userName}</td><td>${new Date(order.date).toLocaleString()}</td>
+                                <td>$${order.total.toFixed(2)}</td><td>${getPaymentMethodName(order.paymentMethod)}</td><td>${order.paymentReference || 'N/A'}</td>
+                                <td><select class="order-status-select" data-id="${order.id}">
                                     ${['pending', 'preparing', 'ready', 'delivered', 'cancelled', 'paid'].map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${getStatusText(s)}</option>`).join('')}
-                                </select>
-                            </td>
-                            <td><button class="view-order" data-id="${order.id}">Ver</button></td>`;
-                        adminOrdersTableBody.appendChild(row);
-                    });
+                                </select></td>
+                                <td><button class="view-order" data-id="${order.id}">Ver</button></td>
+                            </tr>`;
+                        }).join('');
                     
-                    adminOrdersTableBody.querySelectorAll('.order-status-select').forEach(select => {
-                        select.addEventListener('change', (e) => updateOrderStatus(e.target.dataset.id, e.target.value));
-                    });
+                    adminOrdersTableBody.querySelectorAll('.order-status-select').forEach(select => select.addEventListener('change', e => updateOrderStatus(e.target.dataset.id, e.target.value)));
                 }, error => console.error("Error cargando pedidos de admin: ", error));
         }
         
@@ -2348,49 +2163,37 @@
         }
         
         function loadCustomers() {
+            if (currentUserRole !== 'admin') return;
             db.collection("customers").get()
-                .then(querySnapshot => {
-                    customersTableBody.innerHTML = querySnapshot.empty ? `<tr><td colspan="5" style="text-align: center;">No hay clientes registrados</td></tr>` :
-                    querySnapshot.docs.map(doc => {
-                        const customer = doc.data();
-                        return `<tr>
-                                    <td>${customer.displayName}</td><td>${customer.email}</td>
-                                    <td>${customer.phone || 'N/A'}</td><td>${customer.orderCount || 0}</td>
-                                    <td>${customer.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'Nunca'}</td>
-                                </tr>`;
+                .then(snapshot => {
+                    customersTableBody.innerHTML = snapshot.empty ? `<tr><td colspan="5">No hay clientes</td></tr>` :
+                    snapshot.docs.map(doc => {
+                        const c = doc.data();
+                        return `<tr><td>${c.displayName}</td><td>${c.email}</td><td>${c.phone || 'N/A'}</td><td>${c.orderCount || 0}</td><td>${c.lastLogin ? new Date(c.lastLogin).toLocaleString() : 'Nunca'}</td></tr>`;
                     }).join('');
                 }).catch(error => console.error("Error cargando clientes: ", error));
         }
         
         function renderProfile() {
-            if (!currentUser) return;
-            const creationDate = currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime).getFullYear() : 'N/A';
-            profileContainer.innerHTML = `
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
-                        <h3>${currentUser.displayName || "Cliente"}</h3>
-                        <p>${currentUser.email}</p>
-                    </div>
-                    <div class="profile-stats">
-                        <div class="stat-item"><span class="stat-value">${creationDate}</span><span class="stat-label">Miembro desde</span></div>
-                        <div class="stat-item"><span class="stat-value">${orders.length}</span><span class="stat-label">Pedidos</span></div>
-                    </div>
-                    <div class="profile-actions">
-                        <button class="btn">Editar Perfil</button>
-                        <button class="btn btn-secondary" id="viewHistoryBtn">Ver Historial</button>
-                    </div>
-                </div>`;
-            document.getElementById('viewHistoryBtn').addEventListener('click', () => showSection('orders'));
+            if (!currentUser || !profileContainer) return;
+            db.collection('orders').where('userId', '==', currentUser.uid).get().then(snapshot => {
+                const creationDate = currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime).getFullYear() : 'N/A';
+                profileContainer.innerHTML = `
+                    <div class="profile-card">
+                        <div class="profile-header"><div class="profile-avatar"><i class="fas fa-user-circle"></i></div><h3>${currentUser.displayName || "Cliente"}</h3><p>${currentUser.email}</p></div>
+                        <div class="profile-stats">
+                            <div class="stat-item"><span class="stat-value">${creationDate}</span><span class="stat-label">Miembro desde</span></div>
+                            <div class="stat-item"><span class="stat-value">${snapshot.size}</span><span class="stat-label">Pedidos</span></div>
+                        </div>
+                        <div class="profile-actions"><button class="btn">Editar Perfil</button><button class="btn btn-secondary" id="viewHistoryBtn">Ver Historial</button></div>
+                    </div>`;
+                document.getElementById('viewHistoryBtn').addEventListener('click', () => showSection('orders'));
+            });
         }
         
         function showSection(sectionId) {
-            sections.forEach(section => {
-                section.style.display = section.id === `${sectionId}Section` ? 'block' : 'none';
-            });
-            magicNavItems.forEach(item => {
-                item.classList.toggle('active', item.dataset.section === sectionId);
-            });
+            sections.forEach(section => section.style.display = section.id === `${sectionId}Section` ? 'block' : 'none');
+            magicNavItems.forEach(item => item.classList.toggle('active', item.dataset.section === sectionId));
         }
         
         function showNotification(message) {
@@ -2410,83 +2213,66 @@
             setTimeout(() => mobileCartIcon.classList.remove('pulse'), 500);
         }
         
-        function openSidebar() {
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-        }
-        
-        function closeSidebarFunc() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        }
+        function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+        function closeSidebarFunc() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
         
         function handlePaymentMethodChange() {
-            const method = paymentMethod.value;
             document.querySelectorAll('.payment-detail').forEach(el => el.classList.remove('active'));
-            if(document.getElementById(`${method}Details`)) {
-                document.getElementById(`${method}Details`).classList.add('active');
-            }
+            const detailEl = document.getElementById(`${paymentMethod.value}Details`);
+            if(detailEl) detailEl.classList.add('active');
         }
         
         // =====================================
-        // Funciones para Meseros
+        // ROLES ESPECÍFICOS
         // =====================================
-        function listenForWaiterData() {
-            // Listen for own orders and for table locks
-            listenForWaiterOrders();
-            listenForTableLocks();
+        function listenForCustomerOrders() {
+            realtimeListener = db.collection("orders").where("userId", "==", currentUser.uid).orderBy("date", "desc")
+                .onSnapshot(snapshot => {
+                    ordersTableBody.innerHTML = snapshot.empty ? `<tr><td colspan="6">No tienes pedidos</td></tr>` :
+                        snapshot.docs.map(doc => {
+                            const order = { id: doc.id, ...doc.data() };
+                            const isFinalState = order.status === 'paid' || order.status === 'cancelled';
+                            return `<tr>
+                                <td>#${order.id.substring(0, 6)}</td><td>${new Date(order.date).toLocaleString()}</td>
+                                <td>${order.items.length} prod.</td><td>$${order.total.toFixed(2)}</td>
+                                <td><span class="item-status status-${order.status}">${getStatusText(order.status)}</span></td>
+                                <td>${!isFinalState ? `<button class="btn btn-secondary cancel-order" data-id="${order.id}">Cancelar</button>` : ''}</td>
+                            </tr>`;
+                        }).join('');
+                    ordersTableBody.querySelectorAll('.cancel-order').forEach(btn => btn.addEventListener('click', e => cancelOrder(e.currentTarget.dataset.id)));
+                }, error => console.error("Error escuchando pedidos de cliente: ", error));
         }
 
         function listenForWaiterOrders() {
-            realtimeListener = db.collection("orders")
-                .where("waiterId", "==", currentUser.uid)
-                .orderBy("date", "desc")
-                .onSnapshot(querySnapshot => {
-                    ordersTableBody.innerHTML = '';
-                    if (querySnapshot.empty) {
-                        ordersTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No tienes pedidos registrados</td></tr>`;
-                        return;
-                    }
-                    querySnapshot.forEach(doc => {
-                        const order = { id: doc.id, ...doc.data() };
-                        const isFinalState = order.status === 'paid' || order.status === 'cancelled';
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${order.id.substring(0, 8)}</td>
-                            <td>${new Date(order.date).toLocaleString()}</td>
-                            <td>${order.items.reduce((sum, item) => sum + item.quantity, 0)} prod.</td>
-                            <td>$${order.total.toFixed(2)}</td>
-                            <td>Mesa ${order.table}</td>
-                            <td><span class="item-status status-${order.status}">${getStatusText(order.status)}</span></td>
-                            <td>
-                                ${!isFinalState ? `<button class="btn btn-secondary cancel-order" data-id="${order.id}">Cancelar</button>` : ''}
-                            </td>`;
-                        ordersTableBody.appendChild(row);
-                    });
-                    ordersTableBody.querySelectorAll('.cancel-order').forEach(button => {
-                        button.addEventListener('click', (e) => cancelOrder(e.currentTarget.dataset.id));
-                    });
+             realtimeListener = db.collection("orders").where("waiterId", "==", currentUser.uid).orderBy("date", "desc")
+                .onSnapshot(snapshot => {
+                    ordersTableBody.innerHTML = snapshot.empty ? `<tr><td colspan="6">No has tomado pedidos</td></tr>` :
+                        snapshot.docs.map(doc => {
+                            const order = { id: doc.id, ...doc.data() };
+                            const isFinalState = order.status === 'paid' || order.status === 'cancelled';
+                            return `<tr>
+                                <td>#${order.id.substring(0, 6)}</td><td>${new Date(order.date).toLocaleString()}</td>
+                                <td>Mesa ${order.table}</td><td>$${order.total.toFixed(2)}</td>
+                                <td><span class="item-status status-${order.status}">${getStatusText(order.status)}</span></td>
+                                <td>${!isFinalState ? `<button class="btn btn-secondary cancel-order" data-id="${order.id}">Cancelar</button>` : ''}</td>
+                            </tr>`;
+                        }).join('');
+                    ordersTableBody.querySelectorAll('.cancel-order').forEach(btn => btn.addEventListener('click', e => cancelOrder(e.currentTarget.dataset.id)));
                 }, error => console.error("Error escuchando pedidos de mesero: ", error));
         }
 
         function listenForTableLocks() {
-            db.collection("orders")
-              .where("status", "in", ["pending", "preparing", "ready"])
+            db.collection("orders").where("status", "in", ["pending", "preparing", "ready"])
               .onSnapshot(snapshot => {
                 const lockedTables = new Set(snapshot.docs.map(doc => doc.data().table));
-                document.querySelectorAll('.table-card').forEach(card => {
-                    card.classList.toggle('locked', lockedTables.has(card.dataset.table));
-                });
+                document.querySelectorAll('.table-card').forEach(card => card.classList.toggle('locked', lockedTables.has(card.dataset.table)));
             });
         }
 
         function setupTableSelection() {
             document.querySelectorAll('.table-card').forEach(card => {
                 card.addEventListener('click', () => {
-                    if (card.classList.contains('locked')) {
-                        showNotification('Esta mesa está ocupada.');
-                        return;
-                    }
+                    if (card.classList.contains('locked')) return showNotification('Esta mesa está ocupada.');
                     document.querySelectorAll('.table-card.active').forEach(c => c.classList.remove('active'));
                     card.classList.add('active');
                     currentTable = card.dataset.table;
@@ -2501,17 +2287,12 @@
             waiterProductsContainer.innerHTML = filteredProducts.map(product => `
                 <div class="product-card">
                     <div class="product-badge">${product.category}</div>
-                    <div class="product-image"><img src="https://via.placeholder.com/300x200?text=${product.name.replace(/\s+/g, '+')}" alt="${product.name}"></div>
                     <div class="product-info">
                         <h3 class="product-title"><span>${product.name}</span><span class="product-price">$${product.price.toFixed(2)}</span></h3>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-footer"><button class="add-to-cart" data-id="${product.id}"><i class="fas fa-plus"></i> <span>Añadir</span></button></div>
+                        <div class="product-footer"><button class="add-to-cart" data-id="${product.id}"><i class="fas fa-plus"></i> Añadir</button></div>
                     </div>
                 </div>`).join('');
-            
-            waiterProductsContainer.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', (e) => addToCart(e.currentTarget.dataset.id));
-            });
+            waiterProductsContainer.querySelectorAll('.add-to-cart').forEach(button => button.addEventListener('click', e => addToCart(e.currentTarget.dataset.id)));
         }
         
         async function processWaiterOrder() {
@@ -2520,43 +2301,32 @@
             if (!currentTable) return showNotification('Seleccione una mesa primero');
             
             const subtotal = activeCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const tax = subtotal * (taxRate / 100);
-            const total = subtotal + tax;
+            const total = subtotal * (1 + taxRate / 100);
             
             const order = {
                 date: new Date().toISOString(), userId: currentUser.uid, userEmail: currentUser.email,
-                userName: `Mesa ${currentTable}`, items: activeCart, subtotal, tax, total,
+                userName: `Mesa ${currentTable}`, items: activeCart, subtotal, tax: total - subtotal, total,
                 status: 'pending', paymentMethod: 'cash', paymentReference: `Mesa ${currentTable}`,
                 table: currentTable, waiterId: currentUser.uid
             };
             
-            try {
-                await db.collection("orders").add(order);
-                showNotification(`Pedido para Mesa ${currentTable} realizado con éxito!`);
+            db.collection("orders").add(order).then(() => {
+                showNotification(`Pedido para Mesa ${currentTable} enviado.`);
                 cartByTable[currentTable] = [];
                 const activeCard = document.querySelector('.table-card.active');
                 if(activeCard) activeCard.classList.remove('active');
                 currentTable = null;
                 updateCartCount();
                 closeCartModal();
-            } catch (error) {
-                showNotification('Error al guardar el pedido: ' + error.message);
-            }
+            }).catch(error => showNotification('Error: ' + error.message));
         }
 
         function cancelOrder(orderId) {
-            db.collection("orders").doc(orderId).update({ status: 'cancelled' })
-            .then(() => showNotification('Pedido cancelado correctamente'))
-            .catch(error => showNotification('Error al cancelar pedido: ' + error.message));
+            updateOrderStatus(orderId, 'cancelled');
         }
         
-        // =====================================
-        // Funciones para Cocineros
-        // =====================================
         function listenForKitchenOrders() {
-            realtimeListener = db.collection("orders")
-                .where("status", "in", ["pending", "preparing", "ready"])
-                .orderBy("date", "asc")
+            realtimeListener = db.collection("orders").where("status", "in", ["pending", "preparing", "ready"]).orderBy("date", "asc")
                 .onSnapshot(snapshot => {
                     renderKitchenOrders(snapshot.docs);
                 }, error => console.error("Error escuchando pedidos de cocina: ", error));
@@ -2564,57 +2334,38 @@
         
         function renderKitchenOrders(docs) {
             if (!kitchenOrdersContainer) return;
-            kitchenOrdersContainer.innerHTML = '';
+            const relevantDocs = docs.filter(doc => doc.data().items.some(it => {
+                const cat = (it.category || '').toLowerCase();
+                return currentUserRole === 'empanada_chef' ? (cat === 'empanadas' || cat === 'bebidas') : (cat !== 'empanadas');
+            }));
 
-            const relevantDocs = docs.filter(doc => {
-                const order = doc.data();
-                return order.items.some(it => {
-                    const cat = (it.category || '').toLowerCase();
-                    return currentUserRole === 'empanada_chef' ? (cat === 'empanadas' || cat === 'bebidas') : (cat !== 'empanadas');
-                });
-            });
-
-            if (relevantDocs.length === 0) {
-                kitchenOrdersContainer.innerHTML = '<p class="muted" style="text-align:center; padding: 2rem;">No hay pedidos para tu estación.</p>';
-                return;
-            }
-            
-            relevantDocs.forEach(doc => {
-                const order = { id: doc.id, ...doc.data() };
-                const filteredItems = order.items.filter(it => {
-                    const cat = (it.category || '').toLowerCase();
-                    return currentUserRole === 'empanada_chef' ? (cat === 'empanadas' || cat === 'bebidas') : (cat !== 'empanadas');
-                });
-                
-                const el = document.createElement('div');
-                el.className = 'kitchen-order-card';
-                el.innerHTML = `
-                    <div class="order-header">
-                        <div>
-                            <div class="order-id">#${order.id.slice(-6)} | Mesa: ${order.table || 'N/A'}</div>
-                            <div class="meta">${new Date(order.date).toLocaleTimeString()}</div>
+            kitchenOrdersContainer.innerHTML = relevantDocs.length === 0 ? '<p class="muted">No hay pedidos para tu estación.</p>' :
+                relevantDocs.map(doc => {
+                    const order = { id: doc.id, ...doc.data() };
+                    const filteredItems = order.items.filter(it => {
+                        const cat = (it.category || '').toLowerCase();
+                        return currentUserRole === 'empanada_chef' ? (cat === 'empanadas' || cat === 'bebidas') : (cat !== 'empanadas');
+                    });
+                    
+                    return `<div class="kitchen-order-card">
+                        <div class="order-header">
+                            <div><div class="order-id">#${order.id.slice(-6)} | Mesa: ${order.table || 'N/A'}</div><div class="meta">${new Date(order.date).toLocaleTimeString()}</div></div>
+                            <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
                         </div>
-                        <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
-                    </div>
-                    <div class="order-items">${filteredItems.map(it => `<div class="order-item"><span>${it.quantity || 1}× ${it.name}</span></div>`).join('')}</div>
-                    <div class="order-actions">
-                        ${order.status === 'pending' ? `<button class="chef-btn mark-preparing-btn" data-id="${order.id}">Preparar</button>` : ''}
-                        ${order.status === 'preparing' ? `<button class="chef-btn mark-ready-btn" data-id="${order.id}">Listo</button>` : ''}
+                        <div class="order-items">${filteredItems.map(it => `<div class="order-item"><span>${it.quantity || 1}× ${it.name}</span></div>`).join('')}</div>
+                        <div class="order-actions">
+                            ${order.status === 'pending' ? `<button class="chef-btn mark-preparing-btn" data-id="${order.id}">Preparar</button>` : ''}
+                            ${order.status === 'preparing' ? `<button class="chef-btn mark-ready-btn" data-id="${order.id}">Listo</button>` : ''}
+                        </div>
                     </div>`;
-                kitchenOrdersContainer.appendChild(el);
-            });
+                }).join('');
 
             kitchenOrdersContainer.querySelectorAll('.mark-preparing-btn').forEach(btn => btn.addEventListener('click', e => updateOrderStatus(e.currentTarget.dataset.id, 'preparing')));
             kitchenOrdersContainer.querySelectorAll('.mark-ready-btn').forEach(btn => btn.addEventListener('click', e => updateOrderStatus(e.currentTarget.dataset.id, 'ready')));
         }
 
-        // =====================================
-        // Funciones para Cajero
-        // =====================================
         function listenForCashierOrders() {
-            realtimeListener = db.collection("orders")
-                .where("status", "in", ["pending", "preparing", "ready"])
-                .orderBy("date", "asc")
+            realtimeListener = db.collection("orders").where("status", "in", ["pending", "preparing", "ready"]).orderBy("date", "asc")
                 .onSnapshot(snapshot => {
                     renderCashierOrders(snapshot.docs);
                 }, error => console.error("Error escuchando pedidos para caja: ", error));
@@ -2622,44 +2373,25 @@
 
         function renderCashierOrders(docs) {
             if (!cashierOrdersContainer) return;
-            cashierOrdersContainer.innerHTML = '';
-
-            if (docs.length === 0) {
-                cashierOrdersContainer.innerHTML = '<p class="muted" style="text-align:center; padding: 2rem;">No hay pedidos por cobrar.</p>';
-                return;
-            }
-
-            docs.forEach(doc => {
-                const order = { id: doc.id, ...doc.data() };
-                const el = document.createElement('div');
-                el.className = 'cashier-order-card';
-                el.innerHTML = `
-                    <div class="order-header">
-                        <div>
-                            <div class="order-id">#${order.id.slice(-6)} | Mesa: ${order.table || 'N/A'}</div>
-                            <div class="meta">Total: <strong>$${order.total.toFixed(2)}</strong></div>
+            cashierOrdersContainer.innerHTML = docs.length === 0 ? '<p class="muted">No hay pedidos por cobrar.</p>' :
+                docs.map(doc => {
+                    const order = { id: doc.id, ...doc.data() };
+                    return `<div class="cashier-order-card">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-id">#${order.id.slice(-6)} | Mesa: ${order.table || 'N/A'}</div>
+                                <div class="meta">Total: <strong>$${order.total.toFixed(2)}</strong></div>
+                            </div>
+                            <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
                         </div>
-                        <div class="item-status status-${order.status}">${getStatusText(order.status)}</div>
-                    </div>
-                    <div class="order-actions">
-                        <button class="cashier-btn mark-paid-btn" data-id="${order.id}">Marcar como Pagado</button>
+                        <div class="order-actions"><button class="cashier-btn mark-paid-btn" data-id="${order.id}">Marcar como Pagado</button></div>
                     </div>`;
-                cashierOrdersContainer.appendChild(el);
-            });
-
-            cashierOrdersContainer.querySelectorAll('.mark-paid-btn').forEach(btn => {
-                btn.addEventListener('click', e => markOrderPaid(e.currentTarget.dataset.id));
-            });
-        }
-        
-        function markOrderPaid(orderId) {
-            db.collection("orders").doc(orderId).update({ status: 'paid' })
-            .then(() => showNotification('Pedido marcado como pagado'))
-            .catch(error => showNotification('Error al procesar pago: ' + error.message));
+                }).join('');
+            cashierOrdersContainer.querySelectorAll('.mark-paid-btn').forEach(btn => btn.addEventListener('click', e => updateOrderStatus(e.currentTarget.dataset.id, 'paid')));
         }
         
         // =====================================
-        // Configuración de Event Listeners
+        // INICIALIZACIÓN
         // =====================================
         function setupEventListeners() {
             menuToggle.addEventListener('click', openSidebar);
@@ -2682,55 +2414,51 @@
             checkoutBtn.addEventListener('click', checkout);
             processOrderBtn.addEventListener('click', processWaiterOrder);
 
-            adminBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const tab = btn.dataset.tab;
-                    adminBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    adminSections.forEach(sec => sec.classList.remove('active'));
-                    document.getElementById(`${tab}Admin`).classList.add('active');
-                });
-            });
+            adminBtns.forEach(btn => btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                adminBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                adminSections.forEach(sec => sec.classList.remove('active'));
+                document.getElementById(`${tab}Admin`).classList.add('active');
+            }));
 
-            productForm.addEventListener('submit', (e) => {
+            productForm.addEventListener('submit', e => {
                 e.preventDefault();
-                addProduct(productName.value, productPrice.value, productDescription.value, productCategory.value);
-                productForm.reset();
+                addProduct(document.getElementById('productName').value, document.getElementById('productPrice').value, document.getElementById('productDescription').value, document.getElementById('productCategory').value);
             });
 
-            settingsForm.addEventListener('submit', (e) => {
+            settingsForm.addEventListener('submit', e => {
                 e.preventDefault();
                 taxRate = parseFloat(document.getElementById('taxRate').value);
                 taxRateValue.textContent = taxRate;
                 showNotification('Configuración guardada');
             });
 
-            signUpLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('register'); });
-            forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('forgot'); });
-            loginLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('login'); });
+            signUpLink.addEventListener('click', e => { e.preventDefault(); setAuthMode('register'); });
+            forgotPasswordLink.addEventListener('click', e => { e.preventDefault(); setAuthMode('forgot'); });
+            loginLink.addEventListener('click', e => { e.preventDefault(); setAuthMode('login'); });
 
             paymentMethod.addEventListener('change', handlePaymentMethodChange);
             setupTableSelection();
         }
 
-    // Inicializar la aplicación
-    document.addEventListener('DOMContentLoaded', () => {
-        setupEventListeners();
-        setAuthMode('login');
-    });
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            setAuthMode('login');
+        });
 
-    function openCartModal() {
-        renderCart();
-        cartModal.style.display = 'flex';
-        const isWaiter = currentUserRole === 'waiter';
-        customerPaymentSection.style.display = isWaiter ? 'none' : 'block';
-        checkoutBtn.style.display = isWaiter ? 'none' : 'block';
-        processOrderBtn.style.display = isWaiter ? 'block' : 'none';
-    }
+        function openCartModal() {
+            renderCart();
+            cartModal.style.display = 'flex';
+            const isWaiter = currentUserRole === 'waiter';
+            customerPaymentSection.style.display = isWaiter ? 'none' : 'block';
+            checkoutBtn.style.display = isWaiter ? 'none' : 'block';
+            processOrderBtn.style.display = isWaiter ? 'block' : 'none';
+        }
 
-    function closeCartModal() {
-        cartModal.style.display = 'none';
-    }
+        function closeCartModal() {
+            cartModal.style.display = 'none';
+        }
 
     </script>
 </body>
