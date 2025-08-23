@@ -286,7 +286,7 @@
         .detail-item { border-bottom: 1px solid var(--border-color); }
 
         /* --- ADMIN PANEL --- */
-        .admin-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .admin-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; flex-wrap: wrap; }
         .admin-tab-btn { padding: 1rem 1.5rem; border: none; background: none; cursor: pointer; font-size: 1rem; font-weight: 600; color: var(--text-gray); position: relative; }
         .admin-tab-btn.active { color: var(--primary); }
         .admin-tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
@@ -302,7 +302,7 @@
         .btn-danger { background-color: var(--danger); color: white; }
         .employee-filter-controls { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
         
-        /* === ESTILOS MEJORADOS PARA LA LISTA DE PRODUCTOS EN ADMIN (GRID LAYOUT) === */
+        /* === ESTILOS PARA LA LISTA DE PRODUCTOS EN ADMIN === */
         #adminProductList { display: flex; flex-direction: column; gap: 0.75rem; }
         .admin-product-list-header, .admin-product-list-item {
             display: grid;
@@ -312,38 +312,28 @@
             padding: 0.75rem 1rem;
         }
         .admin-product-list-header {
-            font-weight: 600;
-            color: var(--text-gray);
-            font-size: 0.875rem;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
+            font-weight: 600; color: var(--text-gray); font-size: 0.875rem;
+            border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;
             display: none; /* Oculto por defecto, visible en pantallas grandes */
         }
         .admin-product-list-item {
-            background-color: var(--bg-light);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            transition: var(--transition);
+            background-color: var(--bg-light); border: 1px solid var(--border-color);
+            border-radius: var(--border-radius); transition: var(--transition);
         }
-        .admin-product-list-item:hover {
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-        }
+        .admin-product-list-item:hover { border-color: var(--primary); box-shadow: var(--shadow); }
         .admin-product-name { font-weight: 600; }
         .admin-product-desc, .admin-product-price { color: var(--text-gray); font-size: 0.9rem; }
-        .admin-product-desc {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis; /* Corta el texto largo con '...' */
-        }
+        .admin-product-desc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .admin-product-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+        
+        /* === ESTILOS PARA PAGOS === */
+        .payment-methods { margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; }
+        #pagoMovilDetails { display: none; margin-top: 1rem; }
+        #pagoMovilInfo { background: var(--bg-off-white); border: 1px dashed var(--border-color); border-radius: var(--border-radius); padding: 1rem; margin-top: 1rem; font-size: 0.875rem; }
+        #pagoMovilInfo p { margin: 0.25rem 0; }
+        #pagoMovilInfo strong { color: var(--text-dark); }
 
-        @media (min-width: 768px) {
-            .admin-product-list-header {
-                display: grid; /* Muestra los encabezados en pantallas de tablet o más grandes */
-            }
-        }
-
+        @media (min-width: 768px) { .admin-product-list-header { display: grid; } }
 
         /* ... (El resto del CSS se mantiene similar) ... */
         .order-card.status-pending { border-color: var(--warning); } .order-card.status-preparing { border-color: #3B82F6; } .order-card.status-ready { border-color: var(--success); } .order-card.status-paid { border-color: var(--accent); } .order-card.status-cancelled { border-color: var(--text-gray); }
@@ -416,7 +406,6 @@
                         <a href="#" id="signUpLink">Crear cuenta</a><span id="linkSeparator" style="margin:0 .5rem">·</span><a href="#" id="forgotPasswordLink">Olvidé contraseña</a><a href="#" id="loginLink" style="display:none">Volver a login</a>
                     </div>
                     <div class="separator">o continúa con</div>
-                    <!-- NUEVA ESTRUCTURA DE BOTONES SOCIALES -->
                     <div class="auth-options">
                         <button class="social-btn" id="googleLogin" title="Continuar con Google"><i class="fab fa-google"></i></button>
                         <button class="social-btn" id="appleLogin" title="Continuar con Apple"><i class="fab fa-apple"></i></button>
@@ -430,12 +419,13 @@
         <section id="ordersSection" style="display: none;"><h2 class="section-title">Mis Pedidos</h2><div class="order-filter-controls" id="waiterFilterControls"></div><div class="order-list-container" id="waiterOrdersContainer"></div></section>
         <section id="profileSection" style="display: none;"><h2 class="section-title">Mi Perfil</h2><div id="profileContainer"></div></section>
         
-        <!-- === SECCIÓN DE ADMIN MODIFICADA === -->
+        <!-- === SECCIÓN DE ADMIN === -->
         <section id="adminSection" style="display: none;">
             <h2 class="section-title">Panel de Administración</h2>
             <div class="admin-tabs" id="adminTabs">
                 <button class="admin-tab-btn active" data-tab="menu">Gestionar Menú</button>
                 <button class="admin-tab-btn" data-tab="employees">Gestionar Empleados</button>
+                <button class="admin-tab-btn" data-tab="payment">Métodos de Pago</button>
             </div>
 
             <!-- Contenido Pestaña Menú -->
@@ -445,9 +435,7 @@
                         <h3>Lista de Productos</h3>
                         <button class="btn-primary" id="addNewProductBtn" style="width: auto;">Añadir Nuevo</button>
                     </div>
-                    <div id="adminProductList">
-                        <!-- La lista de productos del admin se cargará aquí -->
-                    </div>
+                    <div id="adminProductList"></div>
                 </div>
             </div>
 
@@ -460,9 +448,30 @@
                         <button class="filter-btn" data-filter="customers">Ver Clientes</button>
                     </div>
                     <div id="employeeListStatus"></div>
-                    <div class="employee-list" id="employeeList">
-                        <!-- La lista de empleados se cargará aquí -->
-                    </div>
+                    <div class="employee-list" id="employeeList"></div>
+                </div>
+            </div>
+
+            <!-- Contenido Pestaña Métodos de Pago -->
+            <div id="admin-tab-payment" class="admin-tab-content">
+                <div class="admin-card">
+                    <h3>Datos para Pago Móvil</h3>
+                    <p>Introduce los datos que verán los clientes al seleccionar este método de pago.</p>
+                    <form id="paymentMethodForm" style="margin-top: 1.5rem;">
+                        <div class="form-group">
+                            <label for="pagoMovilBank">Entidad Bancaria</label>
+                            <input type="text" id="pagoMovilBank" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pagoMovilPhone">Número de Teléfono</label>
+                            <input type="text" id="pagoMovilPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pagoMovilRif">RIF / C.I. de la Empresa</label>
+                            <input type="text" id="pagoMovilRif" required>
+                        </div>
+                        <button type="submit" id="savePaymentDetailsBtn" class="btn-primary">Guardar Datos</button>
+                    </form>
                 </div>
             </div>
         </section>
@@ -477,7 +486,29 @@
     <div class="modal" id="cartModal">
         <div class="modal-content">
             <div class="modal-header"><h3>Tu Carrito</h3><button class="close-modal">&times;</button></div>
-            <div class="modal-body" id="cartItemsContainer"></div>
+            <div class="modal-body">
+                <div id="cartItemsContainer"></div>
+                <div class="payment-methods">
+                    <div class="form-group">
+                        <label for="paymentMethodSelect">Método de Pago</label>
+                        <select id="paymentMethodSelect">
+                            <option value="">Seleccione una opción...</option>
+                            <option value="Efectivo Bs">Efectivo Bs</option>
+                            <option value="Efectivo $">Efectivo $</option>
+                            <option value="Efectivo €">Efectivo €</option>
+                            <option value="Pago Móvil">Pago Móvil</option>
+                            <option value="Punto de Venta">Punto de Venta</option>
+                        </select>
+                    </div>
+                    <div id="pagoMovilDetails">
+                        <div class="form-group">
+                            <label for="pagoMovilRef">Referencia Bancaria (6 dígitos)</label>
+                            <input type="text" id="pagoMovilRef" maxlength="6">
+                        </div>
+                        <div id="pagoMovilInfo">Cargando datos...</div>
+                    </div>
+                </div>
+            </div>
             <div class="modal-footer"><button id="checkoutBtn" class="btn-primary">Finalizar Compra</button><button id="processOrderBtn" class="btn-primary" style="display:none;">Procesar Pedido</button></div>
         </div>
     </div>
@@ -558,11 +589,13 @@
         const cashierOrdersContainer = document.getElementById('cashierOrdersContainer');
         const notification = document.getElementById('notification');
         
-        // Carts
+        // Carts & Payment
         const cartModal = document.getElementById('cartModal');
         const desktopCartBtn = document.getElementById('desktopCartBtn');
         const checkoutBtn = document.getElementById('checkoutBtn');
         const processOrderBtn = document.getElementById('processOrderBtn');
+        const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+        const pagoMovilDetailsDiv = document.getElementById('pagoMovilDetails');
 
         // Auth
         const authForm = document.getElementById('authForm'), authEmail = document.getElementById('authEmail'), authPassword = document.getElementById('authPassword'), authConfirmPassword = document.getElementById('authConfirmPassword'), confirmPasswordField = document.getElementById('confirmPasswordField'), authSubmitBtn = document.getElementById('authSubmitBtn'), authMessage = document.getElementById('authMessage'), signUpLink = document.getElementById('signUpLink'), forgotPasswordLink = document.getElementById('forgotPasswordLink'), loginLink = document.getElementById('loginLink'), googleLoginBtn = document.getElementById('googleLogin'), appleLoginBtn = document.getElementById('appleLogin'), linkSeparator = document.getElementById('linkSeparator');
@@ -684,7 +717,6 @@
         function setupAdminPanel() {
             const tabs = document.getElementById('adminTabs');
             const contents = document.querySelectorAll('.admin-tab-content');
-            const employeeFilters = document.getElementById('employeeFilterControls');
             
             tabs.addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON') return;
@@ -696,27 +728,59 @@
                 const targetContent = document.getElementById(`admin-tab-${e.target.dataset.tab}`);
                 targetContent.classList.add('active');
                 
-                if (e.target.dataset.tab === 'menu') {
-                    loadAdminProducts();
-                } else if(e.target.dataset.tab === 'employees') {
-                    loadEmployees('employees'); 
-                    employeeFilters.querySelector('.active').classList.remove('active');
-                    employeeFilters.querySelector('[data-filter="employees"]').classList.add('active');
-                }
+                const filter = e.target.dataset.filter;
+                if (e.target.dataset.tab === 'menu') loadAdminProducts();
+                else if (e.target.dataset.tab === 'employees') loadEmployees(filter || 'employees');
+                else if (e.target.dataset.tab === 'payment') loadPaymentDetails();
             });
 
-            employeeFilters.addEventListener('click', (e) => {
+            document.getElementById('employeeFilterControls').addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON') return;
-                employeeFilters.querySelector('.active').classList.remove('active');
+                document.getElementById('employeeFilterControls').querySelector('.active').classList.remove('active');
                 e.target.classList.add('active');
                 loadEmployees(e.target.dataset.filter);
             });
 
             document.getElementById('addNewProductBtn').addEventListener('click', () => openProductModal());
             document.getElementById('saveProductBtn').addEventListener('click', handleProductFormSubmit);
+            document.getElementById('paymentMethodForm').addEventListener('submit', handleSavePaymentDetails);
             
-            // Cargar la vista por defecto (lista de productos)
+            // Cargar la vista por defecto
             loadAdminProducts();
+        }
+        
+        async function loadPaymentDetails() {
+            const doc = await db.collection('config').doc('paymentMethods').get();
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('pagoMovilBank').value = data.pagoMovil?.bank || '';
+                document.getElementById('pagoMovilPhone').value = data.pagoMovil?.phone || '';
+                document.getElementById('pagoMovilRif').value = data.pagoMovil?.rif || '';
+            }
+        }
+        
+        async function handleSavePaymentDetails(e) {
+            e.preventDefault();
+            const btn = document.getElementById('savePaymentDetailsBtn');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            const bank = document.getElementById('pagoMovilBank').value;
+            const phone = document.getElementById('pagoMovilPhone').value;
+            const rif = document.getElementById('pagoMovilRif').value;
+
+            try {
+                await db.collection('config').doc('paymentMethods').set({
+                    pagoMovil: { bank, phone, rif }
+                }, { merge: true });
+                showNotification('Datos de Pago Móvil guardados con éxito.');
+            } catch (error) {
+                console.error("Error saving payment details:", error);
+                showNotification('Error al guardar los datos.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Guardar Datos';
+            }
         }
 
         // --- Product CRUD Functions (Admin) ---
@@ -836,26 +900,19 @@
             }
 
             try {
-                // Eliminar documento de Firestore
                 await db.collection('products').doc(productId).delete();
-
-                // Si hay una URL de imagen y no es un placeholder, eliminar de Storage
                 if (imageUrl && imageUrl.includes('firebasestorage')) {
                     const imageRef = storage.refFromURL(imageUrl);
                     await imageRef.delete();
                 }
-
                 showNotification('Producto eliminado con éxito.');
-                loadProducts(); // Recargar productos para la vista de cliente/mesero
-                
-                // Eliminar el elemento de la lista del admin visualmente
+                loadProducts();
                 const itemToRemove = document.getElementById(`admin-product-${productId}`);
                 if (itemToRemove) {
                     itemToRemove.style.transition = 'opacity 0.3s ease';
                     itemToRemove.style.opacity = '0';
                     setTimeout(() => itemToRemove.remove(), 300);
                 }
-
             } catch (error) {
                 console.error("Error deleting product:", error);
                 showNotification('Error al eliminar el producto.', 'error');
@@ -870,15 +927,11 @@
             statusDiv.innerHTML = '<p>Cargando...</p>';
 
             const employeeRoles = ['waiter', 'chef', 'cashier', 'admin'];
+            let query;
+            if (filter === 'employees') query = db.collection('customers').where('role', 'in', employeeRoles);
+            else query = db.collection('customers').where('role', '==', 'customer');
 
             try {
-                let query;
-                if (filter === 'employees') {
-                    query = db.collection('customers').where('role', 'in', employeeRoles);
-                } else { // filter === 'customers'
-                    query = db.collection('customers').where('role', '==', 'customer');
-                }
-                
                 const snapshot = await query.get();
                 const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
@@ -905,10 +958,7 @@
                     </div>
                 `).join('');
 
-                container.querySelectorAll('.save-role-btn').forEach(btn => {
-                    btn.addEventListener('click', handleRoleUpdate);
-                });
-
+                container.querySelectorAll('.save-role-btn').forEach(btn => btn.addEventListener('click', handleRoleUpdate));
             } catch (error) {
                 console.error("Error loading users: ", error);
                 statusDiv.innerHTML = `<p class="empty-list-message" style="color: var(--danger);">Error al cargar: ${error.message}</p>`;
@@ -936,7 +986,6 @@
                     item.style.opacity = '0';
                     setTimeout(() => item.remove(), 300);
                 }
-
             } catch (error) {
                 console.error("Error updating role: ", error);
                 showNotification('Error al actualizar el rol.', 'error');
@@ -997,38 +1046,29 @@
         function listenForWaiterOrders() {
             const query = db.collection("orders").where('waiterId', "==", currentUser.uid);
             realtimeOrdersListener = query.onSnapshot(snapshot => {
-                // NOTIFICATION LOGIC: Check for status changes made by chef
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "modified") {
-                        const oldData = change.doc.data();
                         const newData = change.doc.data();
-                        if (oldData.status !== 'ready' && newData.status === 'ready') {
-                            showNotification(`¡El pedido de la Mesa ${newData.table} está listo!`);
-                        }
+                        if (newData.status === 'ready') showNotification(`¡El pedido de la Mesa ${newData.table} está listo!`);
                     }
                 });
-
                 allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => new Date(b.date) - new Date(a.date));
                 renderFilteredOrders(waiterOrdersContainer, waiterFilter);
             }, console.error);
         }
-
         function listenForKitchenOrders() {
             const query = db.collection("orders");
             realtimeOrdersListener = query.onSnapshot(snapshot => {
-                // NOTIFICATION LOGIC: Check for new pending orders
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added" && change.doc.data().status === 'pending') {
                         const order = change.doc.data();
                         showNotification(`Nuevo pedido para la ${order.table ? `Mesa ${order.table}` : 'cliente'}`);
                     }
                 });
-                
                 allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(a.date) - new Date(b.date));
                 renderFilteredOrders(kitchenOrdersContainer, chefFilter);
             }, console.error);
         }
-
         function listenForCashierOrders() {
             const query = db.collection("orders");
             realtimeOrdersListener = query.onSnapshot(snapshot => {
@@ -1036,7 +1076,6 @@
                 renderFilteredOrders(cashierOrdersContainer, cashierFilter);
             }, console.error);
         }
-
         function renderFilteredOrders(container, filter) {
             if (!container) return;
             const statusMap = { active: ['pending', 'preparing', 'ready'], history: ['paid', 'cancelled'] };
@@ -1102,12 +1141,25 @@
             const count = activeCart ? activeCart.reduce((sum, item) => sum + item.quantity, 0) : 0;
             document.querySelectorAll('.cart-count').forEach(el => el.textContent = count);
         }
-        function openCartModal() {
+        async function openCartModal() {
             renderCart();
             cartModal.classList.add('visible');
             const isWaiter = currentUserRole === 'waiter';
             checkoutBtn.style.display = isWaiter ? 'none' : 'block';
             processOrderBtn.style.display = isWaiter ? 'block' : 'none';
+            document.querySelector('.payment-methods').style.display = isWaiter ? 'none' : 'block';
+            
+            // Cargar datos de Pago Móvil para el cliente
+            if(!isWaiter) {
+                const doc = await db.collection('config').doc('paymentMethods').get();
+                const infoDiv = document.getElementById('pagoMovilInfo');
+                if (doc.exists && doc.data().pagoMovil) {
+                    const data = doc.data().pagoMovil;
+                    infoDiv.innerHTML = `<p><strong>Banco:</strong> ${data.bank}</p><p><strong>Teléfono:</strong> ${data.phone}</p><p><strong>RIF/CI:</strong> ${data.rif}</p>`;
+                } else {
+                    infoDiv.innerHTML = `<p>Los datos de Pago Móvil no están configurados.</p>`;
+                }
+            }
         }
         function closeCartModal() {
             cartModal.classList.remove('visible');
@@ -1119,12 +1171,14 @@
 
             if (!activeCart || activeCart.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color: var(--text-gray);">Tu carrito está vacío.</p>';
+                document.querySelector('.payment-methods').style.display = 'none';
                 return;
             }
             container.innerHTML = activeCart.map(item => `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem 0;">
                     <div><p style="font-weight:600;">${item.name}</p><p style="font-size:0.875rem; color:var(--text-gray);">$${item.price.toFixed(2)}</p></div><div>${item.quantity}</div>
                 </div>`).join('');
+            document.querySelector('.payment-methods').style.display = 'block';
         }
         async function processWaiterOrder() {
             const activeCart = getActiveCart();
@@ -1133,7 +1187,8 @@
                 date: new Date().toISOString(), waiterId: currentUser.uid,
                 userName: `Mesa ${currentTable}`, items: activeCart,
                 total: activeCart.reduce((s, i) => s + (i.price * i.quantity), 0),
-                status: 'pending', table: currentTable
+                status: 'pending', table: currentTable,
+                payment: { method: 'En mesa' }
             };
             try {
                 await db.collection("orders").add(order);
@@ -1146,13 +1201,24 @@
             } catch (error) { showNotification('Error al guardar el pedido', 'error'); }
         }
         async function checkout() {
+            const paymentMethod = paymentMethodSelect.value;
+            const pagoMovilRef = document.getElementById('pagoMovilRef').value;
+
             if (cart.length === 0) return showNotification('El carrito está vacío', 'error');
+            if (!paymentMethod) return showNotification('Por favor, seleccione un método de pago.', 'error');
+            if (paymentMethod === 'Pago Móvil' && pagoMovilRef.length !== 6) return showNotification('La referencia de Pago Móvil debe tener 6 dígitos.', 'error');
+            
             const order = {
                 date: new Date().toISOString(), userId: currentUser.uid,
                 userName: currentUser.displayName, items: cart,
                 total: cart.reduce((s, i) => s + (i.price * i.quantity), 0),
                 status: 'pending',
+                payment: {
+                    method: paymentMethod,
+                    ...(paymentMethod === 'Pago Móvil' && { reference: pagoMovilRef })
+                }
             };
+
             try {
                 await db.collection("orders").add(order);
                 showNotification(`Pedido enviado con éxito.`);
@@ -1284,6 +1350,10 @@
             menuToggle.addEventListener('click', openSidebarFunc);
             closeSidebar.addEventListener('click', closeSidebarFunc);
             overlay.addEventListener('click', closeSidebarFunc);
+
+            paymentMethodSelect.addEventListener('change', (e) => {
+                pagoMovilDetailsDiv.style.display = e.target.value === 'Pago Móvil' ? 'block' : 'none';
+            });
         });
     </script>
 </body>
