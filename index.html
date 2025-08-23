@@ -724,7 +724,7 @@
                 } else {
                     // New user or user who hasn't completed setup
                     if (!doc.exists) {
-                        // Create a basic profile first
+                        // Create a basic profile first, then show setup.
                         await saveCustomerData(user, 'customer');
                     }
                     // Hide everything and show setup screen
@@ -1580,8 +1580,18 @@
                 await db.collection("customers").doc(currentUser.uid).set(userData, { merge: true });
                 showNotification('¡Datos guardados con éxito!');
                 
-                // Force a re-check of the auth state to load the main app
-                auth.onAuthStateChanged(auth.currentUser);
+                // ** CORRECTED LOGIC **
+                // Manually hide the setup form and show the main app
+                newUserSetupSection.style.display = 'none';
+                mainHeader.classList.add('visible');
+                magicNav.classList.add('visible');
+                
+                // The user is a customer by default at this stage
+                currentUserRole = 'customer'; 
+                
+                // Load the main app content
+                loadInitialDataForRole();
+                loadProducts();
 
             } catch (error) {
                 console.error("Error saving user data:", error);
