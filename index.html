@@ -291,12 +291,13 @@
         .admin-tab-content { display: none; }
         .admin-tab-content.active { display: block; }
         .admin-card { background: var(--bg-light); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); max-width: 600px; margin: 0 auto; }
-        .employee-list { display: flex; flex-direction: column; gap: 1rem; }
+        .employee-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;}
         .employee-item { display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); }
         .employee-info p { margin: 0; }
         .employee-info .email { font-size: 0.875rem; color: var(--text-gray); }
         .btn-secondary { background-color: var(--bg-off-white); color: var(--text-dark); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 600; cursor: pointer; transition: var(--transition); }
         .btn-secondary:hover { background-color: var(--border-color); }
+        .employee-filter-controls { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
 
         /* ... (El resto del CSS se mantiene similar, pero adaptado a la paleta clara) ... */
         .order-card.status-pending { border-color: var(--warning); } .order-card.status-preparing { border-color: #3B82F6; } .order-card.status-ready { border-color: var(--success); } .order-card.status-paid { border-color: var(--accent); } .order-card.status-cancelled { border-color: var(--text-gray); }
@@ -428,6 +429,11 @@
             <div id="admin-tab-employees" class="admin-tab-content">
                  <div class="admin-card">
                     <h3>Gestionar Roles de Empleados</h3>
+                    <div class="employee-filter-controls" id="employeeFilterControls">
+                        <button class="filter-btn active" data-filter="employees">Ver Empleados</button>
+                        <button class="filter-btn" data-filter="customers">Ver Clientes</button>
+                    </div>
+                    <div id="employeeListStatus"></div>
                     <div class="employee-list" id="employeeList">
                         <!-- La lista de empleados se cargará aquí -->
                     </div>
@@ -603,6 +609,7 @@
         function setupAdminPanel() {
             const tabs = document.getElementById('adminTabs');
             const contents = document.querySelectorAll('.admin-tab-content');
+            const employeeFilters = document.getElementById('employeeFilterControls');
             
             tabs.addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON') return;
@@ -615,8 +622,18 @@
                 targetContent.classList.add('active');
                 
                 if(e.target.dataset.tab === 'employees') {
-                    loadEmployees();
+                    // Cargar vista por defecto (empleados) al cambiar a la pestaña
+                    loadEmployees('employees'); 
+                    employeeFilters.querySelector('.active').classList.remove('active');
+                    employeeFilters.querySelector('[data-filter="employees"]').classList.add('active');
                 }
+            });
+
+            employeeFilters.addEventListener('click', (e) => {
+                if(e.target.tagName !== 'BUTTON') return;
+                employeeFilters.querySelector('.active').classList.remove('active');
+                e.target.classList.add('active');
+                loadEmployees(e.target.dataset.filter);
             });
 
             document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
@@ -655,25 +672,43 @@
             }
         }
 
-        async function loadEmployees() {
+        async function loadEmployees(filter = 'employees') {
             const container = document.getElementById('employeeList');
-            container.innerHTML = '<p>Cargando empleados...</p>';
+            const statusDiv = document.getElementById('employeeListStatus');
+            container.innerHTML = '';
+            statusDiv.innerHTML = '<p>Cargando...</p>';
+
+            const employeeRoles = ['waiter', 'chef', 'cashier', 'admin'];
+
             try {
-                const snapshot = await db.collection('customers').get();
-                const employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                let query;
+                if (filter === 'employees') {
+                    query = db.collection('customers').where('role', 'in', employeeRoles);
+                } else { // filter === 'customers'
+                    query = db.collection('customers').where('role', '==', 'customer');
+                }
                 
-                container.innerHTML = employees.map(emp => `
-                    <div class="employee-item" data-id="${emp.id}">
+                const snapshot = await query.get();
+                const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                if (users.length === 0) {
+                    statusDiv.innerHTML = `<p class="empty-list-message">No se encontraron ${filter}.</p>`;
+                    return;
+                }
+                
+                statusDiv.innerHTML = '';
+                container.innerHTML = users.map(user => `
+                    <div class="employee-item" data-id="${user.id}">
                         <div class="employee-info">
-                            <p><strong>${emp.displayName || 'Sin Nombre'}</strong></p>
-                            <p class="email">${emp.email}</p>
+                            <p><strong>${user.displayName || 'Sin Nombre'}</strong></p>
+                            <p class="email">${user.email}</p>
                         </div>
                         <select class="role-select">
-                            <option value="customer" ${emp.role === 'customer' ? 'selected' : ''}>Cliente</option>
-                            <option value="waiter" ${emp.role === 'waiter' ? 'selected' : ''}>Mesero</option>
-                            <option value="chef" ${emp.role === 'chef' ? 'selected' : ''}>Cocinero</option>
-                            <option value="cashier" ${emp.role === 'cashier' ? 'selected' : ''}>Cajero</option>
-                            <option value="admin" ${emp.role === 'admin' ? 'selected' : ''}>Admin</option>
+                            <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Cliente</option>
+                            <option value="waiter" ${user.role === 'waiter' ? 'selected' : ''}>Mesero</option>
+                            <option value="chef" ${user.role === 'chef' ? 'selected' : ''}>Cocinero</option>
+                            <option value="cashier" ${user.role === 'cashier' ? 'selected' : ''}>Cajero</option>
+                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
                         </select>
                         <button class="btn-secondary save-role-btn">Guardar</button>
                     </div>
@@ -684,8 +719,8 @@
                 });
 
             } catch (error) {
-                console.error("Error loading employees: ", error);
-                container.innerHTML = '<p>Error al cargar los empleados.</p>';
+                console.error("Error loading users: ", error);
+                statusDiv.innerHTML = `<p class="empty-list-message" style="color: var(--danger);">Error al cargar: ${error.message}</p>`;
             }
         }
 
@@ -700,6 +735,17 @@
             try {
                 await db.collection('customers').doc(userId).update({ role: newRole });
                 showNotification('Rol actualizado con éxito.');
+                // Opcional: remover el item de la lista si ya no cumple con el filtro actual
+                const activeFilter = document.querySelector('#employeeFilterControls .filter-btn.active').dataset.filter;
+                const employeeRoles = ['waiter', 'chef', 'cashier', 'admin'];
+                const isEmployee = employeeRoles.includes(newRole);
+
+                if ((activeFilter === 'employees' && !isEmployee) || (activeFilter === 'customers' && isEmployee)) {
+                    item.style.transition = 'opacity 0.3s ease';
+                    item.style.opacity = '0';
+                    setTimeout(() => item.remove(), 300);
+                }
+
             } catch (error) {
                 console.error("Error updating role: ", error);
                 showNotification('Error al actualizar el rol.', 'error');
