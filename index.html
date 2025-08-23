@@ -855,7 +855,10 @@
             try {
                 const collectionRef = db.collection('config/pagoMovil/paymentMethods');
                 if (id) {
-                    await collectionRef.doc(id).update(data);
+                    // *** CAMBIO CLAVE AQUÍ ***
+                    // Usar set con merge:true en lugar de update.
+                    // Esto actualiza si existe, o crea si no existe, evitando el error.
+                    await collectionRef.doc(id).set(data, { merge: true });
                     showNotification('Método de pago actualizado con éxito.');
                 } else {
                     await collectionRef.add(data);
