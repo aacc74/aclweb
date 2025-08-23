@@ -1766,8 +1766,8 @@
                     auth.sendPasswordResetEmail(email)
                         .then(() => {
                             showNotification("Correo de recuperación enviado. Revisa tu bandeja de entrada.");
-                            setAuthMode('login');
-                            authSubmitBtn.disabled = false; // Re-enable button
+                            authSubmitBtn.disabled = false; // Re-enable button after success
+                            setAuthMode('login'); // Return to login view
                         })
                         .catch(handleAuthError);
                 }
