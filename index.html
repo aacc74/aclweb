@@ -256,12 +256,14 @@
         }
         
         /* --- MODAL --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(29, 41, 55, 0.5); z-index: 1500; justify-content: center; align-items: center; }
         .modal.visible { display: flex; }
         .modal-content {
             background: var(--bg-light); border-radius: var(--border-radius);
             width: 90%; max-width: 500px; max-height: 90vh;
             display: flex; flex-direction: column; box-shadow: var(--shadow-lg);
         }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; } .modal-header h3 { font-size: 1.25rem; } .modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; } .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); text-align: right; } .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
         
         /* --- WAITER TABLE VIEW --- */
         .table-card {
@@ -290,14 +292,23 @@
         .admin-tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
         .admin-tab-content { display: none; }
         .admin-tab-content.active { display: block; }
-        .admin-card { background: var(--bg-light); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); max-width: 600px; margin: 0 auto; }
+        .admin-card { background: var(--bg-light); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); max-width: 700px; margin: 0 auto; }
         .employee-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;}
         .employee-item { display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); }
         .employee-info p { margin: 0; }
         .employee-info .email { font-size: 0.875rem; color: var(--text-gray); }
         .btn-secondary { background-color: var(--bg-off-white); color: var(--text-dark); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 600; cursor: pointer; transition: var(--transition); }
         .btn-secondary:hover { background-color: var(--border-color); }
+        .btn-danger { background-color: var(--danger); color: white; }
         .employee-filter-controls { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+
+        /* Estilos para la lista de productos en Admin */
+        .admin-product-list-item { display: grid; grid-template-columns: 50px 1fr auto; gap: 1rem; align-items: center; padding: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .admin-product-list-item:last-child { border-bottom: none; }
+        .admin-product-img { width: 50px; height: 50px; object-fit: cover; border-radius: var(--border-radius); }
+        .admin-product-info h4 { margin: 0; font-size: 1rem; }
+        .admin-product-info p { margin: 0; color: var(--text-gray); font-size: 0.875rem;}
+        .admin-product-actions { display: flex; gap: 0.5rem; }
 
         /* ... (El resto del CSS se mantiene similar, pero adaptado a la paleta clara) ... */
         .order-card.status-pending { border-color: var(--warning); } .order-card.status-preparing { border-color: #3B82F6; } .order-card.status-ready { border-color: var(--success); } .order-card.status-paid { border-color: var(--accent); } .order-card.status-cancelled { border-color: var(--text-gray); }
@@ -305,8 +316,6 @@
         .status-pending { background-color: var(--warning); } .status-preparing { background-color: #3B82F6; } .status-ready { background-color: var(--success); } .status-paid { background-color: var(--accent); } .status-cancelled { background-color: var(--text-gray); }
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; } .order-header h4 { font-size: 1.125rem; } .order-header span { font-size: 0.875rem; color: var(--text-gray); }
         .order-items { border-top: 1px solid var(--border-color); padding-top: 0.75rem; } .order-item { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.25rem 0; } .order-item span:first-child { color: var(--text-gray); } .order-actions { margin-top: 1rem; text-align: right; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(29, 41, 55, 0.5); z-index: 1500; justify-content: center; align-items: center; }
-        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; } .modal-header h3 { font-size: 1.25rem; } .modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; } .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); text-align: right; } .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
         .table-selection { margin-bottom: 2rem; } .tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; } .table-card i { font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--primary); transition: var(--transition); } .table-card.locked i { color: var(--text-gray); } .table-card span { font-weight: 600; }
         .profile-header { text-align: center; margin-bottom: 1.5rem; } .profile-header h3 { font-size: 1.5rem; } .profile-header p { color: var(--text-gray); } .profile-details { display: flex; flex-direction: column; gap: 1rem; } .detail-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); } .detail-item:last-child { border-bottom: none; } .detail-item span:first-child { font-weight: 500; color: var(--text-dark); } .detail-item span:last-child { color: var(--text-gray); }
         .notification { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background-color: var(--text-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 2rem; box-shadow: var(--shadow-lg); z-index: 2000; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
@@ -314,7 +323,6 @@
     </style>
 </head>
 <body>
-    <!-- El HTML sigue siendo el mismo que en la versión anterior -->
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -391,37 +399,20 @@
         <section id="adminSection" style="display: none;">
             <h2 class="section-title">Panel de Administración</h2>
             <div class="admin-tabs" id="adminTabs">
-                <button class="admin-tab-btn active" data-tab="menu">Ingresar Menú</button>
-                <button class="admin-tab-btn" data-tab="employees">Administrar Empleados</button>
+                <button class="admin-tab-btn active" data-tab="menu">Gestionar Menú</button>
+                <button class="admin-tab-btn" data-tab="employees">Gestionar Empleados</button>
             </div>
 
             <!-- Contenido Pestaña Menú -->
             <div id="admin-tab-menu" class="admin-tab-content active">
                 <div class="admin-card">
-                    <h3>Añadir Nuevo Producto</h3>
-                    <form id="addProductForm">
-                        <div class="form-group">
-                            <label for="productName">Nombre del Producto</label>
-                            <input type="text" id="productName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="productCategory">Categoría</label>
-                            <input type="text" id="productCategory" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="productPrice">Precio</label>
-                            <input type="number" id="productPrice" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="productDescription">Descripción</label>
-                            <textarea id="productDescription" rows="3"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="productImage">Imagen del Producto</label>
-                            <input type="file" id="productImage" accept="image/*">
-                        </div>
-                        <button type="submit" class="btn-primary" id="addProductBtn">Añadir Producto</button>
-                    </form>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>Lista de Productos</h3>
+                        <button class="btn-primary" id="addNewProductBtn" style="width: auto;">Añadir Nuevo</button>
+                    </div>
+                    <div id="adminProductList">
+                        <!-- La lista de productos del admin se cargará aquí -->
+                    </div>
                 </div>
             </div>
 
@@ -456,6 +447,45 @@
         </div>
     </div>
     
+    <!-- === MODAL PARA PRODUCTOS (AÑADIR/EDITAR) === -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="productModalTitle">Añadir Nuevo Producto</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+                    <div class="form-group">
+                        <label for="productName">Nombre del Producto</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Categoría</label>
+                        <input type="text" id="productCategory" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Precio</label>
+                        <input type="number" id="productPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Descripción</label>
+                        <textarea id="productDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="productImage">Imagen del Producto</label>
+                        <input type="file" id="productImage" accept="image/*">
+                        <input type="hidden" id="existingImageUrl">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProductBtn" class="btn-primary">Guardar Producto</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Navegación Inferior -->
     <nav class="magic-nav" id="magicNav"></nav>
     
@@ -463,8 +493,6 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // El JavaScript es idéntico al de la versión anterior.
-        // La lógica no cambia, solo la presentación (CSS).
         const firebaseConfig = {
             apiKey: "AIzaSyAY9aPCtpNEv77Bmm3ITDwuwg7FPSWVHTA",
             authDomain: "arcanosweb-3a746.firebaseapp.com",
@@ -476,13 +504,14 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage(); // <--- Añadido para Storage
+        const storage = firebase.storage();
 
         let currentUser = null, currentUserRole = 'customer', currentCategory = 'all';
         let products = [], allOrders = [], cart = [], cartByTable = {};
         let currentTable = null, realtimeOrdersListener = null;
         let chefFilter = 'pending', cashierFilter = 'ready', waiterFilter = 'active';
 
+        // --- DOM Elements ---
         const mainHeader = document.getElementById('mainHeader');
         const logoutBtn = document.getElementById('logoutBtn');
         const authSection = document.getElementById('authSection');
@@ -493,14 +522,24 @@
         const kitchenOrdersContainer = document.getElementById('kitchenOrdersContainer');
         const cashierOrdersContainer = document.getElementById('cashierOrdersContainer');
         const notification = document.getElementById('notification');
+        
+        // Carts
         const cartModal = document.getElementById('cartModal');
         const desktopCartBtn = document.getElementById('desktopCartBtn');
-        const authForm = document.getElementById('authForm'), authEmail = document.getElementById('authEmail'), authPassword = document.getElementById('authPassword'), authConfirmPassword = document.getElementById('authConfirmPassword'), confirmPasswordField = document.getElementById('confirmPasswordField'), authSubmitBtn = document.getElementById('authSubmitBtn'), authMessage = document.getElementById('authMessage'), signUpLink = document.getElementById('signUpLink'), forgotPasswordLink = document.getElementById('forgotPasswordLink'), loginLink = document.getElementById('loginLink'), googleLoginBtn = document.getElementById('googleLogin'), appleLoginBtn = document.getElementById('appleLogin'), linkSeparator = document.getElementById('linkSeparator');
-        let authMode = 'login';
         const checkoutBtn = document.getElementById('checkoutBtn');
         const processOrderBtn = document.getElementById('processOrderBtn');
+
+        // Auth
+        const authForm = document.getElementById('authForm'), authEmail = document.getElementById('authEmail'), authPassword = document.getElementById('authPassword'), authConfirmPassword = document.getElementById('authConfirmPassword'), confirmPasswordField = document.getElementById('confirmPasswordField'), authSubmitBtn = document.getElementById('authSubmitBtn'), authMessage = document.getElementById('authMessage'), signUpLink = document.getElementById('signUpLink'), forgotPasswordLink = document.getElementById('forgotPasswordLink'), loginLink = document.getElementById('loginLink'), googleLoginBtn = document.getElementById('googleLogin'), appleLoginBtn = document.getElementById('appleLogin'), linkSeparator = document.getElementById('linkSeparator');
+        let authMode = 'login';
+        
+        // Sidebar
         const sidebar = document.getElementById('sidebar'), overlay = document.getElementById('overlay'), menuToggle = document.getElementById('menuToggle'), closeSidebar = document.getElementById('closeSidebar'), categoriesContainer = document.getElementById('categoriesContainer');
 
+        // Product Modal
+        const productModal = document.getElementById('productModal');
+
+        // --- Auth State ---
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
@@ -548,6 +587,7 @@
             authSubmitBtn.textContent = isLogin ? "Iniciar Sesión" : (isRegister ? "Registrarse" : "Enviar enlace");
         }
         
+        // --- UI & Navigation ---
         function showSection(sectionId) {
             allSections.forEach(s => s.style.display = 'none');
             const targetSection = document.getElementById(`${sectionId}Section`);
@@ -597,7 +637,7 @@
                 waiter: () => { showSection('waiter'); listenForTableLocks(); listenForWaiterOrders(); renderWaiterProducts(); },
                 chef: () => { showSection('chef'); listenForKitchenOrders(); },
                 cashier: () => { showSection('cashier'); listenForCashierOrders(); },
-                admin: () => { showSection('admin'); setupAdminPanel(); }, // <--- Modificado
+                admin: () => { showSection('admin'); setupAdminPanel(); },
                 customer: () => { showSection('menu'); listenForWaiterOrders(); renderProfile(); }
             };
             const action = roleToAction[currentUserRole.includes('chef') ? 'chef' : currentUserRole] || roleToAction.customer;
@@ -605,7 +645,7 @@
             setupFilterControls();
         }
 
-        // === NUEVAS FUNCIONES PARA EL PANEL DE ADMIN ===
+        // === ADMIN PANEL FUNCTIONS ===
         function setupAdminPanel() {
             const tabs = document.getElementById('adminTabs');
             const contents = document.querySelectorAll('.admin-tab-content');
@@ -621,8 +661,9 @@
                 const targetContent = document.getElementById(`admin-tab-${e.target.dataset.tab}`);
                 targetContent.classList.add('active');
                 
-                if(e.target.dataset.tab === 'employees') {
-                    // Cargar vista por defecto (empleados) al cambiar a la pestaña
+                if (e.target.dataset.tab === 'menu') {
+                    loadAdminProducts();
+                } else if(e.target.dataset.tab === 'employees') {
                     loadEmployees('employees'); 
                     employeeFilters.querySelector('.active').classList.remove('active');
                     employeeFilters.querySelector('[data-filter="employees"]').classList.add('active');
@@ -636,21 +677,86 @@
                 loadEmployees(e.target.dataset.filter);
             });
 
-            document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
+            document.getElementById('addNewProductBtn').addEventListener('click', () => openProductModal());
+            document.getElementById('saveProductBtn').addEventListener('click', handleProductFormSubmit);
+            
+            // Cargar la vista por defecto (lista de productos)
+            loadAdminProducts();
         }
 
-        async function handleAddProduct(e) {
-            e.preventDefault();
-            const btn = document.getElementById('addProductBtn');
+        // --- Product CRUD Functions (Admin) ---
+        async function loadAdminProducts() {
+            const container = document.getElementById('adminProductList');
+            container.innerHTML = `<p>Cargando productos...</p>`;
+            try {
+                const snapshot = await db.collection('products').orderBy('name').get();
+                const productList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                if (productList.length === 0) {
+                    container.innerHTML = `<p class="empty-list-message">No hay productos en el menú.</p>`;
+                    return;
+                }
+
+                container.innerHTML = productList.map(p => `
+                    <div class="admin-product-list-item" id="admin-product-${p.id}">
+                        <img src="${p.imageUrl || 'https://via.placeholder.com/50'}" alt="${p.name}" class="admin-product-img">
+                        <div class="admin-product-info">
+                            <h4>${p.name}</h4>
+                            <p>${p.category} - $${p.price.toFixed(2)}</p>
+                        </div>
+                        <div class="admin-product-actions">
+                            <button class="btn-secondary edit-product-btn" data-id="${p.id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-secondary btn-danger delete-product-btn" data-id="${p.id}" data-image="${p.imageUrl || ''}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.querySelectorAll('.edit-product-btn').forEach(btn => btn.addEventListener('click', e => openProductModal(e.currentTarget.dataset.id)));
+                container.querySelectorAll('.delete-product-btn').forEach(btn => btn.addEventListener('click', e => handleDeleteProduct(e.currentTarget.dataset.id, e.currentTarget.dataset.image)));
+
+            } catch (error) {
+                console.error("Error loading admin products:", error);
+                container.innerHTML = `<p class="empty-list-message" style="color:var(--danger)">Error al cargar productos.</p>`;
+            }
+        }
+
+        async function openProductModal(productId = null) {
+            const form = document.getElementById('productForm');
+            form.reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('existingImageUrl').value = '';
+
+            const modalTitle = document.getElementById('productModalTitle');
+            if (productId) {
+                modalTitle.textContent = 'Editar Producto';
+                const doc = await db.collection('products').doc(productId).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('productId').value = productId;
+                    document.getElementById('productName').value = data.name;
+                    document.getElementById('productCategory').value = data.category;
+                    document.getElementById('productPrice').value = data.price;
+                    document.getElementById('productDescription').value = data.description || '';
+                    document.getElementById('existingImageUrl').value = data.imageUrl || '';
+                }
+            } else {
+                modalTitle.textContent = 'Añadir Nuevo Producto';
+            }
+            productModal.classList.add('visible');
+        }
+
+        async function handleProductFormSubmit() {
+            const btn = document.getElementById('saveProductBtn');
             btn.disabled = true;
             btn.textContent = 'Guardando...';
 
+            const productId = document.getElementById('productId').value;
             const name = document.getElementById('productName').value;
             const category = document.getElementById('productCategory').value;
             const price = parseFloat(document.getElementById('productPrice').value);
             const description = document.getElementById('productDescription').value;
             const imageFile = document.getElementById('productImage').files[0];
-            let imageUrl = `https://via.placeholder.com/300x200?text=${name.replace(/\s+/g, '+')}`;
+            let imageUrl = document.getElementById('existingImageUrl').value || '';
 
             try {
                 if (imageFile) {
@@ -659,19 +765,61 @@
                     imageUrl = await snapshot.ref.getDownloadURL();
                 }
 
-                await db.collection('products').add({ name, category, price, description, imageUrl });
-                showNotification('Producto añadido con éxito');
-                e.target.reset();
-                loadProducts(); // Recargar productos para que se reflejen los cambios
+                const productData = { name, category, price, description, imageUrl };
+
+                if (productId) {
+                    await db.collection('products').doc(productId).update(productData);
+                    showNotification('Producto actualizado con éxito');
+                } else {
+                    await db.collection('products').add(productData);
+                    showNotification('Producto añadido con éxito');
+                }
+                
+                productModal.classList.remove('visible');
+                loadProducts(); // Recargar productos para la vista de cliente/mesero
+                loadAdminProducts(); // Recargar lista en el panel de admin
             } catch (error) {
-                console.error("Error adding product: ", error);
-                showNotification('Error al añadir el producto', 'error');
+                console.error("Error saving product: ", error);
+                showNotification('Error al guardar el producto', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Añadir Producto';
+                btn.textContent = 'Guardar Producto';
             }
         }
 
+        async function handleDeleteProduct(productId, imageUrl) {
+            if (!confirm(`¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            try {
+                // Eliminar documento de Firestore
+                await db.collection('products').doc(productId).delete();
+
+                // Si hay una URL de imagen y no es un placeholder, eliminar de Storage
+                if (imageUrl && imageUrl.includes('firebasestorage')) {
+                    const imageRef = storage.refFromURL(imageUrl);
+                    await imageRef.delete();
+                }
+
+                showNotification('Producto eliminado con éxito.');
+                loadProducts(); // Recargar productos para la vista de cliente/mesero
+                
+                // Eliminar el elemento de la lista del admin visualmente
+                const itemToRemove = document.getElementById(`admin-product-${productId}`);
+                if (itemToRemove) {
+                    itemToRemove.style.transition = 'opacity 0.3s ease';
+                    itemToRemove.style.opacity = '0';
+                    setTimeout(() => itemToRemove.remove(), 300);
+                }
+
+            } catch (error) {
+                console.error("Error deleting product:", error);
+                showNotification('Error al eliminar el producto.', 'error');
+            }
+        }
+        
+        // --- Employee CRUD Functions (Admin) ---
         async function loadEmployees(filter = 'employees') {
             const container = document.getElementById('employeeList');
             const statusDiv = document.getElementById('employeeListStatus');
@@ -706,7 +854,7 @@
                         <select class="role-select">
                             <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Cliente</option>
                             <option value="waiter" ${user.role === 'waiter' ? 'selected' : ''}>Mesero</option>
-                            <option value="chef" ${user.role === 'chef' ? 'selected' : ''}>Cocinero</option>
+                            <option value="chef" ${user.role.includes('chef') ? 'selected' : ''}>Cocinero</option>
                             <option value="cashier" ${user.role === 'cashier' ? 'selected' : ''}>Cajero</option>
                             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
                         </select>
@@ -735,7 +883,7 @@
             try {
                 await db.collection('customers').doc(userId).update({ role: newRole });
                 showNotification('Rol actualizado con éxito.');
-                // Opcional: remover el item de la lista si ya no cumple con el filtro actual
+                
                 const activeFilter = document.querySelector('#employeeFilterControls .filter-btn.active').dataset.filter;
                 const employeeRoles = ['waiter', 'chef', 'cashier', 'admin'];
                 const isEmployee = employeeRoles.includes(newRole);
@@ -754,8 +902,8 @@
                 e.target.textContent = 'Guardar';
             }
         }
-        // === FIN NUEVAS FUNCIONES ===
 
+        // --- Product & Category Functions (Customer/Waiter) ---
         function loadProducts() {
             db.collection("products").get().then(snapshot => {
                 products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -787,7 +935,6 @@
             productsContainer.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.currentTarget.dataset.id)));
         }
         function createProductCard(p) {
-            // Usar la URL de la imagen si existe, de lo contrario usar placeholder
             const imageUrl = p.imageUrl || `https://via.placeholder.com/300x200?text=${p.name.replace(/\s+/g, '+')}`;
             return `<div class="product-card">
                         <div class="product-image"><img src="${imageUrl}" alt="${p.name}"></div>
@@ -803,24 +950,46 @@
                     </div>`;
         }
 
+        // --- Order & Notification Functions ---
         function listenForWaiterOrders() {
-            const query = db.collection("orders").where(currentUserRole === 'waiter' ? 'waiterId' : 'userId', "==", currentUser.uid).orderBy("date", "desc");
+            const query = db.collection("orders").where('waiterId', "==", currentUser.uid);
             realtimeOrdersListener = query.onSnapshot(snapshot => {
-                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // NOTIFICATION LOGIC: Check for status changes made by chef
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "modified") {
+                        const oldData = change.doc.data();
+                        const newData = change.doc.data();
+                        if (oldData.status !== 'ready' && newData.status === 'ready') {
+                            showNotification(`¡El pedido de la Mesa ${newData.table} está listo!`);
+                        }
+                    }
+                });
+
+                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => new Date(b.date) - new Date(a.date));
                 renderFilteredOrders(waiterOrdersContainer, waiterFilter);
             }, console.error);
         }
+
         function listenForKitchenOrders() {
-            const query = db.collection("orders").orderBy("date", "asc");
+            const query = db.collection("orders");
             realtimeOrdersListener = query.onSnapshot(snapshot => {
-                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // NOTIFICATION LOGIC: Check for new pending orders
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added" && change.doc.data().status === 'pending') {
+                        const order = change.doc.data();
+                        showNotification(`Nuevo pedido para la ${order.table ? `Mesa ${order.table}` : 'cliente'}`);
+                    }
+                });
+                
+                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(a.date) - new Date(b.date));
                 renderFilteredOrders(kitchenOrdersContainer, chefFilter);
             }, console.error);
         }
+
         function listenForCashierOrders() {
-            const query = db.collection("orders").orderBy("date", "desc");
+            const query = db.collection("orders");
             realtimeOrdersListener = query.onSnapshot(snapshot => {
-                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.date) - new Date(a.date));
                 renderFilteredOrders(cashierOrdersContainer, cashierFilter);
             }, console.error);
         }
@@ -866,6 +1035,7 @@
             db.collection("orders").doc(orderId).update({ status }).then(() => showNotification("Estado actualizado")).catch(err => showNotification('Error al actualizar', 'error'));
         }
 
+        // --- Cart Functions ---
         function getActiveCart() {
             if (currentUserRole === 'waiter') {
                 if (!currentTable) { showNotification('Seleccione una mesa', 'error'); return null; }
@@ -949,6 +1119,7 @@
             } catch (error) { showNotification('Error al guardar el pedido', 'error'); }
         }
 
+        // --- Waiter Specific Functions ---
         function listenForTableLocks() {
             const tableContainer = document.getElementById('tableSelection');
             if(!tableContainer) return;
@@ -978,6 +1149,7 @@
             container.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.currentTarget.dataset.id)));
         }
 
+        // --- Other Functions ---
         function renderProfile() {
             const container = document.getElementById('profileContainer');
             if (!container || !currentUser) return;
@@ -1034,6 +1206,7 @@
             });
         }
 
+        // --- Global Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
             authForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -1061,6 +1234,7 @@
 
             desktopCartBtn.addEventListener('click', openCartModal);
             cartModal.querySelector('.close-modal')?.addEventListener('click', closeCartModal);
+            productModal.querySelector('.close-modal')?.addEventListener('click', () => productModal.classList.remove('visible'));
             logoutBtn.addEventListener('click', () => auth.signOut());
             checkoutBtn.addEventListener('click', checkout);
             processOrderBtn.addEventListener('click', processWaiterOrder);
