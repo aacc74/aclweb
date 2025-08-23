@@ -282,8 +282,24 @@
             max-width: 500px; margin: 2rem auto; background: var(--bg-light);
             padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow);
         }
-        .profile-avatar { background: var(--primary); color: white; }
-        .detail-item { border-bottom: 1px solid var(--border-color); }
+        .profile-avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: var(--primary); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; font-family: var(--font-display);
+            margin: 0 auto 1rem;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        .detail-item:last-of-type { border-bottom: none; }
+        .detail-item span:first-child { font-weight: 600; color: var(--text-dark); margin-right: 1rem; }
+        .detail-item span:last-child { color: var(--text-gray); text-align: right; }
+
 
         /* --- ADMIN PANEL --- */
         .admin-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; flex-wrap: wrap; }
@@ -369,7 +385,7 @@
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; } .order-header h4 { font-size: 1.125rem; } .order-header span { font-size: 0.875rem; color: var(--text-gray); }
         .order-items { border-top: 1px solid var(--border-color); padding-top: 0.75rem; } .order-item { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.25rem 0; } .order-item span:first-child { color: var(--text-gray); } .order-actions { margin-top: 1rem; text-align: right; }
         .table-selection { margin-bottom: 2rem; } .tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; } .table-card i { font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--primary); transition: var(--transition); } .table-card.locked i { color: var(--text-gray); } .table-card span { font-weight: 600; }
-        .profile-header { text-align: center; margin-bottom: 1.5rem; } .profile-header h3 { font-size: 1.5rem; } .profile-header p { color: var(--text-gray); } .profile-details { display: flex; flex-direction: column; gap: 1rem; } .detail-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); } .detail-item:last-child { border-bottom: none; } .detail-item span:first-child { font-weight: 500; color: var(--text-dark); } .detail-item span:last-child { color: var(--text-gray); }
+        .profile-header { text-align: center; margin-bottom: 1.5rem; } .profile-header h3 { font-size: 1.5rem; } .profile-header p { color: var(--text-gray); } .profile-details { display: flex; flex-direction: column; gap: 1rem; }
         .notification { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background-color: var(--text-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 2rem; box-shadow: var(--shadow-lg); z-index: 2000; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
         .notification.show { opacity: 1; transform: translate(-50%, -10px); }
     </style>
@@ -423,7 +439,7 @@
                 <div class="auth-body">
                     <form id="authForm" class="auth-form">
                         <div class="form-group"><label for="authEmail">Correo</label><input type="email" id="authEmail" required></div>
-                        <div class="form-group"><label for="authPassword">Contraseña</label><input type="password" id="authPassword" required></div>
+                        <div class="form-group" id="passwordField"><label for="authPassword">Contraseña</label><input type="password" id="authPassword" required></div>
                         <div id="confirmPasswordField" style="display: none;" class="form-group"><label for="authConfirmPassword">Confirmar Contraseña</label><input type="password" id="authConfirmPassword"></div>
                         <button type="submit" class="btn-primary" id="authSubmitBtn">Iniciar Sesión</button>
                     </form>
@@ -616,6 +632,41 @@
             </div>
         </div>
     </div>
+
+    <!-- === MODAL PARA EDITAR PERFIL === -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="profileModalTitle">Editar Perfil</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="profileFirstName">Nombre</label>
+                            <input type="text" id="profileFirstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileLastName">Apellido</label>
+                            <input type="text" id="profileLastName" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileAddress">Dirección Completa</label>
+                        <textarea id="profileAddress" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePhone">Número de Contacto</label>
+                        <input type="tel" id="profilePhone" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProfileBtn" class="btn-primary">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
     
     <!-- === MODAL PARA TÉRMINOS Y CONDICIONES === -->
     <div class="modal" id="termsModal">
@@ -687,6 +738,10 @@
         const termsModal = document.getElementById('termsModal');
         const openTermsLink = document.getElementById('openTermsLink');
 
+        // Profile Modal
+        const profileModal = document.getElementById('profileModal');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+
         // Carts & Payment
         const cartModal = document.getElementById('cartModal');
         const desktopCartBtn = document.getElementById('desktopCartBtn');
@@ -696,7 +751,7 @@
         const pagoMovilDetailsDiv = document.getElementById('pagoMovilDetails');
 
         // Auth
-        const authForm = document.getElementById('authForm'), authEmail = document.getElementById('authEmail'), authPassword = document.getElementById('authPassword'), authConfirmPassword = document.getElementById('authConfirmPassword'), confirmPasswordField = document.getElementById('confirmPasswordField'), authSubmitBtn = document.getElementById('authSubmitBtn'), authMessage = document.getElementById('authMessage'), signUpLink = document.getElementById('signUpLink'), forgotPasswordLink = document.getElementById('forgotPasswordLink'), loginLink = document.getElementById('loginLink'), googleLoginBtn = document.getElementById('googleLogin'), appleLoginBtn = document.getElementById('appleLogin'), linkSeparator = document.getElementById('linkSeparator');
+        const authForm = document.getElementById('authForm'), authEmail = document.getElementById('authEmail'), authPassword = document.getElementById('authPassword'), confirmPasswordField = document.getElementById('confirmPasswordField'), authSubmitBtn = document.getElementById('authSubmitBtn'), authMessage = document.getElementById('authMessage'), signUpLink = document.getElementById('signUpLink'), forgotPasswordLink = document.getElementById('forgotPasswordLink'), loginLink = document.getElementById('loginLink'), googleLoginBtn = document.getElementById('googleLogin'), appleLoginBtn = document.getElementById('appleLogin'), linkSeparator = document.getElementById('linkSeparator'), passwordField = document.getElementById('passwordField');
         let authMode = 'login';
         
         // Sidebar
@@ -761,14 +816,32 @@
         function setAuthMode(mode) {
             authMode = mode;
             authForm.reset();
-            const isLogin = mode === 'login', isRegister = mode === 'register';
+            const isLogin = mode === 'login';
+            const isRegister = mode === 'register';
+            const isForgot = mode === 'forgot';
+
+            // Update field visibility
+            passwordField.style.display = isForgot ? 'none' : 'block';
             confirmPasswordField.style.display = isRegister ? 'block' : 'none';
+            
+            // Update link visibility
             signUpLink.style.display = isLogin ? 'inline' : 'none';
             forgotPasswordLink.style.display = isLogin ? 'inline' : 'none';
             linkSeparator.style.display = isLogin ? 'inline' : 'none';
             loginLink.style.display = !isLogin ? 'inline' : 'none';
-            authMessage.textContent = isLogin ? "Bienvenido de nuevo" : (isRegister ? "Crea tu cuenta" : "Recupera tu acceso");
-            authSubmitBtn.textContent = isLogin ? "Iniciar Sesión" : (isRegister ? "Registrarse" : "Enviar enlace");
+            
+            // Update footer visibility for forgot password mode
+            authForm.querySelector('.separator').style.display = isForgot ? 'none' : 'flex';
+            authForm.parentElement.parentElement.querySelector('.auth-options').style.display = isForgot ? 'none' : 'grid';
+
+            // Update text content
+            authMessage.textContent = 
+                isLogin ? "Bienvenido de nuevo" : 
+                (isRegister ? "Crea tu cuenta" : "Recupera tu acceso");
+            
+            authSubmitBtn.textContent = 
+                isLogin ? "Iniciar Sesión" : 
+                (isRegister ? "Registrarse" : "Enviar enlace de recuperación");
         }
         
         // --- UI & Navigation ---
@@ -1497,27 +1570,75 @@
             container.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.currentTarget.dataset.id)));
         }
 
-        // --- Other Functions ---
-        function renderProfile() {
+        // --- Profile Functions ---
+        async function renderProfile() {
             const container = document.getElementById('profileContainer');
             if (!container || !currentUser) return;
-            const creationDate = currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime).toLocaleDateString() : 'N/A';
+            
+            const doc = await db.collection('customers').doc(currentUser.uid).get();
+            if (!doc.exists) {
+                container.innerHTML = '<p>No se pudo cargar el perfil.</p>';
+                return;
+            }
+            const data = doc.data();
+            const creationDate = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+            
             container.innerHTML = `
                 <div class="profile-card">
                     <div class="profile-header">
-                        <div class="profile-avatar">${(currentUser.displayName || 'C').charAt(0)}</div>
-                        <h3>${currentUser.displayName || 'Cliente'}</h3>
-                        <p>${currentUser.email}</p>
+                        <div class="profile-avatar">${(data.displayName || 'C').charAt(0).toUpperCase()}</div>
+                        <h3 style="margin-top: 0.5rem;">${data.displayName || 'Cliente'}</h3>
+                        <p>${data.email}</p>
                     </div>
                     <div class="profile-details">
+                        <div class="detail-item"><span>Teléfono</span> <span>${data.phone || 'No especificado'}</span></div>
+                        <div class="detail-item"><span>Dirección</span> <span>${data.address || 'No especificada'}</span></div>
                         <div class="detail-item"><span>Miembro desde</span> <span>${creationDate}</span></div>
-                        <div class="detail-item"><span>Pedidos totales</span> <span id="profileOrderCount">0</span></div>
                     </div>
+                    <button class="btn-primary" id="editProfileBtn" style="margin-top: 1.5rem;">Editar Perfil</button>
                 </div>`;
-            db.collection('orders').where('userId', '==', currentUser.uid).get().then(s => {
-                const countEl = document.getElementById('profileOrderCount');
-                if(countEl) countEl.textContent = s.size;
-            });
+            
+            document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
+        }
+
+        async function openProfileModal() {
+            const doc = await db.collection('customers').doc(currentUser.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('profileFirstName').value = data.firstName || '';
+                document.getElementById('profileLastName').value = data.lastName || '';
+                document.getElementById('profileAddress').value = data.address || '';
+                document.getElementById('profilePhone').value = data.phone || '';
+            }
+            profileModal.classList.add('visible');
+        }
+
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveProfileBtn');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            const updatedData = {
+                firstName: document.getElementById('profileFirstName').value,
+                lastName: document.getElementById('profileLastName').value,
+                address: document.getElementById('profileAddress').value,
+                phone: document.getElementById('profilePhone').value,
+            };
+            updatedData.displayName = `${updatedData.firstName} ${updatedData.lastName}`;
+
+            try {
+                await db.collection('customers').doc(currentUser.uid).update(updatedData);
+                showNotification('Perfil actualizado con éxito');
+                profileModal.classList.remove('visible');
+                renderProfile(); // Re-render profile to show new data
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                showNotification('Error al actualizar el perfil.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Guardar Cambios';
+            }
         }
         
         function getStatusText(status) {
@@ -1580,7 +1701,6 @@
                 await db.collection("customers").doc(currentUser.uid).set(userData, { merge: true });
                 showNotification('¡Datos guardados con éxito!');
                 
-                // ** CORRECTED LOGIC **
                 // Manually hide the setup form and show the main app
                 newUserSetupSection.style.display = 'none';
                 mainHeader.classList.add('visible');
@@ -1604,6 +1724,7 @@
         // --- Global Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
             newUserSetupForm.addEventListener('submit', handleNewUserSetup);
+            saveProfileBtn.addEventListener('click', handleProfileUpdate);
             
             openTermsLink.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1614,23 +1735,40 @@
                 btn.addEventListener('click', () => termsModal.classList.remove('visible'));
             });
 
+            profileModal.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => profileModal.classList.remove('visible'));
+            });
+
             authForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const email = authEmail.value, password = authPassword.value;
+                const email = authEmail.value;
+                const password = authPassword.value;
+
                 authSubmitBtn.disabled = true;
                 authSubmitBtn.textContent = 'Procesando...';
-                if (authMode === 'login') auth.signInWithEmailAndPassword(email, password).catch(handleAuthError);
-                else if (authMode === 'register') {
-                    if (password !== authConfirmPassword.value) { handleAuthError({ message: "Las contraseñas no coinciden." }); return; }
+
+                if (authMode === 'login') {
+                    auth.signInWithEmailAndPassword(email, password).catch(handleAuthError);
+                } else if (authMode === 'register') {
+                    if (password !== authConfirmPassword.value) { 
+                        handleAuthError({ message: "Las contraseñas no coinciden." });
+                        return; 
+                    }
                     auth.createUserWithEmailAndPassword(email, password).catch(handleAuthError);
                 } else if (authMode === 'forgot') {
-                    auth.sendPasswordResetEmail(email).then(() => { showNotification("Correo de recuperación enviado."); setAuthMode('login'); }).catch(handleAuthError);
+                    auth.sendPasswordResetEmail(email)
+                        .then(() => {
+                            showNotification("Correo de recuperación enviado. Revisa tu bandeja de entrada.");
+                            setAuthMode('login');
+                        })
+                        .catch(handleAuthError);
                 }
             });
             function handleAuthError(error) {
                 showNotification(`Error: ${error.message}`, 'error');
-                setAuthMode(authMode);
                 authSubmitBtn.disabled = false;
+                // Restore button text based on the current mode
+                setAuthMode(authMode); 
             }
             signUpLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('register'); });
             forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('forgot'); });
