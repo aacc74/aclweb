@@ -349,6 +349,16 @@
         .payment-method-info .bank { font-weight: 600; }
         .payment-method-info .details { font-size: 0.9rem; color: var(--text-gray); }
         .payment-method-actions { display: flex; gap: 0.5rem; }
+        
+        /* ESTILOS PARA FORMULARIO DE NUEVO USUARIO */
+        .form-row { display: flex; gap: 1rem; }
+        .form-row .form-group { flex: 1; }
+        #newUserSetupForm a {
+            color: var(--primary);
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
 
         @media (min-width: 768px) { .admin-product-list-header { display: grid; } }
 
@@ -430,7 +440,41 @@
                 </div>
             </div>
         </section>
-        
+
+        <!-- === NUEVA SECCIÓN: CONFIGURACIÓN INICIAL DE USUARIO === -->
+        <section id="newUserSetupSection" style="display: none;">
+            <div class="admin-card" style="max-width: 600px; margin-top: 2rem;">
+                <h2 class="section-title" style="margin-bottom: 1.5rem;">Datos de Usuario</h2>
+                <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">¡Bienvenido! Por favor, completa tus datos para poder usar el servicio de delivery.</p>
+                <form id="newUserSetupForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userFirstName">Nombre</label>
+                            <input type="text" id="userFirstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userLastName">Apellido</label>
+                            <input type="text" id="userLastName" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="userAddress">Dirección Completa</label>
+                        <textarea id="userAddress" rows="3" required placeholder="Ej: Calle 123, Edificio ABC, Apto 4, Ciudad"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPhone">Número de Contacto</label>
+                        <input type="tel" id="userPhone" required>
+                        <p style="font-size: 0.8rem; color: var(--text-gray); margin-top: 0.25rem;">Este número se usará para coordinar el delivery.</p>
+                    </div>
+                     <div class="form-group" style="display: flex; align-items: center; gap: 0.75rem;">
+                        <input type="checkbox" id="userTerms" required style="width: auto; height: auto;">
+                        <label for="userTerms" style="margin-bottom: 0; font-weight: 400;">He leído y acepto los <a id="openTermsLink">Términos y Condiciones</a>.</label>
+                    </div>
+                    <button type="submit" class="btn-primary" id="saveUserSetupBtn">Crear Cuenta y Continuar</button>
+                </form>
+            </div>
+        </section>
+
         <!-- Secciones de la App -->
         <section id="menuSection" style="display: none;"><h2 class="section-title">Nuestro Menú</h2><div class="products-grid" id="productsContainer"></div></section>
         <section id="ordersSection" style="display: none;"><h2 class="section-title">Mis Pedidos</h2><div class="order-filter-controls" id="waiterFilterControls"></div><div class="order-list-container" id="waiterOrdersContainer"></div></section>
@@ -572,6 +616,32 @@
             </div>
         </div>
     </div>
+    
+    <!-- === MODAL PARA TÉRMINOS Y CONDICIONES === -->
+    <div class="modal" id="termsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Términos y Condiciones</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="line-height: 1.5;">
+                <h4 style="margin-bottom: 0.5rem;">1. Uso de Datos</h4>
+                <p>Al registrarte, aceptas que Arcanos Lunch recopile y utilice tu nombre, dirección y número de teléfono con el único propósito de gestionar y entregar tus pedidos a domicilio (delivery).</p>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">2. Responsabilidad</h4>
+                <p>La información proporcionada debe ser veraz y precisa. El restaurante no se hace responsable por entregas fallidas o demoradas debido a datos incorrectos o incompletos.</p>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">3. Comunicación</h4>
+                <p>Aceptas que nuestro personal de delivery pueda contactarte a través del número de teléfono proporcionado para coordinar la entrega de tu pedido.</p>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">4. Seguridad de Datos</h4>
+                <p>Nos comprometemos a proteger tu información personal y a no compartirla con terceros no relacionados con el proceso de entrega de tu pedido.</p>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">5. Aceptación</h4>
+                <p>Marcar la casilla de aceptación es un requisito indispensable para crear tu cuenta y utilizar nuestros servicios de delivery. Al hacerlo, confirmas que has leído, entendido y aceptado estos términos.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary close-modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Navegación Inferior -->
     <nav class="magic-nav" id="magicNav"></nav>
@@ -611,6 +681,12 @@
         const cashierOrdersContainer = document.getElementById('cashierOrdersContainer');
         const notification = document.getElementById('notification');
         
+        // New User Setup
+        const newUserSetupSection = document.getElementById('newUserSetupSection');
+        const newUserSetupForm = document.getElementById('newUserSetupForm');
+        const termsModal = document.getElementById('termsModal');
+        const openTermsLink = document.getElementById('openTermsLink');
+
         // Carts & Payment
         const cartModal = document.getElementById('cartModal');
         const desktopCartBtn = document.getElementById('desktopCartBtn');
@@ -630,21 +706,36 @@
         const productModal = document.getElementById('productModal');
 
         // --- Auth State ---
-        auth.onAuthStateChanged(user => {
+        auth.onAuthStateChanged(async user => {
             currentUser = user;
             if (user) {
-                authSection.style.opacity = '0';
-                setTimeout(() => authSection.style.display = 'none', 300);
-                mainHeader.classList.add('visible');
-                magicNav.classList.add('visible');
-                
-                db.collection("customers").doc(user.uid).get().then(doc => {
-                    currentUserRole = doc.exists ? (doc.data().role || 'customer') : 'customer';
-                    if (!doc.exists) saveCustomerData(user);
+                const userDocRef = db.collection("customers").doc(user.uid);
+                const doc = await userDocRef.get();
+
+                if (doc.exists && doc.data().address) {
+                    // User exists and has completed setup
+                    authSection.style.display = 'none';
+                    newUserSetupSection.style.display = 'none';
+                    mainHeader.classList.add('visible');
+                    magicNav.classList.add('visible');
+                    currentUserRole = doc.data().role || 'customer';
                     loadInitialDataForRole();
-                });
-                loadProducts();
+                    loadProducts();
+                } else {
+                    // New user or user who hasn't completed setup
+                    if (!doc.exists) {
+                        // Create a basic profile first
+                        await saveCustomerData(user, 'customer');
+                    }
+                    // Hide everything and show setup screen
+                    allSections.forEach(s => s.style.display = 'none');
+                    mainHeader.classList.remove('visible');
+                    magicNav.classList.remove('visible');
+                    authSection.style.display = 'none';
+                    newUserSetupSection.style.display = 'block';
+                }
             } else {
+                // No user logged in
                 authSection.style.display = 'flex';
                 setTimeout(() => authSection.style.opacity = '1', 50);
                 mainHeader.classList.remove('visible');
@@ -655,13 +746,16 @@
             }
         });
 
-        function saveCustomerData(user) {
-            db.collection("customers").doc(user.uid).set({
-                uid: user.uid, email: user.email,
-                displayName: user.displayName || "Cliente",
-                role: 'customer',
+        async function saveCustomerData(user, role = 'customer') {
+            const displayName = user.displayName || "Nuevo Usuario";
+            const customerData = {
+                uid: user.uid,
+                email: user.email,
+                displayName: displayName,
+                role: role,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            };
+            return db.collection("customers").doc(user.uid).set(customerData, { merge: true });
         }
 
         function setAuthMode(mode) {
@@ -855,9 +949,6 @@
             try {
                 const collectionRef = db.collection('config/pagoMovil/paymentMethods');
                 if (id) {
-                    // *** CAMBIO CLAVE AQUÍ ***
-                    // Usar set con merge:true en lugar de update.
-                    // Esto actualiza si existe, o crea si no existe, evitando el error.
                     await collectionRef.doc(id).set(data, { merge: true });
                     showNotification('Método de pago actualizado con éxito.');
                 } else {
@@ -1462,9 +1553,57 @@
                 });
             });
         }
+        
+        // --- NEW USER SETUP ---
+        async function handleNewUserSetup(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+            
+            const btn = document.getElementById('saveUserSetupBtn');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            const firstName = document.getElementById('userFirstName').value;
+            const lastName = document.getElementById('userLastName').value;
+            const address = document.getElementById('userAddress').value;
+            const phone = document.getElementById('userPhone').value;
+
+            const userData = {
+                displayName: `${firstName} ${lastName}`,
+                firstName,
+                lastName,
+                address,
+                phone
+            };
+
+            try {
+                await db.collection("customers").doc(currentUser.uid).set(userData, { merge: true });
+                showNotification('¡Datos guardados con éxito!');
+                
+                // Force a re-check of the auth state to load the main app
+                auth.onAuthStateChanged(auth.currentUser);
+
+            } catch (error) {
+                console.error("Error saving user data:", error);
+                showNotification('Error al guardar tus datos.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Guardar Datos';
+            }
+        }
 
         // --- Global Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
+            newUserSetupForm.addEventListener('submit', handleNewUserSetup);
+            
+            openTermsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                termsModal.classList.add('visible');
+            });
+
+            termsModal.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => termsModal.classList.remove('visible'));
+            });
+
             authForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const email = authEmail.value, password = authPassword.value;
