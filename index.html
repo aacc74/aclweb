@@ -85,12 +85,12 @@
         .auth-body { padding: 2rem; }
         .form-group { margin-bottom: 1.25rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; }
-        .form-group input {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%; padding: 0.75rem 1rem;
             border: 1px solid var(--border-color); border-radius: var(--border-radius);
             font-size: 1rem; transition: var(--transition); background: var(--bg-off-white);
         }
-        .form-group input:focus {
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); outline: none;
         }
         .btn-primary {
@@ -283,6 +283,21 @@
         .profile-avatar { background: var(--primary); color: white; }
         .detail-item { border-bottom: 1px solid var(--border-color); }
 
+        /* --- ADMIN PANEL --- */
+        .admin-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .admin-tab-btn { padding: 1rem 1.5rem; border: none; background: none; cursor: pointer; font-size: 1rem; font-weight: 600; color: var(--text-gray); position: relative; }
+        .admin-tab-btn.active { color: var(--primary); }
+        .admin-tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
+        .admin-tab-content { display: none; }
+        .admin-tab-content.active { display: block; }
+        .admin-card { background: var(--bg-light); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); max-width: 600px; margin: 0 auto; }
+        .employee-list { display: flex; flex-direction: column; gap: 1rem; }
+        .employee-item { display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); }
+        .employee-info p { margin: 0; }
+        .employee-info .email { font-size: 0.875rem; color: var(--text-gray); }
+        .btn-secondary { background-color: var(--bg-off-white); color: var(--text-dark); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 600; cursor: pointer; transition: var(--transition); }
+        .btn-secondary:hover { background-color: var(--border-color); }
+
         /* ... (El resto del CSS se mantiene similar, pero adaptado a la paleta clara) ... */
         .order-card.status-pending { border-color: var(--warning); } .order-card.status-preparing { border-color: #3B82F6; } .order-card.status-ready { border-color: var(--success); } .order-card.status-paid { border-color: var(--accent); } .order-card.status-cancelled { border-color: var(--text-gray); }
         .item-status { padding: 0.25rem 0.5rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; color: white; text-transform: capitalize; }
@@ -370,7 +385,57 @@
         <section id="menuSection" style="display: none;"><h2 class="section-title">Nuestro Menú</h2><div class="products-grid" id="productsContainer"></div></section>
         <section id="ordersSection" style="display: none;"><h2 class="section-title">Mis Pedidos</h2><div class="order-filter-controls" id="waiterFilterControls"></div><div class="order-list-container" id="waiterOrdersContainer"></div></section>
         <section id="profileSection" style="display: none;"><h2 class="section-title">Mi Perfil</h2><div id="profileContainer"></div></section>
-        <section id="adminSection" style="display: none;"><h2 class="section-title">Admin</h2></section>
+        
+        <!-- === SECCIÓN DE ADMIN MODIFICADA === -->
+        <section id="adminSection" style="display: none;">
+            <h2 class="section-title">Panel de Administración</h2>
+            <div class="admin-tabs" id="adminTabs">
+                <button class="admin-tab-btn active" data-tab="menu">Ingresar Menú</button>
+                <button class="admin-tab-btn" data-tab="employees">Administrar Empleados</button>
+            </div>
+
+            <!-- Contenido Pestaña Menú -->
+            <div id="admin-tab-menu" class="admin-tab-content active">
+                <div class="admin-card">
+                    <h3>Añadir Nuevo Producto</h3>
+                    <form id="addProductForm">
+                        <div class="form-group">
+                            <label for="productName">Nombre del Producto</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productCategory">Categoría</label>
+                            <input type="text" id="productCategory" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productPrice">Precio</label>
+                            <input type="number" id="productPrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productDescription">Descripción</label>
+                            <textarea id="productDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="productImage">Imagen del Producto</label>
+                            <input type="file" id="productImage" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn-primary" id="addProductBtn">Añadir Producto</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Contenido Pestaña Empleados -->
+            <div id="admin-tab-employees" class="admin-tab-content">
+                 <div class="admin-card">
+                    <h3>Gestionar Roles de Empleados</h3>
+                    <div class="employee-list" id="employeeList">
+                        <!-- La lista de empleados se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- === FIN SECCIÓN ADMIN === -->
+
         <section id="waiterSection" style="display: none;"><div class="table-selection" id="tableSelection"></div><h2 class="section-title" id="waiterMenuTitle" style="display:none;"></h2><div class="products-grid" id="waiterProductsContainer"></div></section>
         <section id="chefSection" style="display: none;"><h2 class="section-title">Panel de Cocina</h2><div class="order-filter-controls" id="chefFilterControls"></div><div class="order-list-container" id="kitchenOrdersContainer"></div></section>
         <section id="cashierSection" style="display: none;"><h2 class="section-title">Panel de Caja</h2><div class="order-filter-controls" id="cashierFilterControls"></div><div class="order-list-container" id="cashierOrdersContainer"></div></section>
@@ -405,6 +470,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const storage = firebase.storage(); // <--- Añadido para Storage
 
         let currentUser = null, currentUserRole = 'customer', currentCategory = 'all';
         let products = [], allOrders = [], cart = [], cartByTable = {};
@@ -525,13 +591,124 @@
                 waiter: () => { showSection('waiter'); listenForTableLocks(); listenForWaiterOrders(); renderWaiterProducts(); },
                 chef: () => { showSection('chef'); listenForKitchenOrders(); },
                 cashier: () => { showSection('cashier'); listenForCashierOrders(); },
-                admin: () => showSection('admin'),
+                admin: () => { showSection('admin'); setupAdminPanel(); }, // <--- Modificado
                 customer: () => { showSection('menu'); listenForWaiterOrders(); renderProfile(); }
             };
             const action = roleToAction[currentUserRole.includes('chef') ? 'chef' : currentUserRole] || roleToAction.customer;
             action();
             setupFilterControls();
         }
+
+        // === NUEVAS FUNCIONES PARA EL PANEL DE ADMIN ===
+        function setupAdminPanel() {
+            const tabs = document.getElementById('adminTabs');
+            const contents = document.querySelectorAll('.admin-tab-content');
+            
+            tabs.addEventListener('click', (e) => {
+                if(e.target.tagName !== 'BUTTON') return;
+
+                tabs.querySelector('.active').classList.remove('active');
+                e.target.classList.add('active');
+
+                contents.forEach(content => content.classList.remove('active'));
+                const targetContent = document.getElementById(`admin-tab-${e.target.dataset.tab}`);
+                targetContent.classList.add('active');
+                
+                if(e.target.dataset.tab === 'employees') {
+                    loadEmployees();
+                }
+            });
+
+            document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
+        }
+
+        async function handleAddProduct(e) {
+            e.preventDefault();
+            const btn = document.getElementById('addProductBtn');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            const name = document.getElementById('productName').value;
+            const category = document.getElementById('productCategory').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const description = document.getElementById('productDescription').value;
+            const imageFile = document.getElementById('productImage').files[0];
+            let imageUrl = `https://via.placeholder.com/300x200?text=${name.replace(/\s+/g, '+')}`;
+
+            try {
+                if (imageFile) {
+                    const imageRef = storage.ref(`product_images/${Date.now()}_${imageFile.name}`);
+                    const snapshot = await imageRef.put(imageFile);
+                    imageUrl = await snapshot.ref.getDownloadURL();
+                }
+
+                await db.collection('products').add({ name, category, price, description, imageUrl });
+                showNotification('Producto añadido con éxito');
+                e.target.reset();
+                loadProducts(); // Recargar productos para que se reflejen los cambios
+            } catch (error) {
+                console.error("Error adding product: ", error);
+                showNotification('Error al añadir el producto', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Añadir Producto';
+            }
+        }
+
+        async function loadEmployees() {
+            const container = document.getElementById('employeeList');
+            container.innerHTML = '<p>Cargando empleados...</p>';
+            try {
+                const snapshot = await db.collection('customers').get();
+                const employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                container.innerHTML = employees.map(emp => `
+                    <div class="employee-item" data-id="${emp.id}">
+                        <div class="employee-info">
+                            <p><strong>${emp.displayName || 'Sin Nombre'}</strong></p>
+                            <p class="email">${emp.email}</p>
+                        </div>
+                        <select class="role-select">
+                            <option value="customer" ${emp.role === 'customer' ? 'selected' : ''}>Cliente</option>
+                            <option value="waiter" ${emp.role === 'waiter' ? 'selected' : ''}>Mesero</option>
+                            <option value="chef" ${emp.role === 'chef' ? 'selected' : ''}>Cocinero</option>
+                            <option value="cashier" ${emp.role === 'cashier' ? 'selected' : ''}>Cajero</option>
+                            <option value="admin" ${emp.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                        <button class="btn-secondary save-role-btn">Guardar</button>
+                    </div>
+                `).join('');
+
+                container.querySelectorAll('.save-role-btn').forEach(btn => {
+                    btn.addEventListener('click', handleRoleUpdate);
+                });
+
+            } catch (error) {
+                console.error("Error loading employees: ", error);
+                container.innerHTML = '<p>Error al cargar los empleados.</p>';
+            }
+        }
+
+        async function handleRoleUpdate(e) {
+            const item = e.target.closest('.employee-item');
+            const userId = item.dataset.id;
+            const newRole = item.querySelector('.role-select').value;
+            
+            e.target.disabled = true;
+            e.target.textContent = '...';
+
+            try {
+                await db.collection('customers').doc(userId).update({ role: newRole });
+                showNotification('Rol actualizado con éxito.');
+            } catch (error) {
+                console.error("Error updating role: ", error);
+                showNotification('Error al actualizar el rol.', 'error');
+            } finally {
+                e.target.disabled = false;
+                e.target.textContent = 'Guardar';
+            }
+        }
+        // === FIN NUEVAS FUNCIONES ===
 
         function loadProducts() {
             db.collection("products").get().then(snapshot => {
@@ -564,8 +741,10 @@
             productsContainer.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.currentTarget.dataset.id)));
         }
         function createProductCard(p) {
+            // Usar la URL de la imagen si existe, de lo contrario usar placeholder
+            const imageUrl = p.imageUrl || `https://via.placeholder.com/300x200?text=${p.name.replace(/\s+/g, '+')}`;
             return `<div class="product-card">
-                        <div class="product-image"><img src="https://via.placeholder.com/300x200?text=${p.name.replace(/\s+/g, '+')}" alt="${p.name}"></div>
+                        <div class="product-image"><img src="${imageUrl}" alt="${p.name}"></div>
                         <div class="product-info">
                             <p class="product-category">${p.category}</p>
                             <h3 class="product-title">${p.name}</h3>
