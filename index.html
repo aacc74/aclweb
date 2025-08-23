@@ -292,7 +292,7 @@
         .admin-tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
         .admin-tab-content { display: none; }
         .admin-tab-content.active { display: block; }
-        .admin-card { background: var(--bg-light); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); max-width: 700px; margin: 0 auto; }
+        .admin-card { background: var(--bg-light); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); max-width: 800px; margin: 0 auto; }
         .employee-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;}
         .employee-item { display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); }
         .employee-info p { margin: 0; }
@@ -302,34 +302,48 @@
         .btn-danger { background-color: var(--danger); color: white; }
         .employee-filter-controls { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
         
-        /* === ESTILOS MEJORADOS PARA LA LISTA DE PRODUCTOS EN ADMIN === */
+        /* === ESTILOS MEJORADOS PARA LA LISTA DE PRODUCTOS EN ADMIN (GRID LAYOUT) === */
         #adminProductList { display: flex; flex-direction: column; gap: 0.75rem; }
-        .admin-product-list-item { 
-            display: grid; 
-            grid-template-columns: 60px 1fr auto; 
-            gap: 1rem; 
-            align-items: center; 
-            padding: 1rem; 
+        .admin-product-list-header, .admin-product-list-item {
+            display: grid;
+            grid-template-columns: 60px 1.5fr 2fr 1fr 100px; /* Imagen, Nombre, Desc, Precio, Acciones */
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem 1rem;
+        }
+        .admin-product-list-header {
+            font-weight: 600;
+            color: var(--text-gray);
+            font-size: 0.875rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            display: none; /* Oculto por defecto, visible en pantallas grandes */
+        }
+        .admin-product-list-item {
             background-color: var(--bg-light);
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
             transition: var(--transition);
         }
         .admin-product-list-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
         }
-        .admin-product-img { width: 60px; height: 60px; object-fit: cover; border-radius: var(--border-radius); }
-        .admin-product-info h4 { 
-            margin: 0; 
-            font-size: 1rem; 
-            font-weight: 600;
-            overflow-wrap: break-word; /* CORRECCIÓN: Ajuste de texto */
-            word-wrap: break-word;     /* CORRECCIÓN: Fallback para navegadores antiguos */
+        .admin-product-img { width: 50px; height: 50px; object-fit: cover; border-radius: var(--border-radius); }
+        .admin-product-name { font-weight: 600; }
+        .admin-product-desc, .admin-product-price { color: var(--text-gray); font-size: 0.9rem; }
+        .admin-product-desc {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Corta el texto largo con '...' */
         }
-        .admin-product-info p { margin: 0; color: var(--text-gray); font-size: 0.875rem;}
-        .admin-product-actions { display: flex; gap: 0.5rem; }
+        .admin-product-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+        @media (min-width: 768px) {
+            .admin-product-list-header {
+                display: grid; /* Muestra los encabezados en pantallas de tablet o más grandes */
+            }
+        }
 
 
         /* ... (El resto del CSS se mantiene similar) ... */
@@ -718,20 +732,30 @@
                     container.innerHTML = `<p class="empty-list-message">No hay productos en el menú.</p>`;
                     return;
                 }
+                
+                const headerHTML = `
+                    <div class="admin-product-list-header">
+                        <div></div> <!-- Columna vacía para la imagen -->
+                        <div>Producto</div>
+                        <div>Descripción</div>
+                        <div>Precio</div>
+                        <div style="text-align: right;">Acciones</div>
+                    </div>`;
 
-                container.innerHTML = productList.map(p => `
+                const productsHTML = productList.map(p => `
                     <div class="admin-product-list-item" id="admin-product-${p.id}">
                         <img src="${p.imageUrl || 'https://via.placeholder.com/60'}" alt="${p.name}" class="admin-product-img">
-                        <div class="admin-product-info">
-                            <h4>${p.name}</h4>
-                            <p>${p.category} - $${p.price.toFixed(2)}</p>
-                        </div>
+                        <div class="admin-product-name">${p.name}</div>
+                        <div class="admin-product-desc">${p.description || '-'}</div>
+                        <div class="admin-product-price">$${p.price.toFixed(2)}</div>
                         <div class="admin-product-actions">
                             <button class="btn-secondary edit-product-btn" data-id="${p.id}"><i class="fas fa-edit"></i></button>
                             <button class="btn-secondary btn-danger delete-product-btn" data-id="${p.id}" data-image="${p.imageUrl || ''}"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 `).join('');
+
+                container.innerHTML = headerHTML + productsHTML;
 
                 container.querySelectorAll('.edit-product-btn').forEach(btn => btn.addEventListener('click', e => openProductModal(e.currentTarget.dataset.id)));
                 container.querySelectorAll('.delete-product-btn').forEach(btn => btn.addEventListener('click', e => handleDeleteProduct(e.currentTarget.dataset.id, e.currentTarget.dataset.image)));
