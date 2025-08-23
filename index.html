@@ -321,7 +321,13 @@
             box-shadow: var(--shadow-md);
         }
         .admin-product-img { width: 60px; height: 60px; object-fit: cover; border-radius: var(--border-radius); }
-        .admin-product-info h4 { margin: 0; font-size: 1rem; font-weight: 600; }
+        .admin-product-info h4 { 
+            margin: 0; 
+            font-size: 1rem; 
+            font-weight: 600;
+            overflow-wrap: break-word; /* CORRECCIÓN: Ajuste de texto */
+            word-wrap: break-word;     /* CORRECCIÓN: Fallback para navegadores antiguos */
+        }
         .admin-product-info p { margin: 0; color: var(--text-gray); font-size: 0.875rem;}
         .admin-product-actions { display: flex; gap: 0.5rem; }
 
