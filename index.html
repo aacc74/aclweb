@@ -746,7 +746,7 @@
                     <div class="admin-product-list-item" id="admin-product-${p.id}">
                         <img src="${p.imageUrl || 'https://via.placeholder.com/60'}" alt="${p.name}" class="admin-product-img">
                         <div class="admin-product-name">${p.name}</div>
-                        <div class="admin-product-desc">${p.description || '-'}</div>
+                        <div class="admin-product-desc" title="${p.description || ''}">${p.description || '-'}</div>
                         <div class="admin-product-price">$${p.price.toFixed(2)}</div>
                         <div class="admin-product-actions">
                             <button class="btn-secondary edit-product-btn" data-id="${p.id}"><i class="fas fa-edit"></i></button>
