@@ -790,6 +790,10 @@
                     mainHeader.classList.remove('visible');
                     magicNav.classList.remove('visible');
                     authSection.style.display = 'none';
+                    
+                    // Reset the form before showing it
+                    newUserSetupForm.reset();
+                    
                     newUserSetupSection.style.display = 'block';
                 }
             } else {
