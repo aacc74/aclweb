@@ -692,7 +692,10 @@
                 delivery: () => { showSection('delivery'); listenForDeliveryOrders(); },
                 admin: () => { showSection('admin'); setupAdminPanel(); }
             };
-            const action = roleToAction[currentUserRole] || roleToAction.customer;
+            
+            // **CORRECTION**: Check if role includes 'chef' to direct to the correct panel.
+            const actionKey = currentUserRole.includes('chef') ? 'chef' : currentUserRole;
+            const action = roleToAction[actionKey] || roleToAction.customer;
             action();
             setupFilterControls();
         }
@@ -988,7 +991,7 @@
             container.innerHTML = '';
             statusDiv.innerHTML = '<p>Cargando...</p>';
 
-            const employeeRoles = ['waiter', 'chef', 'cashier', 'admin', 'delivery'];
+            const employeeRoles = ['waiter', 'general_chef', 'empanada_chef', 'cashier', 'admin', 'delivery'];
             let query;
             if (filter === 'employees') query = db.collection('customers').where('role', 'in', employeeRoles);
             else query = db.collection('customers').where('role', '==', 'customer');
@@ -1012,6 +1015,7 @@
                         </select>
                     ` : '';
 
+                    // **CORRECTION**: Added specific chef roles to the dropdown.
                     return `
                     <div class="employee-item" data-id="${user.id}" style="grid-template-columns: 1fr auto ${isDelivery ? 'auto' : ''} auto;">
                         <div class="employee-info">
@@ -1021,7 +1025,8 @@
                         <select class="role-select">
                             <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Cliente</option>
                             <option value="waiter" ${user.role === 'waiter' ? 'selected' : ''}>Mesero</option>
-                            <option value="chef" ${user.role.includes('chef') ? 'selected' : ''}>Cocinero</option>
+                            <option value="general_chef" ${user.role === 'general_chef' ? 'selected' : ''}>Cocinero General</option>
+                            <option value="empanada_chef" ${user.role === 'empanada_chef' ? 'selected' : ''}>Cocinero Empanadas</option>
                             <option value="cashier" ${user.role === 'cashier' ? 'selected' : ''}>Cajero</option>
                             <option value="delivery" ${isDelivery ? 'selected' : ''}>Repartidor</option>
                             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
@@ -1051,12 +1056,10 @@
                 let updateData = { role: newRole };
                 if (newRole === 'delivery') {
                     updateData.deliveryStatus = deliveryStatusSelect ? deliveryStatusSelect.value : 'disponible';
-                    // Set timestamp if becoming available
                     if (updateData.deliveryStatus === 'disponible') {
                         updateData.lastDeliveryTimestamp = firebase.firestore.FieldValue.serverTimestamp();
                     }
                 } else {
-                    // Remove delivery-specific fields if role changes
                     updateData.deliveryStatus = firebase.firestore.FieldValue.delete();
                     updateData.lastDeliveryTimestamp = firebase.firestore.FieldValue.delete();
                 }
@@ -1250,6 +1253,9 @@
             else if (currentUserRole === 'cashier') {
                 if (order.type === 'mesa' && order.status === 'ready') {
                     actions = `<button class="btn-primary" data-action="pay" data-id="${order.id}">Marcar Pagado</button>`;
+                } else if (order.type === 'delivery' && order.status === 'ready') {
+                    // **CORRECTION**: Added the assign button for the cashier.
+                    actions = `<button class="btn-primary" data-action="assign_delivery" data-id="${order.id}">Listo para Asignar</button>`;
                 } else if (order.type === 'delivery' && order.status === 'delivered_pending_cashier') {
                     actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="pay" data-id="${order.id}">Confirmar Pago y Cerrar</button>`;
                 }
@@ -1316,15 +1322,16 @@
 
                 if (action === 'prepare') updateOrderStatus(id, 'preparing');
                 if (action === 'ready') {
+                    // **CORRECTION**: Chef only marks as ready, cashier will assign.
                     await updateOrderStatus(id, 'ready');
-                    if (type === 'delivery') {
-                        assignDeliveryOrder(id);
-                    }
+                }
+                if (action === 'assign_delivery') {
+                    // **CORRECTION**: New action for cashier to trigger assignment.
+                    assignDeliveryOrder(id);
                 }
                 if (action === 'start_delivery') updateOrderStatus(id, 'en_camino');
                 if (action === 'complete_delivery') {
                     await updateOrderStatus(id, 'delivered_pending_cashier');
-                    // Make driver available again and put at the end of the queue
                     db.collection('customers').doc(currentUser.uid).update({
                         deliveryStatus: 'disponible',
                         lastDeliveryTimestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -1369,7 +1376,6 @@
             processOrderBtn.style.display = isWaiter ? 'block' : 'none';
             document.querySelector('.payment-methods').style.display = isWaiter ? 'none' : 'block';
             
-            // Cargar datos de Pago Móvil para el cliente
             if(!isWaiter) {
                 renderPagoMovilOptions();
             }
