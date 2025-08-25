@@ -1085,7 +1085,7 @@
                 renderCategoryFilters();
                 renderProducts();
                 renderWaiterProducts();
-            });
+            }).catch(err => console.error("Error loading products: ", err));
         }
         function renderCategoryFilters() {
             const categories = [...new Set(products.map(p => p.category))];
@@ -1242,7 +1242,7 @@
             // CHEF ACTIONS
             if (currentUserRole.includes('chef')) {
                 if (order.status === 'pending') actions = `<button class="btn-primary" data-action="prepare" data-id="${order.id}">Preparar</button>`;
-                if (order.status === 'preparing') actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="ready" data-id="${order.id}" data-type="${order.type}">Listo</button>`;
+                if (order.status === 'preparing') actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="ready" data-id="${order.id}">Listo</button>`;
             } 
             // DELIVERY ACTIONS
             else if (currentUserRole === 'delivery') {
@@ -1254,7 +1254,6 @@
                 if (order.type === 'mesa' && order.status === 'ready') {
                     actions = `<button class="btn-primary" data-action="pay" data-id="${order.id}">Marcar Pagado</button>`;
                 } else if (order.type === 'delivery' && order.status === 'ready') {
-                    // **CORRECTION**: Added the assign button for the cashier.
                     actions = `<button class="btn-primary" data-action="assign_delivery" data-id="${order.id}">Listo para Asignar</button>`;
                 } else if (order.type === 'delivery' && order.status === 'delivered_pending_cashier') {
                     actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="pay" data-id="${order.id}">Confirmar Pago y Cerrar</button>`;
@@ -1291,7 +1290,9 @@
                 { id: 5, text: 'Entregado', icon: 'fa-check-double' }
             ];
 
-            const progressPercentage = (currentStage.step - 1) / (trackerSteps.length - 1) * 100;
+            const progressPercentage = (currentStage.step - 1) / (trackerSteps.length - 1);
+            // **CORRECTION**: The width of the progress bar must be a percentage of the track (80% of the container).
+            const progressBarWidth = progressPercentage * 80;
 
             return `
                 <div class="order-card status-${order.status}">
@@ -1300,7 +1301,7 @@
                         <span class="item-status status-${order.status}">${getStatusText(order.status)}</span>
                     </div>
                     <div class="order-tracker">
-                        <div class="tracker-progress" style="width: ${progressPercentage}%;"></div>
+                        <div class="tracker-progress" style="width: ${progressBarWidth}%;"></div>
                         ${trackerSteps.map(step => `
                             <div class="tracker-step ${currentStage.step >= step.id ? 'completed' : ''} ${currentStage.step === step.id ? 'active' : ''}">
                                 <div class="icon"><i class="fas ${step.icon}"></i></div>
@@ -1318,15 +1319,13 @@
             container.addEventListener('click', async e => {
                 const target = e.target.closest('button');
                 if (!target) return;
-                const { action, id, type } = target.dataset;
+                const { action, id } = target.dataset;
 
                 if (action === 'prepare') updateOrderStatus(id, 'preparing');
                 if (action === 'ready') {
-                    // **CORRECTION**: Chef only marks as ready, cashier will assign.
                     await updateOrderStatus(id, 'ready');
                 }
                 if (action === 'assign_delivery') {
-                    // **CORRECTION**: New action for cashier to trigger assignment.
                     assignDeliveryOrder(id);
                 }
                 if (action === 'start_delivery') updateOrderStatus(id, 'en_camino');
