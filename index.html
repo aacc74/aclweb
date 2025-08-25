@@ -15,6 +15,7 @@
             --text-dark: #1F2937; --text-gray: #6B7280;
             --border-color: #E5E7EB;
             --success: #10B981; --warning: #F59E0B; --danger: #EF4444;
+            --info: #3B82F6;
             --font-body: 'Inter', sans-serif; --font-display: 'Poppins', sans-serif;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
             --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -153,8 +154,12 @@
         .tracker-step.active .label { color: var(--primary); font-weight: 700; }
         @media (min-width: 768px) { .admin-product-list-header { display: grid; } }
         .order-card.status-pending { border-color: var(--warning); } .order-card.status-preparing { border-color: #3B82F6; } .order-card.status-ready { border-color: var(--success); } .order-card.status-assigned { border-color: #8B5CF6; } .order-card.status-en_camino { border-color: var(--primary); } .order-card.status-delivered_pending_cashier { border-color: #D946EF; } .order-card.status-paid { border-color: var(--accent); } .order-card.status-cancelled { border-color: var(--text-gray); }
+        /* Nuevos estados */
+        .order-card.status-pending_confirmation { border-color: var(--info); } .order-card.status-pending_payment { border-color: var(--warning); } .order-card.status-payment_verification { border-color: var(--accent); }
         .item-status { padding: 0.25rem 0.5rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; color: white; text-transform: capitalize; }
         .status-pending { background-color: var(--warning); } .status-preparing { background-color: #3B82F6; } .status-ready { background-color: var(--success); } .status-assigned { background-color: #8B5CF6; } .status-en_camino { background-color: var(--primary); } .status-delivered_pending_cashier { background-color: #D946EF; } .status-paid { background-color: var(--accent); } .status-cancelled { background-color: var(--text-gray); }
+        /* Nuevos estados */
+        .status-pending_confirmation { background-color: var(--info); } .status-pending_payment { background-color: var(--warning); } .status-payment_verification { background-color: var(--accent); }
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; } .order-header h4 { font-size: 1.125rem; } .order-header span { font-size: 0.875rem; color: var(--text-gray); }
         .order-items { border-top: 1px solid var(--border-color); padding-top: 0.75rem; } .order-item { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.25rem 0; } .order-item span:first-child { color: var(--text-gray); } .order-actions { margin-top: 1rem; text-align: right; }
         .table-selection { margin-bottom: 2rem; } .tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; } .table-card i { font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--primary); transition: var(--transition); } .table-card.locked i { color: var(--text-gray); } .table-card span { font-weight: 600; }
@@ -167,6 +172,7 @@
         #adminReportResults { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
         .report-item-card { background-color: var(--bg-light); padding: 1rem; border-radius: var(--border-radius); box-shadow: var(--shadow); }
         .report-item-card p { margin: 0; } .report-item-card .name { font-weight: 600; } .report-item-card .count { font-size: 1.5rem; color: var(--primary); font-weight: 700; margin-top: 0.5rem; }
+        .order-details-section { background-color: var(--bg-off-white); border-radius: var(--border-radius); padding: 1rem; margin-top: 1rem; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -283,6 +289,7 @@
                 <button class="admin-tab-btn" data-tab="employees">Gestionar Empleados</button>
                 <button class="admin-tab-btn" data-tab="payment">Métodos de Pago</button>
                 <button class="admin-tab-btn" data-tab="reports">Reportes</button>
+                <button class="admin-tab-btn" data-tab="config">Configuración</button>
             </div>
 
             <!-- Contenido Pestaña Menú -->
@@ -314,27 +321,15 @@
                 <div class="admin-card">
                     <h3>Métodos de Pago Móvil</h3>
                     <p>Gestiona las cuentas de Pago Móvil disponibles para los clientes.</p>
-                    
                     <div id="pagoMovilList" style="margin-top: 1.5rem;"></div>
-
                     <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
-
                     <h4 id="paymentMethodFormTitle" style="margin-bottom: 1rem;">Añadir Nuevo Método</h4>
                     <form id="paymentMethodForm">
                         <input type="hidden" id="paymentMethodId">
-                        <div class="form-group">
-                            <label for="pagoMovilBank">Entidad Bancaria (Ej: Banesco, Mercantil)</label>
-                            <input type="text" id="pagoMovilBank" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="pagoMovilPhone">Número de Teléfono</label>
-                            <input type="text" id="pagoMovilPhone" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="pagoMovilRif">RIF / C.I. del Titular</label>
-                            <input type="text" id="pagoMovilRif" required>
-                        </div>
-                        <button type="submit" id="savePaymentMethodBtn" class="btn-primary">Guardar Método de Pago</button>
+                        <div class="form-group"><label for="pagoMovilBank">Entidad Bancaria</label><input type="text" id="pagoMovilBank" required></div>
+                        <div class="form-group"><label for="pagoMovilPhone">Número de Teléfono</label><input type="text" id="pagoMovilPhone" required></div>
+                        <div class="form-group"><label for="pagoMovilRif">RIF / C.I. del Titular</label><input type="text" id="pagoMovilRif" required></div>
+                        <button type="submit" id="savePaymentMethodBtn" class="btn-primary">Guardar Método</button>
                         <button type="button" id="cancelEditPaymentBtn" class="btn-secondary" style="display: none; width: 100%; margin-top: 0.5rem;">Cancelar Edición</button>
                     </form>
                 </div>
@@ -351,6 +346,21 @@
                         <button class="filter-btn active" data-period="month">Mes</button>
                     </div>
                     <div id="adminReportResults"></div>
+                </div>
+            </div>
+            
+            <!-- Contenido Pestaña Configuración -->
+            <div id="admin-tab-config" class="admin-tab-content">
+                <div class="admin-card">
+                    <h3>Configuración General</h3>
+                    <form id="configForm">
+                        <div class="form-group">
+                            <label for="configDeliveryFee">Costo de Envío por defecto (USD)</label>
+                            <input type="number" id="configDeliveryFee" step="0.01" required>
+                            <p style="font-size:0.8rem; color:var(--text-gray); margin-top:0.25rem;">Este valor se usará como sugerencia para el cajero.</p>
+                        </div>
+                        <button type="submit" class="btn-primary">Guardar Configuración</button>
+                    </form>
                 </div>
             </div>
 
@@ -383,21 +393,25 @@
             <div class="modal-header"><h3>Tu Carrito</h3><button class="close-modal">&times;</button></div>
             <div class="modal-body">
                 <div id="cartItemsContainer"></div>
-                <div class="payment-methods">
+                <!-- Delivery/Pickup Options -->
+                <div class="form-group">
+                    <label>Modalidad de Entrega</label>
+                    <select id="deliveryTypeSelect">
+                        <option value="pickup">Retiro en Restaurante (Pickup)</option>
+                        <option value="delivery">Servicio de Entrega (Delivery)</option>
+                    </select>
+                </div>
+                <div id="cartPaymentSection">
                     <div class="form-group">
                         <label for="paymentMethodSelect">Método de Pago</label>
                         <select id="paymentMethodSelect">
                             <option value="">Seleccione una opción...</option>
-                            <option value="Efectivo Bs">Efectivo Bs</option>
-                            <option value="Efectivo $">Efectivo $</option>
-                            <option value="Efectivo €">Efectivo €</option>
+                            <option value="Efectivo">Efectivo ($, € o Bs)</option>
                             <option value="Pago Móvil">Pago Móvil</option>
                             <option value="Punto de Venta">Punto de Venta</option>
                         </select>
                     </div>
-                    <div id="pagoMovilDetails">
-                        <!-- El contenido se genera dinámicamente -->
-                    </div>
+                    <div id="pagoMovilDetails"></div>
                 </div>
             </div>
             <div class="modal-footer"><button id="checkoutBtn" class="btn-primary">Finalizar Compra</button><button id="processOrderBtn" class="btn-primary" style="display:none;">Procesar Pedido</button></div>
@@ -407,118 +421,58 @@
     <!-- === MODAL PARA PRODUCTOS (AÑADIR/EDITAR) === -->
     <div class="modal" id="productModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="productModalTitle">Añadir Nuevo Producto</h3>
-                <button class="close-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h3 id="productModalTitle">Añadir Nuevo Producto</h3><button class="close-modal">&times;</button></div>
             <div class="modal-body">
                 <form id="productForm">
                     <input type="hidden" id="productId">
-                    <div class="form-group">
-                        <label for="productName">Nombre del Producto</label>
-                        <input type="text" id="productName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="productCategory">Categoría</label>
-                        <input type="text" id="productCategory" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="productPrice">Precio</label>
-                        <input type="number" id="productPrice" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="productDescription">Descripción</label>
-                        <textarea id="productDescription" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="productImage">Imagen del Producto</label>
-                        <input type="file" id="productImage" accept="image/*">
-                        <input type="hidden" id="existingImageUrl">
-                    </div>
+                    <div class="form-group"><label for="productName">Nombre del Producto</label><input type="text" id="productName" required></div>
+                    <div class="form-group"><label for="productCategory">Categoría</label><input type="text" id="productCategory" required></div>
+                    <div class="form-group"><label for="productPrice">Precio</label><input type="number" id="productPrice" step="0.01" required></div>
+                    <div class="form-group"><label for="productDescription">Descripción</label><textarea id="productDescription" rows="3"></textarea></div>
+                    <div class="form-group"><label for="productImage">Imagen del Producto</label><input type="file" id="productImage" accept="image/*"><input type="hidden" id="existingImageUrl"></div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button id="saveProductBtn" class="btn-primary">Guardar Producto</button>
-            </div>
+            <div class="modal-footer"><button id="saveProductBtn" class="btn-primary">Guardar Producto</button></div>
         </div>
     </div>
 
     <!-- === MODAL PARA EDITAR PERFIL === -->
     <div class="modal" id="profileModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="profileModalTitle">Editar Perfil</h3>
-                <button class="close-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h3 id="profileModalTitle">Editar Perfil</h3><button class="close-modal">&times;</button></div>
             <div class="modal-body">
                 <form id="profileForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="profileFirstName">Nombre</label>
-                            <input type="text" id="profileFirstName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="profileLastName">Apellido</label>
-                            <input type="text" id="profileLastName" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="profileAddress">Dirección Completa</label>
-                        <textarea id="profileAddress" rows="3" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="profilePhone">Número de Contacto</label>
-                        <input type="tel" id="profilePhone" required>
-                    </div>
+                    <div class="form-row"><div class="form-group"><label for="profileFirstName">Nombre</label><input type="text" id="profileFirstName" required></div><div class="form-group"><label for="profileLastName">Apellido</label><input type="text" id="profileLastName" required></div></div>
+                    <div class="form-group"><label for="profileAddress">Dirección Completa</label><textarea id="profileAddress" rows="3" required></textarea></div>
+                    <div class="form-group"><label for="profilePhone">Número de Contacto</label><input type="tel" id="profilePhone" required></div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button id="saveProfileBtn" class="btn-primary">Guardar Cambios</button>
-            </div>
+            <div class="modal-footer"><button id="saveProfileBtn" class="btn-primary">Guardar Cambios</button></div>
         </div>
     </div>
     
     <!-- === MODAL PARA TÉRMINOS Y CONDICIONES === -->
     <div class="modal" id="termsModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Términos y Condiciones</h3>
-                <button class="close-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h3>Términos y Condiciones</h3><button class="close-modal">&times;</button></div>
             <div class="modal-body" style="line-height: 1.5;">
-                <h4 style="margin-bottom: 0.5rem;">1. Uso de Datos</h4>
-                <p>Al registrarte, aceptas que Arcanos Lunch recopile y utilice tu nombre, dirección y número de teléfono con el único propósito de gestionar y entregar tus pedidos a domicilio (delivery).</p>
-                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">2. Responsabilidad</h4>
-                <p>La información proporcionada debe ser veraz y precisa. El restaurante no se hace responsable por entregas fallidas o demoradas debido a datos incorrectos o incompletos.</p>
-                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">3. Comunicación</h4>
-                <p>Aceptas que nuestro personal de delivery pueda contactarte a través del número de teléfono proporcionado para coordinar la entrega de tu pedido.</p>
-                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">4. Seguridad de Datos</h4>
-                <p>Nos comprometemos a proteger tu información personal y a no compartirla con terceros no relacionados con el proceso de entrega de tu pedido.</p>
-                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">5. Aceptación</h4>
-                <p>Marcar la casilla de aceptación es un requisito indispensable para crear tu cuenta y utilizar nuestros servicios de delivery. Al hacerlo, confirmas que has leído, entendido y aceptado estos términos.</p>
+                <h4 style="margin-bottom: 0.5rem;">1. Uso de Datos</h4><p>Al registrarte, aceptas que Arcanos Lunch recopile y utilice tu nombre, dirección y número de teléfono con el único propósito de gestionar y entregar tus pedidos a domicilio (delivery).</p>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">2. Responsabilidad</h4><p>La información proporcionada debe ser veraz y precisa. El restaurante no se hace responsable por entregas fallidas o demoradas debido a datos incorrectos o incompletos.</p>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">3. Comunicación</h4><p>Aceptas que nuestro personal de delivery pueda contactarte a través del número de teléfono proporcionado para coordinar la entrega de tu pedido.</p>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">4. Seguridad de Datos</h4><p>Nos comprometemos a proteger tu información personal y a no compartirla con terceros no relacionados con el proceso de entrega de tu pedido.</p>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">5. Aceptación</h4><p>Marcar la casilla de aceptación es un requisito indispensable para crear tu cuenta y utilizar nuestros servicios de delivery. Al hacerlo, confirmas que has leído, entendido y aceptado estos términos.</p>
             </div>
-            <div class="modal-footer">
-                <button class="btn-secondary close-modal">Cerrar</button>
-            </div>
+            <div class="modal-footer"><button class="btn-secondary close-modal">Cerrar</button></div>
         </div>
     </div>
 
     <!-- MODAL PARA REPORTES -->
     <div class="modal" id="reportModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="reportModalTitle">Reporte de Entregas</h3>
-                <button class="close-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h3 id="reportModalTitle">Reporte de Entregas</h3><button class="close-modal">&times;</button></div>
             <div class="modal-body">
-                <div class="order-filter-controls" id="reportDateFilters">
-                    <button class="filter-btn" data-period="day">Hoy</button>
-                    <button class="filter-btn" data-period="week">Semana</button>
-                    <button class="filter-btn active" data-period="month">Mes</button>
-                </div>
-                <div id="reportModalBody" style="text-align: center; font-size: 1.2rem; padding: 2rem 0;">
-                    Cargando reporte...
-                </div>
+                <div class="order-filter-controls" id="reportDateFilters"><button class="filter-btn" data-period="day">Hoy</button><button class="filter-btn" data-period="week">Semana</button><button class="filter-btn active" data-period="month">Mes</button></div>
+                <div id="reportModalBody" style="text-align: center; font-size: 1.2rem; padding: 2rem 0;">Cargando reporte...</div>
             </div>
         </div>
     </div>
@@ -546,9 +500,10 @@
 
         let currentUser = null, currentUserRole = 'customer', currentCategory = 'all', currentTable = null;
         let products = [], allOrders = [], cart = [], cartByTable = {};
-        let activeListeners = []; // Array to hold all active listeners
+        let activeListeners = [];
         let chefFilter = 'pending', cashierOrderTypeFilter = 'mesa', waiterFilter = 'active';
-        let paymentMethods = []; // Almacenar métodos de pago
+        let paymentMethods = [];
+        let appConfig = { deliveryFee: 1.5 }; // Default config
 
         // --- DOM Elements ---
         const mainHeader = document.getElementById('mainHeader');
@@ -580,6 +535,8 @@
         const processOrderBtn = document.getElementById('processOrderBtn');
         const paymentMethodSelect = document.getElementById('paymentMethodSelect');
         const pagoMovilDetailsDiv = document.getElementById('pagoMovilDetails');
+        const deliveryTypeSelect = document.getElementById('deliveryTypeSelect');
+        const cartPaymentSection = document.getElementById('cartPaymentSection');
 
         // Auth
         const authForm = document.getElementById('authForm'), authEmail = document.getElementById('authEmail'), authPassword = document.getElementById('authPassword'), confirmPasswordField = document.getElementById('confirmPasswordField'), authSubmitBtn = document.getElementById('authSubmitBtn'), authMessage = document.getElementById('authMessage'), signUpLink = document.getElementById('signUpLink'), forgotPasswordLink = document.getElementById('forgotPasswordLink'), loginLink = document.getElementById('loginLink'), googleLoginBtn = document.getElementById('googleLogin'), appleLoginBtn = document.getElementById('appleLogin'), linkSeparator = document.getElementById('linkSeparator'), passwordField = document.getElementById('passwordField');
@@ -601,12 +558,23 @@
             activeListeners.forEach(unsubscribe => unsubscribe());
             activeListeners = [];
         }
+        
+        // --- Config Loader ---
+        async function loadAppConfig() {
+            try {
+                const configDoc = await db.collection('config').doc('app').get();
+                if (configDoc.exists) {
+                    appConfig = { ...appConfig, ...configDoc.data() };
+                }
+            } catch (e) { console.error("Error loading config:", e); }
+        }
 
         // --- Auth State ---
         auth.onAuthStateChanged(async user => {
             cleanupListeners();
             currentUser = user;
             if (user) {
+                await loadAppConfig();
                 const userDocRef = db.collection("customers").doc(user.uid);
                 const doc = await userDocRef.get();
 
@@ -619,9 +587,7 @@
                     loadInitialDataForRole();
                     loadProducts();
                 } else {
-                    if (!doc.exists) {
-                        await saveCustomerData(user, 'customer');
-                    }
+                    if (!doc.exists) await saveCustomerData(user, 'customer');
                     allSections.forEach(s => s.style.display = 'none');
                     mainHeader.classList.remove('visible');
                     magicNav.classList.remove('visible');
@@ -642,19 +608,13 @@
         async function saveCustomerData(user, role = 'customer', extraData = {}) {
             const displayName = user.displayName || "Nuevo Usuario";
             let customerData = {
-                uid: user.uid,
-                email: user.email,
-                displayName: displayName,
-                role: role,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                ...extraData
+                uid: user.uid, email: user.email, displayName: displayName,
+                role: role, createdAt: firebase.firestore.FieldValue.serverTimestamp(), ...extraData
             };
-
             if (role === 'delivery') {
                 customerData.deliveryStatus = 'disponible';
                 customerData.lastDeliveryTimestamp = firebase.firestore.FieldValue.serverTimestamp();
             }
-
             return db.collection("customers").doc(user.uid).set(customerData, { merge: true });
         }
 
@@ -664,28 +624,19 @@
             const isLogin = mode === 'login';
             const isRegister = mode === 'register';
             const isForgot = mode === 'forgot';
-
             passwordField.style.display = isForgot ? 'none' : 'block';
             confirmPasswordField.style.display = isRegister ? 'block' : 'none';
-            
             signUpLink.style.display = isLogin ? 'inline' : 'none';
             forgotPasswordLink.style.display = isLogin ? 'inline' : 'none';
             linkSeparator.style.display = isLogin ? 'inline' : 'none';
             loginLink.style.display = !isLogin ? 'inline' : 'none';
-            
             const authContainer = authForm.closest('.auth-container');
             if (authContainer) {
                 authContainer.querySelector('.separator').style.display = isForgot ? 'none' : 'flex';
                 authContainer.querySelector('.auth-options').style.display = isForgot ? 'none' : 'grid';
             }
-
-            authMessage.textContent = 
-                isLogin ? "Bienvenido de nuevo" : 
-                (isRegister ? "Crea tu cuenta" : "Recupera tu acceso");
-            
-            authSubmitBtn.textContent = 
-                isLogin ? "Iniciar Sesión" : 
-                (isRegister ? "Registrarse" : "Enviar enlace de recuperación");
+            authMessage.textContent = isLogin ? "Bienvenido de nuevo" : (isRegister ? "Crea tu cuenta" : "Recupera tu acceso");
+            authSubmitBtn.textContent = isLogin ? "Iniciar Sesión" : (isRegister ? "Registrarse" : "Enviar enlace de recuperación");
         }
         
         // --- UI & Navigation ---
@@ -693,10 +644,8 @@
             allSections.forEach(s => s.style.display = 'none');
             const targetSection = document.getElementById(`${sectionId}Section`);
             if (targetSection) targetSection.style.display = 'block';
-            
             document.querySelectorAll('.magic-nav-item').forEach(item => {
-                let itemSection = item.dataset.section;
-                item.classList.toggle('active', itemSection === sectionId);
+                item.classList.toggle('active', item.dataset.section === sectionId);
             });
         }
 
@@ -713,18 +662,14 @@
             magicNav.innerHTML = (navConfig[roleKey] || []).map(item => 
                 `<a href="#" class="magic-nav-item" data-section="${item.s}"><i class="fas ${item.i}"></i><span>${item.t}</span></a>`
             ).join('');
-            
             if (['customer', 'waiter'].includes(currentUserRole)) {
                 magicNav.innerHTML += `<a href="#" class="magic-nav-item" data-section="cart"><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a>`;
             }
-
             document.querySelectorAll('.magic-nav-item').forEach(item => item.addEventListener('click', e => {
                 e.preventDefault();
                 const section = item.dataset.section;
-                if (section === 'cart') openCartModal();
-                else showSection(section);
+                if (section === 'cart') openCartModal(); else showSection(section);
             }));
-
             desktopCartBtn.style.display = ['customer', 'waiter'].includes(currentUserRole) ? 'block' : 'none';
             menuToggle.style.display = currentUserRole === 'customer' ? 'block' : 'none';
             logoutBtn.style.display = 'block';
@@ -740,159 +685,128 @@
                 delivery: () => { showSection('delivery'); listenForDeliveryOrders(); setupDeliveryActions(); },
                 admin: () => { showSection('admin'); setupAdminPanel(); }
             };
-            
             const actionKey = currentUserRole.includes('chef') ? 'chef' : currentUserRole;
-            const action = roleToAction[actionKey] || roleToAction.customer;
-            action();
+            (roleToAction[actionKey] || roleToAction.customer)();
             setupFilterControls();
         }
 
         // === ADMIN PANEL FUNCTIONS ===
         function setupAdminPanel() {
             const tabs = document.getElementById('adminTabs');
-            const contents = document.querySelectorAll('.admin-tab-content');
-            
             tabs.addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON') return;
                 const tabName = e.target.dataset.tab;
-
                 tabs.querySelector('.active').classList.remove('active');
                 e.target.classList.add('active');
-
-                contents.forEach(content => content.classList.remove('active'));
+                document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
                 document.getElementById(`admin-tab-${tabName}`).classList.add('active');
                 
                 if (tabName === 'menu') loadAdminProducts();
                 else if (tabName === 'employees') loadEmployees('employees');
                 else if (tabName === 'payment') loadPaymentMethods();
                 else if (tabName === 'reports') loadAdminReports();
+                else if (tabName === 'config') loadAdminConfig();
             });
-
             document.getElementById('employeeFilterControls').addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON') return;
                 document.getElementById('employeeFilterControls').querySelector('.active').classList.remove('active');
                 e.target.classList.add('active');
                 loadEmployees(e.target.dataset.filter);
             });
-
             document.getElementById('addNewProductBtn').addEventListener('click', () => openProductModal());
             document.getElementById('saveProductBtn').addEventListener('click', handleProductFormSubmit);
             document.getElementById('paymentMethodForm').addEventListener('submit', handleSavePaymentMethod);
             document.getElementById('cancelEditPaymentBtn').addEventListener('click', () => openPaymentMethodForm()); 
-            
+            document.getElementById('configForm').addEventListener('submit', handleSaveConfig);
             loadAdminProducts();
+        }
+        
+        async function loadAdminConfig() {
+            document.getElementById('configDeliveryFee').value = appConfig.deliveryFee;
+        }
+        
+        async function handleSaveConfig(e) {
+            e.preventDefault();
+            const newFee = parseFloat(document.getElementById('configDeliveryFee').value);
+            if (isNaN(newFee) || newFee < 0) {
+                showNotification("Tarifa de envío inválida.", "error"); return;
+            }
+            try {
+                await db.collection('config').doc('app').set({ deliveryFee: newFee }, { merge: true });
+                appConfig.deliveryFee = newFee;
+                showNotification("Configuración guardada.");
+            } catch (error) {
+                console.error("Error saving config:", error);
+                showNotification("Error al guardar la configuración.", "error");
+            }
         }
         
         // --- Payment Methods CRUD (Admin) ---
         async function loadPaymentMethods() {
             const listContainer = document.getElementById('pagoMovilList');
-            listContainer.innerHTML = `<p>Cargando métodos de pago...</p>`;
+            listContainer.innerHTML = `<p>Cargando...</p>`;
             try {
-                const snapshot = await db.collection('config/pagoMovil/paymentMethods').orderBy('bank').get();
+                const snapshot = await db.collection('config').doc('pagoMovil').collection('paymentMethods').orderBy('bank').get();
                 paymentMethods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
                 if (paymentMethods.length === 0) {
                     listContainer.innerHTML = `<p class="empty-list-message">No hay métodos de Pago Móvil configurados.</p>`;
                     return;
                 }
-
                 listContainer.innerHTML = paymentMethods.map(m => `
                     <div class="payment-method-item" data-id="${m.id}">
-                        <div class="payment-method-info">
-                            <p class="bank">${m.bank}</p>
-                            <p class="details">Tel: ${m.phone} | RIF/CI: ${m.rif}</p>
-                        </div>
-                        <div class="payment-method-actions">
-                            <button class="btn-secondary edit-payment-btn"><i class="fas fa-edit"></i></button>
-                            <button class="btn-secondary btn-danger delete-payment-btn"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                `).join('');
-                
+                        <div class="payment-method-info"><p class="bank">${m.bank}</p><p class="details">Tel: ${m.phone} | RIF/CI: ${m.rif}</p></div>
+                        <div class="payment-method-actions"><button class="btn-secondary edit-payment-btn"><i class="fas fa-edit"></i></button><button class="btn-secondary btn-danger delete-payment-btn"><i class="fas fa-trash"></i></button></div>
+                    </div>`).join('');
                 listContainer.querySelectorAll('.edit-payment-btn').forEach(btn => {
                     btn.addEventListener('click', e => {
                         const id = e.target.closest('.payment-method-item').dataset.id;
-                        const method = paymentMethods.find(m => m.id === id);
-                        openPaymentMethodForm(method);
+                        openPaymentMethodForm(paymentMethods.find(m => m.id === id));
                     });
                 });
                 listContainer.querySelectorAll('.delete-payment-btn').forEach(btn => {
-                     btn.addEventListener('click', e => {
-                        const id = e.target.closest('.payment-method-item').dataset.id;
-                        handleDeletePaymentMethod(id);
-                    });
+                     btn.addEventListener('click', e => handleDeletePaymentMethod(e.target.closest('.payment-method-item').dataset.id));
                 });
-
             } catch (error) {
                 console.error("Error loading payment methods:", error);
-                listContainer.innerHTML = `<p class="empty-list-message" style="color:var(--danger)">Error al cargar métodos de pago.</p>`;
+                listContainer.innerHTML = `<p class="empty-list-message" style="color:var(--danger)">Error al cargar.</p>`;
             }
         }
 
         function openPaymentMethodForm(method = null) {
             const form = document.getElementById('paymentMethodForm');
-            const title = document.getElementById('paymentMethodFormTitle');
-            const cancelBtn = document.getElementById('cancelEditPaymentBtn');
-
             form.reset();
             document.getElementById('paymentMethodId').value = '';
-
+            document.getElementById('paymentMethodFormTitle').textContent = method ? 'Editar Método de Pago' : 'Añadir Nuevo Método';
+            document.getElementById('cancelEditPaymentBtn').style.display = method ? 'block' : 'none';
             if (method) {
-                title.textContent = 'Editar Método de Pago';
                 document.getElementById('paymentMethodId').value = method.id;
                 document.getElementById('pagoMovilBank').value = method.bank;
                 document.getElementById('pagoMovilPhone').value = method.phone;
                 document.getElementById('pagoMovilRif').value = method.rif;
-                cancelBtn.style.display = 'block';
-            } else {
-                title.textContent = 'Añadir Nuevo Método';
-                cancelBtn.style.display = 'none';
             }
         }
         
         async function handleSavePaymentMethod(e) {
             e.preventDefault();
             const btn = document.getElementById('savePaymentMethodBtn');
-            btn.disabled = true;
-            btn.textContent = 'Guardando...';
-
+            btn.disabled = true; btn.textContent = 'Guardando...';
             const id = document.getElementById('paymentMethodId').value;
-            const bank = document.getElementById('pagoMovilBank').value;
-            const phone = document.getElementById('pagoMovilPhone').value;
-            const rif = document.getElementById('pagoMovilRif').value;
-            
-            const data = { bank, phone, rif };
-
+            const data = { bank: document.getElementById('pagoMovilBank').value, phone: document.getElementById('pagoMovilPhone').value, rif: document.getElementById('pagoMovilRif').value };
             try {
-                const collectionRef = db.collection('config/pagoMovil/paymentMethods');
-                if (id) {
-                    await collectionRef.doc(id).set(data, { merge: true });
-                    showNotification('Método de pago actualizado con éxito.');
-                } else {
-                    await collectionRef.add(data);
-                    showNotification('Nuevo método de pago añadido.');
-                }
-                loadPaymentMethods();
-                openPaymentMethodForm(); // Reset form
-            } catch (error) {
-                console.error("Error saving payment method:", error);
-                showNotification('Error al guardar el método de pago.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Guardar Método de Pago';
-            }
+                const collectionRef = db.collection('config').doc('pagoMovil').collection('paymentMethods');
+                if (id) await collectionRef.doc(id).set(data, { merge: true }); else await collectionRef.add(data);
+                showNotification(`Método de pago ${id ? 'actualizado' : 'añadido'}.`);
+                loadPaymentMethods(); openPaymentMethodForm();
+            } catch (error) { console.error("Error saving payment method:", error); showNotification('Error al guardar.', 'error'); } 
+            finally { btn.disabled = false; btn.textContent = 'Guardar Método'; }
         }
 
         async function handleDeletePaymentMethod(id) {
             if (!confirm('¿Estás seguro de que quieres eliminar este método de pago?')) return;
             try {
-                await db.collection('config/pagoMovil/paymentMethods').doc(id).delete();
-                showNotification('Método de pago eliminado.');
-                loadPaymentMethods();
-            } catch (error) {
-                console.error("Error deleting payment method:", error);
-                showNotification('Error al eliminar el método.', 'error');
-            }
+                await db.collection('config').doc('pagoMovil').collection('paymentMethods').doc(id).delete();
+                showNotification('Método de pago eliminado.'); loadPaymentMethods();
+            } catch (error) { console.error("Error deleting payment method:", error); showNotification('Error al eliminar.', 'error'); }
         }
 
         // --- Product CRUD Functions (Admin) ---
@@ -902,41 +816,18 @@
             try {
                 const snapshot = await db.collection('products').orderBy('name').get();
                 const productList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                if (productList.length === 0) {
-                    container.innerHTML = `<p class="empty-list-message">No hay productos en el menú.</p>`;
-                    return;
-                }
-                
-                const headerHTML = `
-                    <div class="admin-product-list-header">
-                        <div>Producto</div>
-                        <div>Descripción</div>
-                        <div>Precio</div>
-                        <div style="text-align: right;">Acciones</div>
-                    </div>`;
-
+                if (productList.length === 0) { container.innerHTML = `<p class="empty-list-message">No hay productos.</p>`; return; }
+                const headerHTML = `<div class="admin-product-list-header"><div>Producto</div><div>Descripción</div><div>Precio</div><div style="text-align: right;">Acciones</div></div>`;
                 const productsHTML = productList.map(p => `
                     <div class="admin-product-list-item" id="admin-product-${p.id}">
-                        <div class="admin-product-name">${p.name}</div>
-                        <div class="admin-product-desc" title="${p.description || ''}">${p.description || '-'}</div>
+                        <div class="admin-product-name">${p.name}</div><div class="admin-product-desc" title="${p.description || ''}">${p.description || '-'}</div>
                         <div class="admin-product-price">$${p.price.toFixed(2)}</div>
-                        <div class="admin-product-actions">
-                            <button class="btn-secondary edit-product-btn" data-id="${p.id}"><i class="fas fa-edit"></i></button>
-                            <button class="btn-secondary btn-danger delete-product-btn" data-id="${p.id}" data-image="${p.imageUrl || ''}"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                `).join('');
-
+                        <div class="admin-product-actions"><button class="btn-secondary edit-product-btn" data-id="${p.id}"><i class="fas fa-edit"></i></button><button class="btn-secondary btn-danger delete-product-btn" data-id="${p.id}" data-image="${p.imageUrl || ''}"><i class="fas fa-trash"></i></button></div>
+                    </div>`).join('');
                 container.innerHTML = headerHTML + productsHTML;
-
                 container.querySelectorAll('.edit-product-btn').forEach(btn => btn.addEventListener('click', e => openProductModal(e.currentTarget.dataset.id)));
                 container.querySelectorAll('.delete-product-btn').forEach(btn => btn.addEventListener('click', e => handleDeleteProduct(e.currentTarget.dataset.id, e.currentTarget.dataset.image)));
-
-            } catch (error) {
-                console.error("Error loading admin products:", error);
-                container.innerHTML = `<p class="empty-list-message" style="color:var(--danger)">Error al cargar productos.</p>`;
-            }
+            } catch (error) { console.error("Error loading admin products:", error); container.innerHTML = `<p class="empty-list-message" style="color:var(--danger)">Error al cargar.</p>`; }
         }
 
         async function openProductModal(productId = null) {
@@ -944,10 +835,8 @@
             form.reset();
             document.getElementById('productId').value = '';
             document.getElementById('existingImageUrl').value = '';
-
-            const modalTitle = document.getElementById('productModalTitle');
+            document.getElementById('productModalTitle').textContent = productId ? 'Editar Producto' : 'Añadir Nuevo Producto';
             if (productId) {
-                modalTitle.textContent = 'Editar Producto';
                 const doc = await db.collection('products').doc(productId).get();
                 if (doc.exists) {
                     const data = doc.data();
@@ -958,17 +847,13 @@
                     document.getElementById('productDescription').value = data.description || '';
                     document.getElementById('existingImageUrl').value = data.imageUrl || '';
                 }
-            } else {
-                modalTitle.textContent = 'Añadir Nuevo Producto';
             }
             productModal.classList.add('visible');
         }
 
         async function handleProductFormSubmit() {
             const btn = document.getElementById('saveProductBtn');
-            btn.disabled = true;
-            btn.textContent = 'Guardando...';
-
+            btn.disabled = true; btn.textContent = 'Guardando...';
             const productId = document.getElementById('productId').value;
             const name = document.getElementById('productName').value;
             const category = document.getElementById('productCategory').value;
@@ -976,82 +861,50 @@
             const description = document.getElementById('productDescription').value;
             const imageFile = document.getElementById('productImage').files[0];
             let imageUrl = document.getElementById('existingImageUrl').value || '';
-
             try {
                 if (imageFile) {
                     const imageRef = storage.ref(`product_images/${Date.now()}_${imageFile.name}`);
                     const snapshot = await imageRef.put(imageFile);
                     imageUrl = await snapshot.ref.getDownloadURL();
                 }
-
                 const productData = { name, category, price, description, imageUrl };
-
-                if (productId) {
-                    await db.collection('products').doc(productId).update(productData);
-                    showNotification('Producto actualizado con éxito');
-                } else {
-                    await db.collection('products').add(productData);
-                    showNotification('Producto añadido con éxito');
-                }
-                
+                if (productId) await db.collection('products').doc(productId).update(productData);
+                else await db.collection('products').add(productData);
+                showNotification(`Producto ${productId ? 'actualizado' : 'añadido'}.`);
                 productModal.classList.remove('visible');
-                loadProducts(); // Recargar productos para la vista de cliente/mesero
-                loadAdminProducts(); // Recargar lista en el panel de admin
-            } catch (error) {
-                console.error("Error saving product: ", error);
-                showNotification('Error al guardar el producto', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Guardar Producto';
-            }
+                loadProducts(); loadAdminProducts();
+            } catch (error) { console.error("Error saving product: ", error); showNotification('Error al guardar.', 'error'); } 
+            finally { btn.disabled = false; btn.textContent = 'Guardar Producto'; }
         }
 
         async function handleDeleteProduct(productId, imageUrl) {
-            if (!confirm(`¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer.`)) {
-                return;
-            }
-
+            if (!confirm(`¿Estás seguro de que quieres eliminar este producto?`)) return;
             try {
                 await db.collection('products').doc(productId).delete();
-                if (imageUrl && imageUrl.includes('firebasestorage')) {
-                    const imageRef = storage.refFromURL(imageUrl);
-                    await imageRef.delete();
-                }
-                showNotification('Producto eliminado con éxito.');
-                loadProducts();
+                if (imageUrl && imageUrl.includes('firebasestorage')) await storage.refFromURL(imageUrl).delete();
+                showNotification('Producto eliminado.'); loadProducts();
                 const itemToRemove = document.getElementById(`admin-product-${productId}`);
                 if (itemToRemove) {
                     itemToRemove.style.transition = 'opacity 0.3s ease';
                     itemToRemove.style.opacity = '0';
                     setTimeout(() => itemToRemove.remove(), 300);
                 }
-            } catch (error) {
-                console.error("Error deleting product:", error);
-                showNotification('Error al eliminar el producto.', 'error');
-            }
+            } catch (error) { console.error("Error deleting product:", error); showNotification('Error al eliminar.', 'error'); }
         }
         
         // --- Employee CRUD Functions (Admin) ---
         async function loadEmployees(filter = 'employees') {
             const container = document.getElementById('employeeList');
             const statusDiv = document.getElementById('employeeListStatus');
-            container.innerHTML = '';
-            statusDiv.innerHTML = '<p>Cargando...</p>';
-
+            container.innerHTML = ''; statusDiv.innerHTML = '<p>Cargando...</p>';
             const employeeRoles = ['waiter', 'general_chef', 'empanada_chef', 'cashier', 'admin', 'delivery'];
             let query;
             if (filter === 'employees') query = db.collection('customers').where('role', 'in', employeeRoles);
             else query = db.collection('customers').where('role', '==', 'customer');
-
             try {
                 const snapshot = await query.get();
                 const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                if (users.length === 0) {
-                    statusDiv.innerHTML = `<p class="empty-list-message">No se encontraron ${filter}.</p>`;
-                    return;
-                }
-                
+                if (users.length === 0) { statusDiv.innerHTML = `<p class="empty-list-message">No se encontraron ${filter}.</p>`; return; }
                 statusDiv.innerHTML = '';
                 container.innerHTML = users.map(user => {
                     const isDelivery = user.role === 'delivery';
@@ -1059,34 +912,20 @@
                         <select class="delivery-status-select">
                             <option value="disponible" ${user.deliveryStatus === 'disponible' ? 'selected' : ''}>Disponible</option>
                             <option value="en_entrega" ${user.deliveryStatus === 'en_entrega' ? 'selected' : ''}>En Entrega</option>
-                        </select>
-                    ` : '';
-
+                        </select>` : '';
                     return `
                     <div class="employee-item" data-id="${user.id}" style="grid-template-columns: 1fr auto ${isDelivery ? 'auto' : ''} auto;">
-                        <div class="employee-info">
-                            <p><strong>${user.displayName || 'Sin Nombre'}</strong></p>
-                            <p class="email">${user.email}</p>
-                        </div>
+                        <div class="employee-info"><p><strong>${user.displayName || 'Sin Nombre'}</strong></p><p class="email">${user.email}</p></div>
                         <select class="role-select">
-                            <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Cliente</option>
-                            <option value="waiter" ${user.role === 'waiter' ? 'selected' : ''}>Mesero</option>
-                            <option value="general_chef" ${user.role === 'general_chef' ? 'selected' : ''}>Cocinero General</option>
-                            <option value="empanada_chef" ${user.role === 'empanada_chef' ? 'selected' : ''}>Cocinero Empanadas</option>
-                            <option value="cashier" ${user.role === 'cashier' ? 'selected' : ''}>Cajero</option>
-                            <option value="delivery" ${isDelivery ? 'selected' : ''}>Repartidor</option>
+                            <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Cliente</option><option value="waiter" ${user.role === 'waiter' ? 'selected' : ''}>Mesero</option>
+                            <option value="general_chef" ${user.role === 'general_chef' ? 'selected' : ''}>Cocinero General</option><option value="empanada_chef" ${user.role === 'empanada_chef' ? 'selected' : ''}>Cocinero Empanadas</option>
+                            <option value="cashier" ${user.role === 'cashier' ? 'selected' : ''}>Cajero</option><option value="delivery" ${isDelivery ? 'selected' : ''}>Repartidor</option>
                             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
                         </select>
-                        ${deliveryStatusHTML}
-                        <button class="btn-secondary save-role-btn">Guardar</button>
-                    </div>
-                `}).join('');
-
+                        ${deliveryStatusHTML}<button class="btn-secondary save-role-btn">Guardar</button>
+                    </div>`}).join('');
                 container.querySelectorAll('.save-role-btn').forEach(btn => btn.addEventListener('click', handleRoleUpdate));
-            } catch (error) {
-                console.error("Error loading users: ", error);
-                statusDiv.innerHTML = `<p class="empty-list-message" style="color: var(--danger);">Error al cargar: ${error.message}</p>`;
-            }
+            } catch (error) { console.error("Error loading users: ", error); statusDiv.innerHTML = `<p class="empty-list-message" style="color: var(--danger);">Error al cargar.</p>`; }
         }
 
         async function handleRoleUpdate(e) {
@@ -1094,43 +933,28 @@
             const userId = item.dataset.id;
             const newRole = item.querySelector('.role-select').value;
             const deliveryStatusSelect = item.querySelector('.delivery-status-select');
-            
-            e.target.disabled = true;
-            e.target.textContent = '...';
-
+            e.target.disabled = true; e.target.textContent = '...';
             try {
                 let updateData = { role: newRole };
                 if (newRole === 'delivery') {
                     updateData.deliveryStatus = deliveryStatusSelect ? deliveryStatusSelect.value : 'disponible';
-                    if (updateData.deliveryStatus === 'disponible') {
-                        updateData.lastDeliveryTimestamp = firebase.firestore.FieldValue.serverTimestamp();
-                    }
+                    if (updateData.deliveryStatus === 'disponible') updateData.lastDeliveryTimestamp = firebase.firestore.FieldValue.serverTimestamp();
                 } else {
                     updateData.deliveryStatus = firebase.firestore.FieldValue.delete();
                     updateData.lastDeliveryTimestamp = firebase.firestore.FieldValue.delete();
                 }
-
                 await db.collection('customers').doc(userId).update(updateData);
-                showNotification('Rol actualizado con éxito.');
-                
+                showNotification('Rol actualizado.');
                 loadEmployees(document.querySelector('#employeeFilterControls .filter-btn.active').dataset.filter);
-
-            } catch (error) {
-                console.error("Error updating role: ", error);
-                showNotification('Error al actualizar el rol.', 'error');
-            } finally {
-                e.target.disabled = false;
-                e.target.textContent = 'Guardar';
-            }
+            } catch (error) { console.error("Error updating role: ", error); showNotification('Error al actualizar.', 'error'); } 
+            finally { e.target.disabled = false; e.target.textContent = 'Guardar'; }
         }
 
         // --- Product & Category Functions (Customer/Waiter) ---
         function loadProducts() {
             db.collection("products").get().then(snapshot => {
                 products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderCategoryFilters();
-                renderProducts();
-                renderWaiterProducts();
+                renderCategoryFilters(); renderProducts(); renderWaiterProducts();
             }).catch(err => console.error("Error loading products: ", err));
         }
         function renderCategoryFilters() {
@@ -1138,13 +962,11 @@
             categoriesContainer.innerHTML = `<a href="#" class="category-btn active" data-category="all"><i class="fas fa-utensils"></i><span>Todos</span></a>` +
                 categories.map(cat => `<a href="#" class="category-btn" data-category="${cat}"><i class="fas fa-tag"></i><span>${cat}</span></a>`).join('');
             categoriesContainer.querySelectorAll('.category-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                filterProductsByCategory(btn.dataset.category);
+                e.preventDefault(); filterProductsByCategory(btn.dataset.category);
             }));
         }
         function filterProductsByCategory(category) {
-            currentCategory = category;
-            renderProducts();
+            currentCategory = category; renderProducts();
             categoriesContainer.querySelector('.active').classList.remove('active');
             categoriesContainer.querySelector(`[data-category="${category}"]`).classList.add('active');
             closeSidebarFunc();
@@ -1157,45 +979,18 @@
         }
         function createProductCard(p) {
             const imageUrl = p.imageUrl || `https://via.placeholder.com/300x200?text=${p.name.replace(/\s+/g, '+')}`;
-            return `<div class="product-card">
-                        <div class="product-image"><img src="${imageUrl}" alt="${p.name}"></div>
-                        <div class="product-info">
-                            <p class="product-category">${p.category}</p>
-                            <h3 class="product-title">${p.name}</h3>
-                            <p class="product-description">${p.description || ''}</p>
-                            <div class="product-footer">
-                                <span class="product-price">$${p.price.toFixed(2)}</span>
-                                <button class="add-to-cart" data-id="${p.id}"><i class="fas fa-plus"></i> Añadir</button>
-                            </div>
-                        </div>
-                    </div>`;
+            return `<div class="product-card"><div class="product-image"><img src="${imageUrl}" alt="${p.name}"></div><div class="product-info"><p class="product-category">${p.category}</p><h3 class="product-title">${p.name}</h3><p class="product-description">${p.description || ''}</p><div class="product-footer"><span class="product-price">$${p.price.toFixed(2)}</span><button class="add-to-cart" data-id="${p.id}"><i class="fas fa-plus"></i> Añadir</button></div></div></div>`;
         }
 
         // --- Order & Notification Functions ---
         async function assignDeliveryOrder(orderId) {
-            const availableDriversQuery = db.collection('customers')
-                .where('role', '==', 'delivery')
-                .where('deliveryStatus', '==', 'disponible')
-                .orderBy('lastDeliveryTimestamp', 'asc')
-                .limit(1);
-
+            const availableDriversQuery = db.collection('customers').where('role', '==', 'delivery').where('deliveryStatus', '==', 'disponible').orderBy('lastDeliveryTimestamp', 'asc').limit(1);
             const snapshot = await availableDriversQuery.get();
-
-            if (snapshot.empty) {
-                showNotification("No hay repartidores disponibles. El pedido quedará en espera.", "warning");
-                return;
-            }
-
+            if (snapshot.empty) { showNotification("No hay repartidores disponibles.", "warning"); return; }
             const driverDoc = snapshot.docs[0];
-            const driverId = driverDoc.id;
-
-            const orderRef = db.collection('orders').doc(orderId);
-            const driverRef = db.collection('customers').doc(driverId);
-
             const batch = db.batch();
-            batch.update(orderRef, { status: 'assigned', driverId: driverId, driverName: driverDoc.data().displayName });
-            batch.update(driverRef, { deliveryStatus: 'en_entrega' });
-            
+            batch.update(db.collection('orders').doc(orderId), { status: 'assigned', driverId: driverDoc.id, driverName: driverDoc.data().displayName });
+            batch.update(db.collection('customers').doc(driverDoc.id), { deliveryStatus: 'en_entrega' });
             await batch.commit();
             showNotification(`Pedido asignado a ${driverDoc.data().displayName}.`);
         }
@@ -1204,7 +999,7 @@
             const query = db.collection("orders").where('userId', "==", currentUser.uid).orderBy('date', 'desc');
             const unsubscribe = query.onSnapshot(snapshot => {
                 allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderFilteredOrders(waiterOrdersContainer, 'all'); // Re-using waiter container for customer
+                renderFilteredOrders(waiterOrdersContainer, 'all'); // Re-using waiter container
             }, console.error);
             activeListeners.push(unsubscribe);
         }
@@ -1212,10 +1007,7 @@
             const query = db.collection("orders").where('waiterId', "==", currentUser.uid);
             const unsubscribe = query.onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === "modified") {
-                        const newData = change.doc.data();
-                        if (newData.status === 'ready') showNotification(`¡El pedido de la Mesa ${newData.table} está listo!`);
-                    }
+                    if (change.type === "modified" && change.doc.data().status === 'ready') showNotification(`¡El pedido de la Mesa ${change.doc.data().table} está listo!`);
                 });
                 allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => new Date(b.date) - new Date(a.date));
                 renderFilteredOrders(waiterOrdersContainer, waiterFilter);
@@ -1226,10 +1018,7 @@
             const query = db.collection("orders");
             const unsubscribe = query.onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === "added" && change.doc.data().status === 'pending') {
-                        const order = change.doc.data();
-                        showNotification(`Nuevo pedido para ${order.table ? `la Mesa ${order.table}` : 'delivery'}`);
-                    }
+                    if (change.type === "added" && change.doc.data().status === 'pending') showNotification(`Nuevo pedido para ${change.doc.data().table ? `la Mesa ${change.doc.data().table}` : (change.doc.data().orderType === 'pickup' ? 'retiro' : 'delivery')}`);
                 });
                 allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(a.date) - new Date(b.date));
                 renderFilteredOrders(kitchenOrdersContainer, chefFilter);
@@ -1245,13 +1034,9 @@
             activeListeners.push(unsubscribe);
         }
         function listenForDeliveryOrders() {
-            const query = db.collection("orders")
-                .where("driverId", "==", currentUser.uid)
-                .where("status", "in", ["assigned", "en_camino"]);
-
+            const query = db.collection("orders").where("driverId", "==", currentUser.uid).where("status", "in", ["assigned", "en_camino"]);
             const unsubscribe = query.onSnapshot(snapshot => {
-                const deliveryOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderOrders(deliveryOrdersContainer, deliveryOrders);
+                renderOrders(deliveryOrdersContainer, snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }, console.error);
             activeListeners.push(unsubscribe);
         }
@@ -1259,16 +1044,16 @@
         function renderFilteredOrders(container, filter) {
             if (!container) return;
             let filtered = [];
-
             if (currentUserRole === 'cashier') {
-                const targetStatuses = filter === 'mesa' ? ['ready'] : ['ready', 'assigned', 'en_camino', 'delivered_pending_cashier'];
-                filtered = allOrders.filter(order => order.type === filter && targetStatuses.includes(order.status));
+                const targetStatuses = filter === 'mesa' ? ['ready'] : 
+                    ['pending_confirmation', 'payment_verification', 'ready', 'assigned', 'en_camino', 'delivered_pending_cashier'];
+                const targetType = filter === 'mesa' ? 'mesa' : 'online';
+                filtered = allOrders.filter(order => order.type === targetType && targetStatuses.includes(order.status));
             } else { 
-                const statusMap = { all: ['pending', 'preparing', 'ready', 'assigned', 'en_camino', 'delivered_pending_cashier', 'paid', 'cancelled'], active: ['pending', 'preparing', 'ready'], history: ['paid', 'cancelled'] };
+                const statusMap = { all: Object.keys(getStatusText()), active: ['pending', 'preparing', 'ready', 'pending_confirmation', 'pending_payment', 'payment_verification'], history: ['paid', 'cancelled'] };
                 const targetStatuses = statusMap[filter] || [filter];
                 filtered = allOrders.filter(order => targetStatuses.includes(order.status));
             }
-            
             renderOrders(container, filtered);
         }
 
@@ -1279,76 +1064,89 @@
         }
 
         function createOrderCard(order) {
-            let actions = '';
+            let actions = '', details = '';
             
-            if (currentUserRole === 'customer' && order.type === 'delivery') {
-                return createCustomerOrderTrackerCard(order);
-            }
+            // Customer Card
+            if (currentUserRole === 'customer') return createCustomerOrderTrackerCard(order);
 
-            // CHEF ACTIONS
+            // Employee Cards
+            const orderTitle = order.table ? `Mesa ${order.table}` : (order.driverName ? `Repartidor: ${order.driverName}` : (order.userName || 'Cliente Online'));
+            const itemsHTML = (order.items || []).map(it => `<div class="order-item"><span>${it.quantity}x</span> <span>${it.name}</span></div>`).join('');
+            
+            // CHEF
             if (currentUserRole.includes('chef')) {
                 if (order.status === 'pending') actions = `<button class="btn-primary" data-action="prepare" data-id="${order.id}">Preparar</button>`;
                 if (order.status === 'preparing') actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="ready" data-id="${order.id}">Listo</button>`;
             } 
-            // DELIVERY ACTIONS
+            // DELIVERY
             else if (currentUserRole === 'delivery') {
                 if (order.status === 'assigned') actions = `<button class="btn-primary" data-action="start_delivery" data-id="${order.id}">Iniciar Entrega</button>`;
                 if (order.status === 'en_camino') actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="complete_delivery" data-id="${order.id}">Entrega Completada</button>`;
             }
-            // CASHIER ACTIONS
+            // CASHIER
             else if (currentUserRole === 'cashier') {
-                if (order.type === 'mesa' && order.status === 'ready') {
-                    actions = `<button class="btn-primary" data-action="pay" data-id="${order.id}">Marcar Pagado</button>`;
-                } else if (order.type === 'delivery' && order.status === 'ready') {
-                    actions = `<button class="btn-primary" data-action="assign_delivery" data-id="${order.id}">Listo para Asignar</button>`;
-                } else if (order.type === 'delivery' && order.status === 'delivered_pending_cashier') {
-                    actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="pay" data-id="${order.id}">Confirmar Pago y Cerrar</button>`;
+                if (order.type === 'mesa' && order.status === 'ready') actions = `<button class="btn-primary" data-action="pay" data-id="${order.id}">Marcar Pagado</button>`;
+                if (order.type === 'online') {
+                    if(order.status === 'pending_confirmation') actions = `<button class="btn-primary" data-action="set_fee" data-id="${order.id}">Confirmar y Asignar Tarifa</button>`;
+                    if(order.status === 'payment_verification') {
+                        details = `<div class="order-details-section">Ref: ${order.payment.reference || 'N/A'} | Total: $${order.total.toFixed(2)}</div>`;
+                        actions = `<button class="btn-primary" style="background-color:var(--success);" data-action="verify_payment" data-id="${order.id}">Pago Verificado</button>`;
+                    }
+                    if(order.status === 'ready') {
+                        if (order.orderType === 'delivery') actions = `<button class="btn-primary" data-action="assign_delivery" data-id="${order.id}">Asignar Repartidor</button>`;
+                        else actions = `<button class="btn-primary" style="background-color:var(--success);" data-action="pay" data-id="${order.id}">Entregar y Pagar</button>`; // Pickup
+                    }
+                    if(order.status === 'delivered_pending_cashier') actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="pay" data-id="${order.id}">Confirmar Pago y Cerrar</button>`;
                 }
             }
+            
             return `<div class="order-card status-${order.status}">
-                        <div class="order-header">
-                            <div><h4>Pedido #${order.id.slice(-6)}</h4><span>${order.table ? `Mesa ${order.table}` : (order.driverName ? `Repartidor: ${order.driverName}` : (order.userName || 'Cliente Delivery'))}</span></div>
-                            <span class="item-status status-${order.status}">${getStatusText(order.status)}</span>
-                        </div>
-                        <div class="order-items">${(order.items || []).map(it => `<div class="order-item"><span>${it.quantity}x</span> <span>${it.name}</span></div>`).join('')}</div>
-                        ${actions ? `<div class="order-actions">${actions}</div>` : ''}
+                        <div class="order-header"><div><h4>Pedido #${order.id.slice(-6)}</h4><span>${orderTitle}</span></div><span class="item-status status-${order.status}">${getStatusText(order.status)}</span></div>
+                        <div class="order-items">${itemsHTML}</div>${details}${actions ? `<div class="order-actions">${actions}</div>` : ''}
                     </div>`;
         }
 
         function createCustomerOrderTrackerCard(order) {
-            const stages = {
-                'pending': { step: 1 }, 'preparing': { step: 2 }, 'ready': { step: 3 }, 'assigned': { step: 3 },
-                'en_camino': { step: 4 }, 'delivered_pending_cashier': { step: 5 }, 'paid': { step: 5 }
-            };
-            const currentStage = stages[order.status] || { step: 0 };
-            
+            const stages = { 'pending_confirmation': 1, 'pending_payment': 2, 'payment_verification': 2, 'pending': 3, 'preparing': 4, 'ready': 5, 'assigned': 5, 'en_camino': 6, 'delivered_pending_cashier': 7, 'paid': 7 };
+            const currentStage = stages[order.status] || 0;
             const trackerSteps = [
-                { id: 1, text: 'Recibido', icon: 'fa-receipt' }, { id: 2, text: 'Preparando', icon: 'fa-hat-chef' },
-                { id: 3, text: 'Listo', icon: 'fa-box-open' }, { id: 4, text: 'En Camino', icon: 'fa-motorcycle' },
-                { id: 5, text: 'Entregado', icon: 'fa-check-double' }
+                { id: 1, text: 'Confirmando', icon: 'fa-question-circle' }, { id: 2, text: 'Esperando Pago', icon: 'fa-credit-card' },
+                { id: 3, text: 'Recibido', icon: 'fa-receipt' }, { id: 4, text: 'Preparando', icon: 'fa-hat-chef' },
+                { id: 5, text: 'Listo', icon: 'fa-box-open' }, { id: 6, text: 'En Camino', icon: 'fa-motorcycle' },
+                { id: 7, text: 'Entregado', icon: 'fa-check-double' }
             ];
-
-            const progressPercentage = currentStage.step > 1 ? (currentStage.step - 1) / (trackerSteps.length - 1) : 0;
+            const progressPercentage = currentStage > 1 ? (currentStage - 1) / (trackerSteps.length - 1) : 0;
             const progressBarWidth = progressPercentage * 80;
+            const itemsHTML = (order.items || []).map(it => `<div class="order-item"><span>${it.quantity}x ${it.name}</span> <span>$${(it.price * it.quantity).toFixed(2)}</span></div>`).join('');
+            
+            let detailsHTML = `<div class="order-details-section">${itemsHTML}`;
+            if(order.deliveryFee > 0) detailsHTML += `<div class="order-item"><span>Envío</span> <span>$${order.deliveryFee.toFixed(2)}</span></div>`;
+            detailsHTML += `<div class="order-item" style="font-weight:bold; border-top:1px solid var(--border-color); padding-top:0.5rem; margin-top:0.5rem;"><span>Total</span> <span>$${order.total.toFixed(2)}</span></div></div>`;
+
+            let actionsHTML = '';
+            if(order.status === 'pending_payment') {
+                actionsHTML = `<div class="order-details-section" style="margin-top:0.5rem;"><p style="font-weight:600; margin-bottom:0.5rem;">Realiza tu Pago Móvil y confirma:</p>`;
+                if (paymentMethods.length > 0) {
+                    const pm = paymentMethods[0];
+                    actionsHTML += `<p style="font-size:0.8rem"><strong>Banco:</strong> ${pm.bank} | <strong>Tel:</strong> ${pm.phone} | <strong>RIF/CI:</strong> ${pm.rif}</p>`;
+                }
+                actionsHTML += `
+                    <div class="form-group" style="margin-top:1rem; margin-bottom:0.5rem;">
+                        <input type="text" class="payment-ref-input" placeholder="Ingresa N° de Referencia" required>
+                    </div>
+                    <button class="btn-primary confirm-payment-btn" data-id="${order.id}">Confirmar Pago</button>
+                </div>`;
+            }
 
             return `
                 <div class="order-card status-${order.status}">
-                    <div class="order-header">
-                        <div><h4>Pedido #${order.id.slice(-6)}</h4><span>${new Date(order.date).toLocaleDateString()}</span></div>
-                        <span class="item-status status-${order.status}">${getStatusText(order.status)}</span>
+                    <div class="order-header"><div><h4>Pedido #${order.id.slice(-6)}</h4><span>${new Date(order.date).toLocaleDateString()}</span></div><span class="item-status status-${order.status}">${getStatusText(order.status)}</span></div>
+                    <div class="order-tracker" style="width:100%; justify-content: space-around; margin-bottom: 2rem;">
+                        <div class="tracker-progress" style="width: ${progressBarWidth}%; left: 5%;"></div>
+                        ${trackerSteps.map(step => `<div class="tracker-step ${currentStage >= step.id ? 'completed' : ''} ${currentStage === step.id ? 'active' : ''}"><div class="icon"><i class="fas ${step.icon}"></i></div><div class="label">${step.text}</div></div>`).join('')}
                     </div>
-                    <div class="order-tracker">
-                        <div class="tracker-progress" style="width: ${progressBarWidth}%;"></div>
-                        ${trackerSteps.map(step => `
-                            <div class="tracker-step ${currentStage.step >= step.id ? 'completed' : ''} ${currentStage.step === step.id ? 'active' : ''}">
-                                <div class="icon"><i class="fas ${step.icon}"></i></div>
-                                <div class="label">${step.text}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="order-items">${(order.items || []).map(it => `<div class="order-item"><span>${it.quantity}x</span> <span>${it.name}</span></div>`).join('')}</div>
-                </div>
-            `;
+                    ${detailsHTML}${actionsHTML}
+                </div>`;
         }
 
         function setupCardActions(container) {
@@ -1364,12 +1162,31 @@
                 if (action === 'start_delivery') updateOrderStatus(id, 'en_camino');
                 if (action === 'complete_delivery') {
                     await updateOrderStatus(id, 'delivered_pending_cashier');
-                    db.collection('customers').doc(currentUser.uid).update({
-                        deliveryStatus: 'disponible',
-                        lastDeliveryTimestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    db.collection('customers').doc(currentUser.uid).update({ deliveryStatus: 'disponible', lastDeliveryTimestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 }
                 if (action === 'pay') updateOrderStatus(id, 'paid');
+                // New cashier actions
+                if (action === 'set_fee') {
+                    const fee = parseFloat(prompt("Ingrese el costo del envío (USD):", appConfig.deliveryFee.toFixed(2)));
+                    if (!isNaN(fee) && fee >= 0) {
+                        const orderRef = db.collection('orders').doc(id);
+                        db.runTransaction(async (transaction) => {
+                            const doc = await transaction.get(orderRef);
+                            if (!doc.exists) throw "Document does not exist!";
+                            const currentTotal = doc.data().items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                            const newTotal = currentTotal + fee;
+                            transaction.update(orderRef, { status: 'pending_payment', deliveryFee: fee, total: newTotal });
+                        });
+                    } else { showNotification("Monto inválido", "error"); }
+                }
+                if (action === 'verify_payment') await updateOrderStatus(id, 'pending');
+                // New customer action
+                if (action === 'confirm-payment') {
+                    const refInput = e.target.previousElementSibling.querySelector('.payment-ref-input');
+                    const reference = refInput.value;
+                    if (reference.length < 4) { showNotification("Referencia muy corta.", "error"); return; }
+                    db.collection('orders').doc(id).update({ status: 'payment_verification', 'payment.reference': reference });
+                }
             });
         }
         function updateOrderStatus(orderId, status) {
@@ -1390,10 +1207,8 @@
             const activeCart = getActiveCart();
             if (!product || !activeCart) return;
             const item = activeCart.find(i => i.id === productId);
-            if (item) item.quantity++;
-            else activeCart.push({ ...product, quantity: 1 });
-            showNotification(`${product.name} añadido`);
-            updateCartCount();
+            if (item) item.quantity++; else activeCart.push({ ...product, quantity: 1 });
+            showNotification(`${product.name} añadido`); updateCartCount();
         }
         function updateCartCount() {
             const activeCart = getActiveCart();
@@ -1401,69 +1216,35 @@
             document.querySelectorAll('.cart-count').forEach(el => el.textContent = count);
         }
         async function openCartModal() {
-            renderCart();
-            cartModal.classList.add('visible');
+            renderCart(); cartModal.classList.add('visible');
             const isWaiter = currentUserRole === 'waiter';
             checkoutBtn.style.display = isWaiter ? 'none' : 'block';
             processOrderBtn.style.display = isWaiter ? 'block' : 'none';
-            document.querySelector('.payment-methods').style.display = isWaiter ? 'none' : 'block';
-            
-            if(!isWaiter) {
-                renderPagoMovilOptions();
-            }
+            document.querySelector('#deliveryTypeSelect').closest('.form-group').style.display = isWaiter ? 'none' : 'block';
+            cartPaymentSection.style.display = isWaiter ? 'none' : 'block';
+            if(!isWaiter) renderPagoMovilOptions();
         }
-        function closeCartModal() {
-            cartModal.classList.remove('visible');
-        }
+        function closeCartModal() { cartModal.classList.remove('visible'); }
         function renderCart() {
             const container = document.getElementById('cartItemsContainer');
             const activeCart = getActiveCart();
-            if (!container || !activeCart) return;
-
-            if (!activeCart || activeCart.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color: var(--text-gray);">Tu carrito está vacío.</p>';
-                document.querySelector('.payment-methods').style.display = 'none';
-                return;
+            if (!container || !activeCart || activeCart.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-gray);">Tu carrito está vacío.</p>';
+                document.querySelector('#deliveryTypeSelect').closest('.form-group').style.display = 'none';
+                cartPaymentSection.style.display = 'none'; return;
             }
-            container.innerHTML = activeCart.map(item => `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem 0;">
-                    <div><p style="font-weight:600;">${item.name}</p><p style="font-size:0.875rem; color:var(--text-gray);">$${item.price.toFixed(2)}</p></div><div>${item.quantity}</div>
-                </div>`).join('');
-            document.querySelector('.payment-methods').style.display = 'block';
+            container.innerHTML = activeCart.map(item => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem 0;"><div><p style="font-weight:600;">${item.name}</p><p style="font-size:0.875rem; color:var(--text-gray);">$${item.price.toFixed(2)}</p></div><div>${item.quantity}</div></div>`).join('');
+            document.querySelector('#deliveryTypeSelect').closest('.form-group').style.display = 'block';
+            cartPaymentSection.style.display = deliveryTypeSelect.value === 'delivery' ? 'block' : 'none';
         }
         
         function renderPagoMovilOptions() {
-            if (paymentMethods.length === 0) {
-                pagoMovilDetailsDiv.innerHTML = `<p id="pagoMovilInfo">Los datos de Pago Móvil no están configurados.</p>`;
-                return;
-            }
-
+            if (paymentMethods.length === 0) { pagoMovilDetailsDiv.innerHTML = `<p id="pagoMovilInfo">Los datos de Pago Móvil no están configurados.</p>`; return; }
             if (paymentMethods.length === 1) {
                 const data = paymentMethods[0];
-                pagoMovilDetailsDiv.innerHTML = `
-                    <div id="pagoMovilInfo">
-                        <p>Realiza el pago a la siguiente cuenta:</p>
-                        <p><strong>Banco:</strong> ${data.bank}</p>
-                        <p><strong>Teléfono:</strong> ${data.phone}</p>
-                        <p><strong>RIF/CI:</strong> ${data.rif}</p>
-                    </div>
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label for="pagoMovilRef">Referencia Bancaria (6+ dígitos)</label>
-                        <input type="text" id="pagoMovilRef" minlength="6">
-                    </div>`;
+                pagoMovilDetailsDiv.innerHTML = `<div id="pagoMovilInfo"><p>Realiza el pago a:</p><p><strong>Banco:</strong> ${data.bank}</p><p><strong>Teléfono:</strong> ${data.phone}</p><p><strong>RIF/CI:</strong> ${data.rif}</p></div>`;
             } else {
-                pagoMovilDetailsDiv.innerHTML = `
-                    <div class="form-group">
-                        <label for="pagoMovilAccountSelect">Selecciona la cuenta a la que transferiste</label>
-                        <select id="pagoMovilAccountSelect">
-                            <option value="">Selecciona una cuenta...</option>
-                            ${paymentMethods.map(m => `<option value="${m.id}">${m.bank} - ${m.phone}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="pagoMovilRef">Referencia Bancaria (6+ dígitos)</label>
-                        <input type="text" id="pagoMovilRef" minlength="6">
-                    </div>`;
+                pagoMovilDetailsDiv.innerHTML = `<div class="form-group"><label for="pagoMovilAccountSelect">Selecciona la cuenta</label><select id="pagoMovilAccountSelect"><option value="">Selecciona...</option>${paymentMethods.map(m => `<option value="${m.id}">${m.bank} - ${m.phone}</option>`).join('')}</select></div>`;
             }
         }
         
@@ -1471,60 +1252,36 @@
             const activeCart = getActiveCart();
             if (!activeCart || activeCart.length === 0 || !currentTable) return showNotification('Seleccione mesa y añada productos.', 'error');
             const order = {
-                date: new Date().toISOString(), waiterId: currentUser.uid,
-                userName: `Mesa ${currentTable}`, items: activeCart,
-                total: activeCart.reduce((s, i) => s + (i.price * i.quantity), 0),
-                status: 'pending', table: currentTable, type: 'mesa',
+                date: new Date().toISOString(), waiterId: currentUser.uid, userName: `Mesa ${currentTable}`, items: activeCart,
+                total: activeCart.reduce((s, i) => s + (i.price * i.quantity), 0), status: 'pending', table: currentTable, type: 'mesa',
                 payment: { method: 'En mesa' }
             };
             try {
                 await db.collection("orders").add(order);
-                showNotification(`Pedido para Mesa ${currentTable} enviado.`);
-                cartByTable[currentTable] = [];
-                document.querySelector('.table-card.active')?.classList.remove('active');
-                currentTable = null;
-                updateCartCount();
-                closeCartModal();
+                showNotification(`Pedido para Mesa ${currentTable} enviado.`); cartByTable[currentTable] = [];
+                document.querySelector('.table-card.active')?.classList.remove('active'); currentTable = null;
+                updateCartCount(); closeCartModal();
             } catch (error) { showNotification('Error al guardar el pedido', 'error'); }
         }
         async function checkout() {
-            const paymentMethod = paymentMethodSelect.value;
-            const pagoMovilRef = document.getElementById('pagoMovilRef')?.value;
-            const pagoMovilAccountSelect = document.getElementById('pagoMovilAccountSelect');
-
             if (cart.length === 0) return showNotification('El carrito está vacío', 'error');
-            if (!paymentMethod) return showNotification('Por favor, seleccione un método de pago.', 'error');
-            
-            let paymentData = { method: paymentMethod };
-
-            if (paymentMethod === 'Pago Móvil') {
-                if (!pagoMovilRef || pagoMovilRef.length < 6) return showNotification('La referencia de Pago Móvil debe tener al menos 6 dígitos.', 'error');
-                paymentData.reference = pagoMovilRef;
-
-                if (pagoMovilAccountSelect) { // Multiple accounts
-                    if(!pagoMovilAccountSelect.value) return showNotification('Por favor, selecciona la cuenta de Pago Móvil a la que transferiste.', 'error');
-                    const selectedAccount = paymentMethods.find(m => m.id === pagoMovilAccountSelect.value);
-                    paymentData.destination = `${selectedAccount.bank} - ${selectedAccount.phone}`;
-                } else { // Single account
-                    const selectedAccount = paymentMethods[0];
-                    paymentData.destination = `${selectedAccount.bank} - ${selectedAccount.phone}`;
-                }
-            }
-            
-            const order = {
-                date: new Date().toISOString(), userId: currentUser.uid,
-                userName: currentUser.displayName, items: cart,
-                total: cart.reduce((s, i) => s + (i.price * i.quantity), 0),
-                status: 'pending', type: 'delivery',
-                payment: paymentData
+            const orderType = deliveryTypeSelect.value;
+            const paymentMethod = paymentMethodSelect.value;
+            let order = {
+                date: new Date().toISOString(), userId: currentUser.uid, userName: currentUser.displayName, items: cart,
+                total: cart.reduce((s, i) => s + (i.price * i.quantity), 0), deliveryFee: 0, orderType: orderType, type: orderType === 'pickup' ? 'mesa' : 'online'
             };
-
+            if(orderType === 'delivery'){
+                order.status = 'pending_confirmation';
+                order.payment = { method: paymentMethod };
+            } else { // Pickup
+                order.status = 'pending'; // Goes straight to kitchen
+                order.table = 'Retiro'; // Identifier for pickup
+            }
             try {
                 await db.collection("orders").add(order);
-                showNotification(`Pedido enviado con éxito.`);
-                cart = [];
-                updateCartCount();
-                closeCartModal();
+                showNotification(`Pedido ${orderType === 'delivery' ? 'solicitado' : 'enviado'}. Revisa "Mis Pedidos".`);
+                cart = []; updateCartCount(); closeCartModal();
             } catch (error) { showNotification('Error al guardar el pedido', 'error'); }
         }
 
@@ -1534,18 +1291,14 @@
             if(!tableContainer) return;
             tableContainer.innerHTML = '<h2 class="section-title">Seleccione una Mesa</h2><div class="tables-grid">' + 
             [...Array(10)].map((_, i) => `<div class="table-card" data-table="${i+1}"><i class="fas fa-utensils"></i><span>Mesa ${i+1}</span></div>`).join('') + '</div>';
-
             tableContainer.addEventListener('click', e => {
                 const card = e.target.closest('.table-card');
                 if (!card || card.classList.contains('locked')) return;
-                tableContainer.querySelector('.active')?.classList.remove('active');
-                card.classList.add('active');
+                tableContainer.querySelector('.active')?.classList.remove('active'); card.classList.add('active');
                 currentTable = card.dataset.table;
-                const menuTitle = document.getElementById('waiterMenuTitle');
-                menuTitle.textContent = `Menú para la Mesa ${currentTable}`;
-                menuTitle.style.display = 'block';
+                document.getElementById('waiterMenuTitle').textContent = `Menú para la Mesa ${currentTable}`;
+                document.getElementById('waiterMenuTitle').style.display = 'block';
             });
-
             const unsubscribe = db.collection("orders").where("status", "in", ["pending", "preparing", "ready"]).onSnapshot(snapshot => {
                 const lockedTables = new Set(snapshot.docs.map(doc => doc.data().table));
                 tableContainer.querySelectorAll('.table-card').forEach(card => card.classList.toggle('locked', lockedTables.has(card.dataset.table)));
@@ -1563,30 +1316,11 @@
         async function renderProfile() {
             const container = document.getElementById('profileContainer');
             if (!container || !currentUser) return;
-            
             const doc = await db.collection('customers').doc(currentUser.uid).get();
-            if (!doc.exists) {
-                container.innerHTML = '<p>No se pudo cargar el perfil.</p>';
-                return;
-            }
+            if (!doc.exists) { container.innerHTML = '<p>No se pudo cargar el perfil.</p>'; return; }
             const data = doc.data();
             const creationDate = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
-            
-            container.innerHTML = `
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="profile-avatar">${(data.displayName || 'C').charAt(0).toUpperCase()}</div>
-                        <h3 style="margin-top: 0.5rem;">${data.displayName || 'Cliente'}</h3>
-                        <p>${data.email}</p>
-                    </div>
-                    <div class="profile-details">
-                        <div class="detail-item"><span>Teléfono</span> <span>${data.phone || 'No especificado'}</span></div>
-                        <div class="detail-item"><span>Dirección</span> <span>${data.address || 'No especificada'}</span></div>
-                        <div class="detail-item"><span>Miembro desde</span> <span>${creationDate}</span></div>
-                    </div>
-                    <button class="btn-primary" id="editProfileBtn" style="margin-top: 1.5rem;">Editar Perfil</button>
-                </div>`;
-            
+            container.innerHTML = `<div class="profile-card"><div class="profile-header"><div class="profile-avatar">${(data.displayName || 'C').charAt(0).toUpperCase()}</div><h3 style="margin-top: 0.5rem;">${data.displayName || 'Cliente'}</h3><p>${data.email}</p></div><div class="profile-details"><div class="detail-item"><span>Teléfono</span> <span>${data.phone || 'N/A'}</span></div><div class="detail-item"><span>Dirección</span> <span>${data.address || 'N/A'}</span></div><div class="detail-item"><span>Miembro desde</span> <span>${creationDate}</span></div></div><button class="btn-primary" id="editProfileBtn" style="margin-top: 1.5rem;">Editar Perfil</button></div>`;
             document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
         }
 
@@ -1605,33 +1339,21 @@
         async function handleProfileUpdate(e) {
             e.preventDefault();
             const btn = document.getElementById('saveProfileBtn');
-            btn.disabled = true;
-            btn.textContent = 'Guardando...';
-
+            btn.disabled = true; btn.textContent = 'Guardando...';
             const updatedData = {
-                firstName: document.getElementById('profileFirstName').value,
-                lastName: document.getElementById('profileLastName').value,
-                address: document.getElementById('profileAddress').value,
-                phone: document.getElementById('profilePhone').value,
+                firstName: document.getElementById('profileFirstName').value, lastName: document.getElementById('profileLastName').value,
+                address: document.getElementById('profileAddress').value, phone: document.getElementById('profilePhone').value,
             };
             updatedData.displayName = `${updatedData.firstName} ${updatedData.lastName}`;
-
             try {
                 await db.collection('customers').doc(currentUser.uid).update(updatedData);
-                showNotification('Perfil actualizado con éxito');
-                profileModal.classList.remove('visible');
-                renderProfile(); // Re-render profile to show new data
-            } catch (error) {
-                console.error("Error updating profile:", error);
-                showNotification('Error al actualizar el perfil.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Guardar Cambios';
-            }
+                showNotification('Perfil actualizado.'); profileModal.classList.remove('visible'); renderProfile();
+            } catch (error) { console.error("Error updating profile:", error); showNotification('Error al actualizar.', 'error'); } 
+            finally { btn.disabled = false; btn.textContent = 'Guardar Cambios'; }
         }
         
         function getStatusText(status) {
-            const texts = { pending: 'Entrante', preparing: 'En preparación', ready: 'Listo para Asignar', assigned: 'Asignado', en_camino: 'En Camino', delivered_pending_cashier: 'Entregado', paid: 'Pagado', cancelled: 'Cancelado' };
+            const texts = { pending: 'Entrante', preparing: 'Preparando', ready: 'Listo', assigned: 'Asignado', en_camino: 'En Camino', delivered_pending_cashier: 'Entregado', paid: 'Pagado', cancelled: 'Cancelado', pending_confirmation: 'Por Confirmar', pending_payment: 'Esperando Pago', payment_verification: 'Verificando Pago' };
             return texts[status] || status;
         }
         function showNotification(message, type = 'success') {
@@ -1647,7 +1369,7 @@
             const configs = [
                 { id: 'waiterFilterControls', container: waiterOrdersContainer, filterVar: 'waiterFilter', buttons: [{t:'Activos', s:'active'}, {t:'Historial', s:'history'}] },
                 { id: 'chefFilterControls', container: kitchenOrdersContainer, filterVar: 'chefFilter', buttons: [{t:'Entrantes', s:'pending'}, {t:'En Preparación', s:'preparing'}] },
-                { id: 'cashierFilterControls', container: cashierOrdersContainer, filterVar: 'cashierOrderTypeFilter', buttons: [{t:'Pedidos en Mesa', s:'mesa'}, {t:'Pedidos en Reparto', s:'delivery'}] },
+                { id: 'cashierFilterControls', container: cashierOrdersContainer, filterVar: 'cashierOrderTypeFilter', buttons: [{t:'Pedidos en Mesa', s:'mesa'}, {t:'Pedidos Online', s:'online'}] },
             ];
             configs.forEach(config => {
                 const controls = document.getElementById(config.id);
@@ -1668,77 +1390,48 @@
         async function handleNewUserSetup(e) {
             e.preventDefault();
             if (!currentUser) return;
-            
             const btn = document.getElementById('saveUserSetupBtn');
-            btn.disabled = true;
-            btn.textContent = 'Guardando...';
-
+            btn.disabled = true; btn.textContent = 'Guardando...';
             const userData = {
                 displayName: `${document.getElementById('userFirstName').value} ${document.getElementById('userLastName').value}`,
-                firstName: document.getElementById('userFirstName').value,
-                lastName: document.getElementById('userLastName').value,
-                address: document.getElementById('userAddress').value,
-                phone: document.getElementById('userPhone').value
+                firstName: document.getElementById('userFirstName').value, lastName: document.getElementById('userLastName').value,
+                address: document.getElementById('userAddress').value, phone: document.getElementById('userPhone').value
             };
-
             try {
                 await saveCustomerData(currentUser, 'customer', userData);
-                showNotification('¡Datos guardados con éxito!');
-                
+                showNotification('¡Datos guardados!');
                 newUserSetupSection.style.display = 'none';
-                mainHeader.classList.add('visible');
-                magicNav.classList.add('visible');
-                
-                currentUserRole = 'customer'; 
-                loadInitialDataForRole();
-                loadProducts();
-
-            } catch (error) {
-                console.error("Error saving user data:", error);
-                showNotification('Error al guardar tus datos.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Crear Cuenta y Continuar';
-            }
+                mainHeader.classList.add('visible'); magicNav.classList.add('visible');
+                currentUserRole = 'customer'; loadInitialDataForRole(); loadProducts();
+            } catch (error) { console.error("Error saving user data:", error); showNotification('Error al guardar tus datos.', 'error'); } 
+            finally { btn.disabled = false; btn.textContent = 'Crear Cuenta y Continuar'; }
         }
 
         // --- REPORTING FUNCTIONS ---
         async function generateDeliveryReport(targetUserId, period) {
-            const today = new Date();
-            let startDate;
-
-            if (period === 'day') {
-                startDate = new Date(today.setHours(0, 0, 0, 0));
-            } else if (period === 'week') {
+            const today = new Date(); let startDate;
+            if (period === 'day') startDate = new Date(today.setHours(0, 0, 0, 0));
+            else if (period === 'week') {
                 const firstDayOfWeek = today.getDate() - today.getDay();
                 startDate = new Date(today.setDate(firstDayOfWeek));
                 startDate.setHours(0, 0, 0, 0);
-            } else { // month
-                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            }
+            } else startDate = new Date(today.getFullYear(), today.getMonth(), 1);
 
-            let query = db.collection('orders')
-                .where('status', '==', 'paid')
-                .where('type', '==', 'delivery')
-                .where('date', '>=', startDate.toISOString());
-
-            if (targetUserId && targetUserId !== 'all') {
-                query = query.where('driverId', '==', targetUserId);
-            }
-
+            let query = db.collection('orders').where('status', '==', 'paid').where('orderType', '==', 'delivery').where('date', '>=', startDate.toISOString());
+            if (targetUserId && targetUserId !== 'all') query = query.where('driverId', '==', targetUserId);
             const snapshot = await query.get();
             
             if (targetUserId && targetUserId !== 'all') {
-                return snapshot.size;
+                const totalFee = snapshot.docs.reduce((sum, doc) => sum + (doc.data().deliveryFee || 0), 0);
+                return { count: snapshot.size, totalFee: totalFee };
             } else {
                 const counts = new Map();
                 snapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    const driverId = data.driverId;
+                    const data = doc.data(); const driverId = data.driverId;
                     if (driverId) {
-                        const currentCount = counts.get(driverId) || { count: 0, name: data.driverName };
-                        currentCount.count++;
-                        counts.set(driverId, currentCount);
+                        const current = counts.get(driverId) || { count: 0, totalFee: 0, name: data.driverName };
+                        current.count++; current.totalFee += (data.deliveryFee || 0);
+                        counts.set(driverId, current);
                     }
                 });
                 return counts;
@@ -1754,136 +1447,82 @@
         
         async function updateDeliveryReportForPeriod(period) {
             reportModalBody.innerHTML = 'Cargando reporte...';
-            const count = await generateDeliveryReport(currentUser.uid, period);
-            reportModalBody.innerHTML = `Total de entregas: <strong style="font-size: 2rem; color: var(--primary); display: block;">${count}</strong>`;
+            const report = await generateDeliveryReport(currentUser.uid, period);
+            reportModalBody.innerHTML = `Total de entregas: <strong style="font-size: 2rem; color: var(--primary); display: block;">${report.count}</strong>
+                                         Ingresos por envíos: <strong style="font-size: 1.5rem; color: var(--success); display: block;">$${report.totalFee.toFixed(2)}</strong>`;
         }
 
         async function loadAdminReports() {
             const select = document.getElementById('adminDeliverySelect');
             const resultsContainer = document.getElementById('adminReportResults');
             const filters = document.querySelector('#admin-tab-reports .report-filters');
-
             resultsContainer.innerHTML = 'Cargando repartidores...';
-
             const snapshot = await db.collection('customers').where('role', '==', 'delivery').get();
             const deliveryUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
             select.innerHTML = '<option value="all">Todos los Repartidores</option>' + deliveryUsers.map(u => `<option value="${u.id}">${u.displayName}</option>`).join('');
 
             const updateReportView = async () => {
                 const selectedDriver = select.value;
                 const selectedPeriod = filters.querySelector('.filter-btn.active').dataset.period;
                 resultsContainer.innerHTML = 'Generando reporte...';
-
                 const reportData = await generateDeliveryReport(selectedDriver, selectedPeriod);
                 
-                if (reportData.size === 0) {
-                    resultsContainer.innerHTML = '<p class="empty-list-message">No hay entregas completadas para este período.</p>';
-                    return;
+                if ((selectedDriver === 'all' && reportData.size === 0) || (selectedDriver !== 'all' && reportData.count === 0)) {
+                    resultsContainer.innerHTML = '<p class="empty-list-message">No hay entregas para este período.</p>'; return;
                 }
-
                 let reportHtml = '';
                 if (selectedDriver === 'all') {
-                     // Add drivers with 0 deliveries for the period
-                    deliveryUsers.forEach(user => {
-                        if (!reportData.has(user.id)) {
-                            reportData.set(user.id, { name: user.displayName, count: 0 });
-                        }
-                    });
-
-                    reportData.forEach((data, driverId) => {
-                        reportHtml += `
-                            <div class="report-item-card">
-                                <p class="name">${data.name}</p>
-                                <p class="count">${data.count}</p>
-                            </div>
-                        `;
+                    deliveryUsers.forEach(user => { if (!reportData.has(user.id)) reportData.set(user.id, { name: user.displayName, count: 0, totalFee: 0 }); });
+                    reportData.forEach((data) => {
+                        reportHtml += `<div class="report-item-card"><p class="name">${data.name}</p><p class="count">${data.count} carreras</p><p class="count" style="font-size:1.2rem; color:var(--success);">$${data.totalFee.toFixed(2)}</p></div>`;
                     });
                 } else {
                     const driver = deliveryUsers.find(u => u.id === selectedDriver);
-                    reportHtml = `
-                        <div class="report-item-card">
-                            <p class="name">${driver.displayName}</p>
-                            <p class="count">${reportData}</p>
-                        </div>`;
+                    reportHtml = `<div class="report-item-card"><p class="name">${driver.displayName}</p><p class="count">${reportData.count} carreras</p><p class="count" style="font-size:1.2rem; color:var(--success);">$${reportData.totalFee.toFixed(2)}</p></div>`;
                 }
                 resultsContainer.innerHTML = reportHtml;
             };
-            
             filters.addEventListener('click', e => {
                 if (e.target.tagName !== 'BUTTON') return;
-                filters.querySelector('.active').classList.remove('active');
-                e.target.classList.add('active');
+                filters.querySelector('.active').classList.remove('active'); e.target.classList.add('active');
                 updateReportView();
             });
             select.addEventListener('change', updateReportView);
-
-            updateReportView(); // Initial load
+            updateReportView();
         }
 
         // --- Global Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
             newUserSetupForm.addEventListener('submit', handleNewUserSetup);
             saveProfileBtn.addEventListener('click', handleProfileUpdate);
-            
-            openTermsLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                termsModal.classList.add('visible');
-            });
-
+            openTermsLink.addEventListener('click', (e) => { e.preventDefault(); termsModal.classList.add('visible'); });
             [termsModal, profileModal, productModal, cartModal, reportModal].forEach(modal => {
-                modal.querySelectorAll('.close-modal').forEach(btn => {
-                    btn.addEventListener('click', () => modal.classList.remove('visible'));
-                });
+                modal.querySelectorAll('.close-modal').forEach(btn => btn.addEventListener('click', () => modal.classList.remove('visible')));
             });
-            
             reportDateFilters.addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON') return;
                 reportDateFilters.querySelector('.active').classList.remove('active');
                 e.target.classList.add('active');
                 updateDeliveryReportForPeriod(e.target.dataset.period);
             });
-
             authForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const email = authEmail.value;
-                const password = authPassword.value;
-
-                authSubmitBtn.disabled = true;
-                authSubmitBtn.textContent = 'Procesando...';
-
-                if (authMode === 'login') {
-                    auth.signInWithEmailAndPassword(email, password).catch(handleAuthError);
-                } else if (authMode === 'register') {
-                    if (password !== authConfirmPassword.value) { 
-                        handleAuthError({ message: "Las contraseñas no coinciden." });
-                        return; 
-                    }
+                e.preventDefault(); const email = authEmail.value; const password = authPassword.value;
+                authSubmitBtn.disabled = true; authSubmitBtn.textContent = 'Procesando...';
+                if (authMode === 'login') auth.signInWithEmailAndPassword(email, password).catch(handleAuthError);
+                else if (authMode === 'register') {
+                    if (password !== authConfirmPassword.value) { handleAuthError({ message: "Las contraseñas no coinciden." }); return; }
                     auth.createUserWithEmailAndPassword(email, password).catch(handleAuthError);
                 } else if (authMode === 'forgot') {
-                    auth.sendPasswordResetEmail(email)
-                        .then(() => {
-                            showNotification("Correo de recuperación enviado. Revisa tu bandeja de entrada.");
-                            setAuthMode('login');
-                        })
-                        .catch(handleAuthError)
-                        .finally(() => {
-                           authSubmitBtn.disabled = false;
-                           authSubmitBtn.textContent = 'Enviar enlace de recuperación';
-                        });
+                    auth.sendPasswordResetEmail(email).then(() => { showNotification("Correo de recuperación enviado."); setAuthMode('login'); }).catch(handleAuthError)
+                    .finally(() => { authSubmitBtn.disabled = false; authSubmitBtn.textContent = 'Enviar enlace'; });
                 }
             });
-            function handleAuthError(error) {
-                showNotification(`Error: ${error.message}`, 'error');
-                authSubmitBtn.disabled = false;
-                setAuthMode(authMode); 
-            }
+            function handleAuthError(error) { showNotification(`Error: ${error.message}`, 'error'); authSubmitBtn.disabled = false; setAuthMode(authMode); }
             signUpLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('register'); });
             forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('forgot'); });
             loginLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('login'); });
             googleLoginBtn.addEventListener('click', () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(handleAuthError));
             appleLoginBtn.addEventListener('click', () => auth.signInWithPopup(new firebase.auth.OAuthProvider('apple.com')).catch(handleAuthError));
-
             desktopCartBtn.addEventListener('click', openCartModal);
             logoutBtn.addEventListener('click', () => { auth.signOut(); });
             checkoutBtn.addEventListener('click', checkout);
@@ -1891,10 +1530,8 @@
             menuToggle.addEventListener('click', openSidebarFunc);
             closeSidebar.addEventListener('click', closeSidebarFunc);
             overlay.addEventListener('click', closeSidebarFunc);
-
-            paymentMethodSelect.addEventListener('change', (e) => {
-                pagoMovilDetailsDiv.style.display = e.target.value === 'Pago Móvil' ? 'block' : 'none';
-            });
+            paymentMethodSelect.addEventListener('change', (e) => { pagoMovilDetailsDiv.style.display = e.target.value === 'Pago Móvil' ? 'block' : 'none'; });
+            deliveryTypeSelect.addEventListener('change', (e) => { cartPaymentSection.style.display = e.target.value === 'pickup' ? 'none' : 'block'; });
         });
     </script>
 </body>
