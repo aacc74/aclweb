@@ -161,6 +161,12 @@
         .profile-header { text-align: center; margin-bottom: 1.5rem; } .profile-header h3 { font-size: 1.5rem; } .profile-header p { color: var(--text-gray); } .profile-details { display: flex; flex-direction: column; gap: 1rem; }
         .notification { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background-color: var(--text-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 2rem; box-shadow: var(--shadow-lg); z-index: 2000; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
         .notification.show { opacity: 1; transform: translate(-50%, -10px); }
+        /* === REPORT STYLES === */
+        .delivery-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+        .report-filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1.5rem; }
+        #adminReportResults { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+        .report-item-card { background-color: var(--bg-light); padding: 1rem; border-radius: var(--border-radius); box-shadow: var(--shadow); }
+        .report-item-card p { margin: 0; } .report-item-card .name { font-weight: 600; } .report-item-card .count { font-size: 1.5rem; color: var(--primary); font-weight: 700; margin-top: 0.5rem; }
     </style>
 </head>
 <body>
@@ -276,6 +282,7 @@
                 <button class="admin-tab-btn active" data-tab="menu">Gestionar Menú</button>
                 <button class="admin-tab-btn" data-tab="employees">Gestionar Empleados</button>
                 <button class="admin-tab-btn" data-tab="payment">Métodos de Pago</button>
+                <button class="admin-tab-btn" data-tab="reports">Reportes</button>
             </div>
 
             <!-- Contenido Pestaña Menú -->
@@ -332,6 +339,21 @@
                     </form>
                 </div>
             </div>
+            
+            <!-- Contenido Pestaña Reportes -->
+            <div id="admin-tab-reports" class="admin-tab-content">
+                <div class="admin-card">
+                    <h3>Reportes de Repartidores</h3>
+                    <div class="report-filters">
+                        <select id="adminDeliverySelect" class="form-group" style="flex:1; margin-bottom:0;"></select>
+                        <button class="filter-btn" data-period="day">Hoy</button>
+                        <button class="filter-btn" data-period="week">Semana</button>
+                        <button class="filter-btn active" data-period="month">Mes</button>
+                    </div>
+                    <div id="adminReportResults"></div>
+                </div>
+            </div>
+
         </section>
         <!-- === FIN SECCIÓN ADMIN === -->
 
@@ -347,7 +369,10 @@
 
         <!-- === NUEVA SECCIÓN DE DELIVERY === -->
         <section id="deliverySection" style="display: none;">
-            <h2 class="section-title">Mis Entregas Asignadas</h2>
+            <div class="delivery-section-header">
+                <h2 class="section-title" style="margin-bottom: 0;">Mis Entregas</h2>
+                <button id="deliveryReportBtn" class="btn-secondary" style="width: auto;">Ver Mis Reportes</button>
+            </div>
             <div class="order-list-container" id="deliveryOrdersContainer"></div>
         </section>
     </main>
@@ -478,6 +503,26 @@
         </div>
     </div>
 
+    <!-- MODAL PARA REPORTES -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="reportModalTitle">Reporte de Entregas</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="order-filter-controls" id="reportDateFilters">
+                    <button class="filter-btn" data-period="day">Hoy</button>
+                    <button class="filter-btn" data-period="week">Semana</button>
+                    <button class="filter-btn active" data-period="month">Mes</button>
+                </div>
+                <div id="reportModalBody" style="text-align: center; font-size: 1.2rem; padding: 2rem 0;">
+                    Cargando reporte...
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Navegación Inferior -->
     <nav class="magic-nav" id="magicNav"></nav>
@@ -545,6 +590,11 @@
 
         // Product Modal
         const productModal = document.getElementById('productModal');
+        
+        // Report Modal
+        const reportModal = document.getElementById('reportModal');
+        const reportModalBody = document.getElementById('reportModalBody');
+        const reportDateFilters = document.getElementById('reportDateFilters');
 
         // --- Listener Management ---
         function cleanupListeners() {
@@ -560,7 +610,6 @@
                 const userDocRef = db.collection("customers").doc(user.uid);
                 const doc = await userDocRef.get();
 
-                // Condition: User exists AND (they are not a customer OR they are a customer and have an address)
                 if (doc.exists && (doc.data().role !== 'customer' || doc.data().address)) {
                     authSection.style.display = 'none';
                     newUserSetupSection.style.display = 'none';
@@ -570,7 +619,6 @@
                     loadInitialDataForRole();
                     loadProducts();
                 } else {
-                    // Show setup form if user is new or is a customer without an address
                     if (!doc.exists) {
                         await saveCustomerData(user, 'customer');
                     }
@@ -689,11 +737,10 @@
                 waiter: () => { showSection('waiter'); listenForTableLocks(); listenForWaiterOrders(); renderWaiterProducts(); },
                 chef: () => { showSection('chef'); listenForKitchenOrders(); },
                 cashier: () => { showSection('cashier'); listenForCashierOrders(); },
-                delivery: () => { showSection('delivery'); listenForDeliveryOrders(); },
+                delivery: () => { showSection('delivery'); listenForDeliveryOrders(); setupDeliveryActions(); },
                 admin: () => { showSection('admin'); setupAdminPanel(); }
             };
             
-            // **CORRECTION**: Check if role includes 'chef' to direct to the correct panel.
             const actionKey = currentUserRole.includes('chef') ? 'chef' : currentUserRole;
             const action = roleToAction[actionKey] || roleToAction.customer;
             action();
@@ -707,18 +754,18 @@
             
             tabs.addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON') return;
+                const tabName = e.target.dataset.tab;
 
                 tabs.querySelector('.active').classList.remove('active');
                 e.target.classList.add('active');
 
                 contents.forEach(content => content.classList.remove('active'));
-                const targetContent = document.getElementById(`admin-tab-${e.target.dataset.tab}`);
-                targetContent.classList.add('active');
+                document.getElementById(`admin-tab-${tabName}`).classList.add('active');
                 
-                const filter = e.target.dataset.filter;
-                if (e.target.dataset.tab === 'menu') loadAdminProducts();
-                else if (e.target.dataset.tab === 'employees') loadEmployees(filter || 'employees');
-                else if (e.target.dataset.tab === 'payment') loadPaymentMethods();
+                if (tabName === 'menu') loadAdminProducts();
+                else if (tabName === 'employees') loadEmployees('employees');
+                else if (tabName === 'payment') loadPaymentMethods();
+                else if (tabName === 'reports') loadAdminReports();
             });
 
             document.getElementById('employeeFilterControls').addEventListener('click', (e) => {
@@ -731,7 +778,7 @@
             document.getElementById('addNewProductBtn').addEventListener('click', () => openProductModal());
             document.getElementById('saveProductBtn').addEventListener('click', handleProductFormSubmit);
             document.getElementById('paymentMethodForm').addEventListener('submit', handleSavePaymentMethod);
-            document.getElementById('cancelEditPaymentBtn').addEventListener('click', () => openPaymentMethodForm()); // Resets form
+            document.getElementById('cancelEditPaymentBtn').addEventListener('click', () => openPaymentMethodForm()); 
             
             loadAdminProducts();
         }
@@ -1015,7 +1062,6 @@
                         </select>
                     ` : '';
 
-                    // **CORRECTION**: Added specific chef roles to the dropdown.
                     return `
                     <div class="employee-item" data-id="${user.id}" style="grid-template-columns: 1fr auto ${isDelivery ? 'auto' : ''} auto;">
                         <div class="employee-info">
@@ -1271,27 +1317,18 @@
 
         function createCustomerOrderTrackerCard(order) {
             const stages = {
-                'pending': { step: 1, text: 'Recibido', icon: 'fa-receipt' },
-                'preparing': { step: 2, text: 'En Preparación', icon: 'fa-hat-chef' },
-                'ready': { step: 3, text: 'Listo para Enviar', icon: 'fa-box-open' },
-                'assigned': { step: 3, text: 'Listo para Enviar', icon: 'fa-box-open' },
-                'en_camino': { step: 4, text: 'En Camino', icon: 'fa-motorcycle' },
-                'delivered_pending_cashier': { step: 5, text: 'Entregado', icon: 'fa-check-double' },
-                'paid': { step: 5, text: 'Entregado', icon: 'fa-check-double' }
+                'pending': { step: 1 }, 'preparing': { step: 2 }, 'ready': { step: 3 }, 'assigned': { step: 3 },
+                'en_camino': { step: 4 }, 'delivered_pending_cashier': { step: 5 }, 'paid': { step: 5 }
             };
-
-            const currentStage = stages[order.status] || { step: 0, text: 'Desconocido', icon: 'fa-question' };
+            const currentStage = stages[order.status] || { step: 0 };
             
             const trackerSteps = [
-                { id: 1, text: 'Recibido', icon: 'fa-receipt' },
-                { id: 2, text: 'Preparando', icon: 'fa-hat-chef' },
-                { id: 3, text: 'Listo', icon: 'fa-box-open' },
-                { id: 4, text: 'En Camino', icon: 'fa-motorcycle' },
+                { id: 1, text: 'Recibido', icon: 'fa-receipt' }, { id: 2, text: 'Preparando', icon: 'fa-hat-chef' },
+                { id: 3, text: 'Listo', icon: 'fa-box-open' }, { id: 4, text: 'En Camino', icon: 'fa-motorcycle' },
                 { id: 5, text: 'Entregado', icon: 'fa-check-double' }
             ];
 
-            const progressPercentage = (currentStage.step - 1) / (trackerSteps.length - 1);
-            // **CORRECTION**: The width of the progress bar must be a percentage of the track (80% of the container).
+            const progressPercentage = currentStage.step > 1 ? (currentStage.step - 1) / (trackerSteps.length - 1) : 0;
             const progressBarWidth = progressPercentage * 80;
 
             return `
@@ -1322,12 +1359,8 @@
                 const { action, id } = target.dataset;
 
                 if (action === 'prepare') updateOrderStatus(id, 'preparing');
-                if (action === 'ready') {
-                    await updateOrderStatus(id, 'ready');
-                }
-                if (action === 'assign_delivery') {
-                    assignDeliveryOrder(id);
-                }
+                if (action === 'ready') await updateOrderStatus(id, 'ready');
+                if (action === 'assign_delivery') assignDeliveryOrder(id);
                 if (action === 'start_delivery') updateOrderStatus(id, 'en_camino');
                 if (action === 'complete_delivery') {
                     await updateOrderStatus(id, 'delivered_pending_cashier');
@@ -1669,6 +1702,125 @@
             }
         }
 
+        // --- REPORTING FUNCTIONS ---
+        async function generateDeliveryReport(targetUserId, period) {
+            const today = new Date();
+            let startDate;
+
+            if (period === 'day') {
+                startDate = new Date(today.setHours(0, 0, 0, 0));
+            } else if (period === 'week') {
+                const firstDayOfWeek = today.getDate() - today.getDay();
+                startDate = new Date(today.setDate(firstDayOfWeek));
+                startDate.setHours(0, 0, 0, 0);
+            } else { // month
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            }
+
+            let query = db.collection('orders')
+                .where('status', '==', 'paid')
+                .where('type', '==', 'delivery')
+                .where('date', '>=', startDate.toISOString());
+
+            if (targetUserId && targetUserId !== 'all') {
+                query = query.where('driverId', '==', targetUserId);
+            }
+
+            const snapshot = await query.get();
+            
+            if (targetUserId && targetUserId !== 'all') {
+                return snapshot.size;
+            } else {
+                const counts = new Map();
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const driverId = data.driverId;
+                    if (driverId) {
+                        const currentCount = counts.get(driverId) || { count: 0, name: data.driverName };
+                        currentCount.count++;
+                        counts.set(driverId, currentCount);
+                    }
+                });
+                return counts;
+            }
+        }
+        
+        function setupDeliveryActions(){
+            document.getElementById('deliveryReportBtn').addEventListener('click', () => {
+                reportModal.classList.add('visible');
+                updateDeliveryReportForPeriod('month'); // Default view
+            });
+        }
+        
+        async function updateDeliveryReportForPeriod(period) {
+            reportModalBody.innerHTML = 'Cargando reporte...';
+            const count = await generateDeliveryReport(currentUser.uid, period);
+            reportModalBody.innerHTML = `Total de entregas: <strong style="font-size: 2rem; color: var(--primary); display: block;">${count}</strong>`;
+        }
+
+        async function loadAdminReports() {
+            const select = document.getElementById('adminDeliverySelect');
+            const resultsContainer = document.getElementById('adminReportResults');
+            const filters = document.querySelector('#admin-tab-reports .report-filters');
+
+            resultsContainer.innerHTML = 'Cargando repartidores...';
+
+            const snapshot = await db.collection('customers').where('role', '==', 'delivery').get();
+            const deliveryUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            select.innerHTML = '<option value="all">Todos los Repartidores</option>' + deliveryUsers.map(u => `<option value="${u.id}">${u.displayName}</option>`).join('');
+
+            const updateReportView = async () => {
+                const selectedDriver = select.value;
+                const selectedPeriod = filters.querySelector('.filter-btn.active').dataset.period;
+                resultsContainer.innerHTML = 'Generando reporte...';
+
+                const reportData = await generateDeliveryReport(selectedDriver, selectedPeriod);
+                
+                if (reportData.size === 0) {
+                    resultsContainer.innerHTML = '<p class="empty-list-message">No hay entregas completadas para este período.</p>';
+                    return;
+                }
+
+                let reportHtml = '';
+                if (selectedDriver === 'all') {
+                     // Add drivers with 0 deliveries for the period
+                    deliveryUsers.forEach(user => {
+                        if (!reportData.has(user.id)) {
+                            reportData.set(user.id, { name: user.displayName, count: 0 });
+                        }
+                    });
+
+                    reportData.forEach((data, driverId) => {
+                        reportHtml += `
+                            <div class="report-item-card">
+                                <p class="name">${data.name}</p>
+                                <p class="count">${data.count}</p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    const driver = deliveryUsers.find(u => u.id === selectedDriver);
+                    reportHtml = `
+                        <div class="report-item-card">
+                            <p class="name">${driver.displayName}</p>
+                            <p class="count">${reportData}</p>
+                        </div>`;
+                }
+                resultsContainer.innerHTML = reportHtml;
+            };
+            
+            filters.addEventListener('click', e => {
+                if (e.target.tagName !== 'BUTTON') return;
+                filters.querySelector('.active').classList.remove('active');
+                e.target.classList.add('active');
+                updateReportView();
+            });
+            select.addEventListener('change', updateReportView);
+
+            updateReportView(); // Initial load
+        }
+
         // --- Global Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
             newUserSetupForm.addEventListener('submit', handleNewUserSetup);
@@ -1679,10 +1831,17 @@
                 termsModal.classList.add('visible');
             });
 
-            [termsModal, profileModal, productModal, cartModal].forEach(modal => {
+            [termsModal, profileModal, productModal, cartModal, reportModal].forEach(modal => {
                 modal.querySelectorAll('.close-modal').forEach(btn => {
                     btn.addEventListener('click', () => modal.classList.remove('visible'));
                 });
+            });
+            
+            reportDateFilters.addEventListener('click', (e) => {
+                if(e.target.tagName !== 'BUTTON') return;
+                reportDateFilters.querySelector('.active').classList.remove('active');
+                e.target.classList.add('active');
+                updateDeliveryReportForPeriod(e.target.dataset.period);
             });
 
             authForm.addEventListener('submit', (e) => {
