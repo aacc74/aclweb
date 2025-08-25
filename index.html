@@ -576,10 +576,45 @@
         const reportModalBody = document.getElementById('reportModalBody');
         const reportDateFilters = document.getElementById('reportDateFilters');
 
+        const statusTexts = { 
+            pending: 'Entrante', preparing: 'Preparando', ready: 'Listo', assigned: 'Asignado', en_camino: 'En Camino', 
+            delivered_pending_cashier: 'Entregado', paid: 'Pagado', cancelled: 'Cancelado', pending_confirmation: 'Por Confirmar', 
+            pending_payment: 'Esperando Pago', payment_verification: 'Verificando Pago' 
+        };
+
         // --- Listener Management ---
         function cleanupListeners() {
             activeListeners.forEach(unsubscribe => unsubscribe());
             activeListeners = [];
+        }
+
+        // --- CORRECCIÓN: openCartModal MOVIDA AQUÍ ---
+        function openCartModal() {
+            renderCart();
+            cartModal.classList.add('visible');
+
+            const isWaiter = currentUserRole === 'waiter';
+            checkoutBtn.style.display = isWaiter ? 'none' : 'block';
+            processOrderBtn.style.display = isWaiter ? 'block' : 'none';
+            
+            document.querySelector('#deliveryTypeSelect').closest('.form-group').style.display = isWaiter ? 'none' : 'block';
+            cartPaymentSection.style.display = isWaiter ? 'none' : 'block';
+
+            const locationFlowContainer = document.getElementById('locationFlowContainer');
+            const checkboxConfirmacion = document.getElementById('confirmacionEnvio');
+            const confirmacionContainer = document.getElementById('confirmacion-container');
+
+            const isDelivery = deliveryTypeSelect.value === 'delivery';
+            if (locationFlowContainer) locationFlowContainer.style.display = isDelivery && !isWaiter ? 'block' : 'none';
+            
+            checkoutBtn.disabled = isDelivery && !isWaiter;
+            
+            if (checkboxConfirmacion) checkboxConfirmacion.checked = false;
+            if (confirmacionContainer) confirmacionContainer.style.display = 'none';
+            
+            if (!isWaiter) {
+                renderPagoMovilOptions();
+            }
         }
         
         // --- Config Loader ---
@@ -1073,7 +1108,11 @@
                 const targetType = filter === 'mesa' ? 'mesa' : 'online';
                 filtered = allOrders.filter(order => order.type === targetType && targetStatuses.includes(order.status));
             } else { 
-                const statusMap = { all: Object.keys(getStatusText()), active: ['pending', 'preparing', 'ready', 'pending_confirmation', 'pending_payment', 'payment_verification'], history: ['paid', 'cancelled'] };
+                const statusMap = { 
+                    all: Object.keys(statusTexts), 
+                    active: ['pending', 'preparing', 'ready', 'pending_confirmation', 'pending_payment', 'payment_verification'], 
+                    history: ['paid', 'cancelled'] 
+                };
                 const targetStatuses = statusMap[filter] || [filter];
                 filtered = allOrders.filter(order => targetStatuses.includes(order.status));
             }
@@ -1367,8 +1406,7 @@
         }
         
         function getStatusText(status) {
-            const texts = { pending: 'Entrante', preparing: 'Preparando', ready: 'Listo', assigned: 'Asignado', en_camino: 'En Camino', delivered_pending_cashier: 'Entregado', paid: 'Pagado', cancelled: 'Cancelado', pending_confirmation: 'Por Confirmar', pending_payment: 'Esperando Pago', payment_verification: 'Verificando Pago' };
-            return texts[status] || status;
+            return statusTexts[status] || status;
         }
         function showNotification(message, type = 'success') {
             notification.textContent = message;
@@ -1545,88 +1583,45 @@
             closeSidebar.addEventListener('click', closeSidebarFunc);
             overlay.addEventListener('click', closeSidebarFunc);
             paymentMethodSelect.addEventListener('change', (e) => { pagoMovilDetailsDiv.style.display = e.target.value === 'Pago Móvil' ? 'block' : 'none'; });
-            deliveryTypeSelect.addEventListener('change', (e) => { cartPaymentSection.style.display = e.target.value === 'pickup' ? 'none' : 'block'; });
             
-            // === INICIO: CÓDIGO PARA EL FLUJO DE UBICACIÓN POR WHATSAPP ===
-
-            // --- Elementos del DOM para el nuevo flujo ---
+            // === CÓDIGO PARA EL FLUJO DE UBICACIÓN POR WHATSAPP ===
             const locationFlowContainer = document.getElementById('locationFlowContainer');
             const btnCompartirUbicacion = document.getElementById('btnCompartirUbicacion');
             const confirmacionContainer = document.getElementById('confirmacion-container');
             const checkboxConfirmacion = document.getElementById('confirmacionEnvio');
 
-            // --- Lógica del nuevo flujo ---
-
-            // 1. Mostrar u ocultar el flujo de ubicación según el tipo de entrega
             deliveryTypeSelect.addEventListener('change', function() {
                 const isDelivery = this.value === 'delivery';
-                locationFlowContainer.style.display = isDelivery ? 'block' : 'none';
+                if (locationFlowContainer) locationFlowContainer.style.display = isDelivery ? 'block' : 'none';
                 
-                // Si no es delivery, el botón de checkout se habilita. Si es delivery, se deshabilita hasta confirmar.
                 if (!isDelivery) {
                     checkoutBtn.disabled = false;
                 } else {
-                    // Si se cambia a delivery, se resetea el estado
-                    checkboxConfirmacion.checked = false;
+                    if (checkboxConfirmacion) checkboxConfirmacion.checked = false;
                     checkoutBtn.disabled = true;
                 }
             });
 
-            // 2. Al hacer clic en "Compartir ubicación"
-            btnCompartirUbicacion.addEventListener('click', function() {
-                // --- VALORES DE PRUEBA (Estos deberían venir de tu sistema) ---
-                // Este debería ser el número del negocio o del encargado de recibir las ubicaciones.
-                const telefonoNegocio = "584241288018"; 
-                
-                // Creamos un identificador para el mensaje. Puede ser el nombre del cliente.
-                const identificadorPedido = currentUser.displayName || 'Cliente'; 
-
-                const mensaje = `Hola Arcanos Lunch, te comparto mi ubicación para mi pedido a nombre de: ${identificadorPedido}. (Por favor, adjunta tu ubicación usando el icono del clip 📎 en WhatsApp).`;
-                const url = `https://wa.me/${telefonoNegocio}?text=${encodeURIComponent(mensaje)}`;
-                
-                // Abrir WhatsApp en una nueva pestaña
-                window.open(url, '_blank');
-                
-                // Mostrar la casilla de confirmación para el siguiente paso
-                confirmacionContainer.style.display = 'block';
-            });
-
-            // 3. Al marcar la casilla de confirmación "Ya envié mi ubicación"
-            checkboxConfirmacion.addEventListener('change', function() {
-                // Si la casilla está marcada Y el modo es delivery, habilitar el botón.
-                if (this.checked && deliveryTypeSelect.value === 'delivery') {
-                    checkoutBtn.disabled = false;
-                } else {
-                    checkoutBtn.disabled = true;
-                }
-            });
-
-            // 4. Modificamos la función que abre el carrito para resetear el estado
-            function openCartModal() {
-                renderCart();
-                cartModal.classList.add('visible');
-
-                // --- Lógica de reseteo para el flujo de ubicación ---
-                const isWaiter = currentUserRole === 'waiter';
-                checkoutBtn.style.display = isWaiter ? 'none' : 'block';
-                processOrderBtn.style.display = isWaiter ? 'block' : 'none';
-                
-                document.querySelector('#deliveryTypeSelect').closest('.form-group').style.display = isWaiter ? 'none' : 'block';
-                cartPaymentSection.style.display = isWaiter ? 'none' : 'block';
-
-                // Reseteamos el estado del flujo de ubicación cada vez que se abre el carrito
-                const isDelivery = deliveryTypeSelect.value === 'delivery';
-                locationFlowContainer.style.display = isDelivery && !isWaiter ? 'block' : 'none';
-                checkoutBtn.disabled = isDelivery && !isWaiter; // Deshabilitado si es delivery
-                checkboxConfirmacion.checked = false;
-                confirmacionContainer.style.display = 'none';
-                // --- Fin de la lógica de reseteo ---
-                
-                if (!isWaiter) {
-                    renderPagoMovilOptions();
-                }
+            if (btnCompartirUbicacion) {
+                btnCompartirUbicacion.addEventListener('click', function() {
+                    const telefonoNegocio = "584241288018"; 
+                    const identificadorPedido = currentUser.displayName || 'Cliente'; 
+                    const mensaje = `Hola Arcanos Lunch, te comparto mi ubicación para mi pedido a nombre de: ${identificadorPedido}. (Por favor, adjunta tu ubicación usando el icono del clip 📎 en WhatsApp).`;
+                    const url = `https://wa.me/${telefonoNegocio}?text=${encodeURIComponent(mensaje)}`;
+                    window.open(url, '_blank');
+                    if (confirmacionContainer) confirmacionContainer.style.display = 'block';
+                });
             }
-            // === FIN: CÓDIGO PARA EL FLUJO DE UBICACIÓN POR WHATSAPP ===
+
+            if (checkboxConfirmacion) {
+                checkboxConfirmacion.addEventListener('change', function() {
+                    if (this.checked && deliveryTypeSelect.value === 'delivery') {
+                        checkoutBtn.disabled = false;
+                    } else {
+                        checkoutBtn.disabled = true;
+                    }
+                });
+            }
         });
     </script>
 </body>
