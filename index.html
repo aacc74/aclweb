@@ -6,144 +6,48 @@
     <title>Arcanos Lunch | Sabor Vibrante</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Nueva Tipografía: Poppins para títulos, Inter para cuerpo -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            /* Paleta "Sabor Vibrante" */
-            --primary: #F97316;      /* Naranja principal, más audaz */
-            --primary-dark: #EA580C;
-            --accent: #FBBF24;       /* Amarillo cálido como acento */
-            
-            --bg-light: #FFFFFF;     /* Fondo principal blanco */
-            --bg-off-white: #F9FAFB; /* Fondo secundario muy claro */
-            
-            --text-dark: #1F2937;     /* Texto principal oscuro */
-            --text-gray: #6B7280;     /* Texto secundario gris */
-            
-            --border-color: #E5E7EB; /* Bordes y divisores */
-
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-
-            /* Tipografía */
-            --font-body: 'Inter', sans-serif;
-            --font-display: 'Poppins', sans-serif; /* Nueva fuente para títulos */
-
-            /* Sombras y Efectos */
+            --primary: #F97316; --primary-dark: #EA580C; --accent: #FBBF24;
+            --bg-light: #FFFFFF; --bg-off-white: #F9FAFB;
+            --text-dark: #1F2937; --text-gray: #6B7280;
+            --border-color: #E5E7EB;
+            --success: #10B981; --warning: #F59E0B; --danger: #EF4444;
+            --font-body: 'Inter', sans-serif; --font-display: 'Poppins', sans-serif;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
             --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            
-            /* Otros */
-            --border-radius: 0.75rem;
-            --transition: all 0.2s ease-in-out;
+            --border-radius: 0.75rem; --transition: all 0.2s ease-in-out;
         }
-        
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         html { scroll-behavior: smooth; }
-
-        body {
-            font-family: var(--font-body);
-            background-color: var(--bg-off-white);
-            color: var(--text-dark);
-            line-height: 1.6;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            padding-top: 80px;
-            padding-bottom: 80px;
-        }
-        
+        body { font-family: var(--font-body); background-color: var(--bg-off-white); color: var(--text-dark); line-height: 1.6; min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding-top: 80px; padding-bottom: 80px; }
         .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
         h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; color: var(--text-dark); }
         .section-title { font-size: 2rem; margin-bottom: 2.5rem; text-align: center; }
-
-        /* --- LOGIN --- */
-        #authSection {
-            display: flex; justify-content: center; align-items: center;
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding: 1rem;
-            background-color: var(--bg-off-white);
-            z-index: 2000; transition: opacity 0.3s ease-in-out;
-        }
-        .auth-container {
-            width: 100%; max-width: 420px;
-            background: var(--bg-light);
-            border-radius: 1.25rem;
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-            animation: fadeInScale 0.4s ease-out forwards;
-        }
+        #authSection { display: flex; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding: 1rem; background-color: var(--bg-off-white); z-index: 2000; transition: opacity 0.3s ease-in-out; }
+        .auth-container { width: 100%; max-width: 420px; background: var(--bg-light); border-radius: 1.25rem; box-shadow: var(--shadow-lg); overflow: hidden; animation: fadeInScale 0.4s ease-out forwards; }
         @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .auth-header { text-align: center; padding: 2.5rem 2rem 1.5rem; background-color: var(--primary); color: white; }
-        .auth-header i { font-size: 3rem; }
-        .auth-header h2 { font-size: 1.75rem; color: white; }
+        .auth-header i { font-size: 3rem; } .auth-header h2 { font-size: 1.75rem; color: white; }
         #authMessage { font-size: 1rem; opacity: 0.9; margin-top: 0.5rem; }
-        .auth-body { padding: 2rem; }
-        .form-group { margin-bottom: 1.25rem; }
+        .auth-body { padding: 2rem; } .form-group { margin-bottom: 1.25rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color); border-radius: var(--border-radius);
-            font-size: 1rem; transition: var(--transition); background: var(--bg-off-white);
-        }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); outline: none;
-        }
-        .btn-primary {
-            width: 100%; background-color: var(--primary); color: white; border: none;
-            padding: 0.875rem; border-radius: var(--border-radius);
-            font-size: 1rem; font-weight: 600; cursor: pointer;
-            transition: var(--transition); box-shadow: var(--shadow);
-        }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); font-size: 1rem; transition: var(--transition); background: var(--bg-off-white); }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); outline: none; }
+        .btn-primary { width: 100%; background-color: var(--primary); color: white; border: none; padding: 0.875rem; border-radius: var(--border-radius); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition); box-shadow: var(--shadow); }
         .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .auth-footer { padding: 0 2rem 2rem; text-align: center; }
-        .auth-links a { color: var(--primary); text-decoration: none; font-weight: 600; }
-        .separator {
-            display: flex; align-items: center; text-align: center;
-            color: var(--text-gray); font-size: 0.875rem; margin: 1.5rem 0;
-        }
+        .auth-footer { padding: 0 2rem 2rem; text-align: center; } .auth-links a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .separator { display: flex; align-items: center; text-align: center; color: var(--text-gray); font-size: 0.875rem; margin: 1.5rem 0; }
         .separator::before, .separator::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
-        .separator:not(:empty)::before { margin-right: .5em; }
-        .separator:not(:empty)::after { margin-left: .5em; }
-        
-        /* --- NUEVO ESTILO DE BOTONES SOCIALES --- */
-        .auth-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        .social-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 50px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-light);
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 1.5rem;
-        }
-        .social-btn:hover {
-            border-color: var(--text-gray);
-            background-color: var(--bg-off-white);
-        }
-        .fa-google { color: #DB4437; }
-        .fa-apple { color: #1F2937; }
-        /* --- FIN NUEVO ESTILO --- */
-        
-        /* --- HEADER & NAV --- */
-        #mainHeader {
-            position: fixed; top: 0; left: 0; width: 100%;
-            background: var(--bg-light);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0; z-index: 900;
-            transform: translateY(-100%); transition: transform 0.3s ease-out;
-        }
+        .separator:not(:empty)::before { margin-right: .5em; } .separator:not(:empty)::after { margin-left: .5em; }
+        .auth-options { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .social-btn { display: flex; align-items: center; justify-content: center; height: 50px; border-radius: var(--border-radius); border: 1px solid var(--border-color); background-color: var(--bg-light); cursor: pointer; transition: var(--transition); font-size: 1.5rem; }
+        .social-btn:hover { border-color: var(--text-gray); background-color: var(--bg-off-white); }
+        .fa-google { color: #DB4437; } .fa-apple { color: #1F2937; }
+        #mainHeader { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg-light); border-bottom: 1px solid var(--border-color); padding: 1rem 0; z-index: 900; transform: translateY(-100%); transition: transform 0.3s ease-out; }
         #mainHeader.visible { transform: translateY(0); }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
         .header-left { display: flex; align-items: center; gap: 1rem; }
@@ -151,237 +55,106 @@
         .logo { font-family: var(--font-display); font-size: 1.5rem; color: var(--text-dark); text-decoration: none; }
         .header-actions { display: flex; align-items: center; gap: 1rem; }
         .cart-btn { position: relative; background: none; border: none; font-size: 1.25rem; color: var(--text-dark); cursor: pointer; }
-        .cart-count {
-            position: absolute; top: -5px; right: -8px; background-color: var(--primary); color: white;
-            border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; font-weight: 600;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .logout-btn {
-            background: var(--bg-off-white); color: var(--text-dark);
-            border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--border-radius);
-            font-weight: 600; cursor: pointer; transition: var(--transition);
-        }
+        .cart-count { position: absolute; top: -5px; right: -8px; background-color: var(--primary); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+        .logout-btn { background: var(--bg-off-white); color: var(--text-dark); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 600; cursor: pointer; transition: var(--transition); }
         .logout-btn:hover { background: var(--primary); border-color: var(--primary); color: white; }
-
-        #magicNav {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: var(--bg-light);
-            border-top: 1px solid var(--border-color);
-            display: flex; justify-content: space-around;
-            padding: 0.5rem 0; z-index: 1000;
-            transform: translateY(100%); transition: transform 0.3s ease-out;
-        }
+        #magicNav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-light); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 0.5rem 0; z-index: 1000; transform: translateY(100%); transition: transform 0.3s ease-out; }
         #magicNav.visible { transform: translateY(0); }
-        .magic-nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            text-decoration: none; color: var(--text-gray);
-            font-size: 0.75rem; font-weight: 500;
-            padding: 0.5rem; border-radius: var(--border-radius);
-            transition: var(--transition); width: 64px; position: relative;
-        }
+        .magic-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-gray); font-size: 0.75rem; font-weight: 500; padding: 0.5rem; border-radius: var(--border-radius); transition: var(--transition); width: 64px; position: relative; }
         .magic-nav-item.active { color: var(--primary); }
         .magic-nav-item i { font-size: 1.25rem; margin-bottom: 0.25rem; }
         .magic-nav-item .cart-count { top: -2px; right: 12px; }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            position: fixed; top: 0; left: -280px; width: 280px;
-            height: 100%; background: var(--bg-light);
-            z-index: 1100; box-shadow: var(--shadow-lg);
-            transition: transform 0.3s ease-out;
-            display: flex; flex-direction: column;
-        }
+        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: var(--bg-light); z-index: 1100; box-shadow: var(--shadow-lg); transition: transform 0.3s ease-out; display: flex; flex-direction: column; }
         .sidebar.open { transform: translateX(280px); }
         .sidebar-header { padding: 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .sidebar-header h3 { font-size: 1.2rem; }
         .close-sidebar { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
         .categories-container { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-        .category-btn {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 0.75rem 1rem; border-radius: var(--border-radius);
-            text-decoration: none; color: var(--text-dark); font-weight: 500;
-            transition: var(--transition);
-        }
+        .category-btn { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: var(--border-radius); text-decoration: none; color: var(--text-dark); font-weight: 500; transition: var(--transition); }
         .category-btn:hover { background-color: var(--bg-off-white); }
         .category-btn.active { background-color: var(--primary); color: white; }
         .category-btn i { width: 20px; text-align: center; }
-        .overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.4); z-index: 1050;
-            transition: opacity 0.3s; opacity: 0;
-        }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1050; transition: opacity 0.3s; opacity: 0; }
         .overlay.active { display: block; opacity: 1; }
-
-        /* --- PRODUCT CARD --- */
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-        .product-card {
-            background: var(--bg-light); border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            overflow: hidden; transition: var(--transition);
-        }
+        .product-card { background: var(--bg-light); border-radius: var(--border-radius); box-shadow: var(--shadow); overflow: hidden; transition: var(--transition); }
         .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
         .product-image { height: 180px; background: var(--border-color); }
         .product-image img { width: 100%; height: 100%; object-fit: cover; }
         .product-info { padding: 1.25rem; }
-        .product-category {
-            font-size: 0.75rem; font-weight: 600; color: var(--text-dark);
-            margin-bottom: 0.75rem; text-transform: uppercase;
-            background-color: var(--accent); display: inline-block;
-            padding: 0.25rem 0.75rem; border-radius: 2rem;
-        }
+        .product-category { font-size: 0.75rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.75rem; text-transform: uppercase; background-color: var(--accent); display: inline-block; padding: 0.25rem 0.75rem; border-radius: 2rem; }
         .product-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
         .product-description { color: var(--text-gray); font-size: 0.875rem; margin-bottom: 1rem; min-height: 40px; }
         .product-footer { display: flex; justify-content: space-between; align-items: center; }
         .product-price { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
-        .add-to-cart {
-            background-color: var(--primary); color: white; border: none; 
-            padding: 0.6rem 1.2rem; border-radius: var(--border-radius);
-            cursor: pointer; font-weight: 600; transition: var(--transition);
-        }
+        .add-to-cart { background-color: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: var(--border-radius); cursor: pointer; font-weight: 600; transition: var(--transition); }
         .add-to-cart:hover { background-color: var(--primary-dark); }
-
-        /* --- ORDER VIEWS --- */
         .order-filter-controls { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; justify-content: center; flex-wrap: wrap; }
-        .filter-btn {
-            padding: 0.5rem 1rem; background: var(--bg-light);
-            border: 1px solid var(--border-color); border-radius: 2rem;
-            cursor: pointer; transition: var(--transition); font-weight: 500; color: var(--text-gray);
-        }
+        .filter-btn { padding: 0.5rem 1rem; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 2rem; cursor: pointer; transition: var(--transition); font-weight: 500; color: var(--text-gray); }
         .filter-btn.active, .filter-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
         .order-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
         .empty-list-message { color: var(--text-gray); text-align: center; padding: 2rem 0; font-style: italic; grid-column: 1 / -1; }
-        .order-card {
-            background: var(--bg-light); border-radius: var(--border-radius);
-            box-shadow: var(--shadow); padding: 1rem; border-left: 4px solid;
-        }
-        
-        /* --- MODAL --- */
+        .order-card { background: var(--bg-light); border-radius: var(--border-radius); box-shadow: var(--shadow); padding: 1.25rem; border-left: 4px solid; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(29, 41, 55, 0.5); z-index: 1500; justify-content: center; align-items: center; }
         .modal.visible { display: flex; }
-        .modal-content {
-            background: var(--bg-light); border-radius: var(--border-radius);
-            width: 90%; max-width: 500px; max-height: 90vh;
-            display: flex; flex-direction: column; box-shadow: var(--shadow-lg);
-        }
+        .modal-content { background: var(--bg-light); border-radius: var(--border-radius); width: 90%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: var(--shadow-lg); }
         .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; } .modal-header h3 { font-size: 1.25rem; } .modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; } .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); text-align: right; } .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
-        
-        /* --- WAITER TABLE VIEW --- */
-        .table-card {
-            background: var(--bg-light); border-radius: var(--border-radius);
-            padding: 1rem; text-align: center; cursor: pointer;
-            transition: var(--transition); box-shadow: var(--shadow);
-            border: 2px solid transparent;
-        }
+        .table-card { background: var(--bg-light); border-radius: var(--border-radius); padding: 1rem; text-align: center; cursor: pointer; transition: var(--transition); box-shadow: var(--shadow); border: 2px solid transparent; }
         .table-card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .table-card.active { border-color: var(--primary); background: var(--primary); color: white; }
         .table-card.locked { background: var(--border-color); color: var(--text-gray); cursor: not-allowed; opacity: 0.8; }
         .table-card.active i, .table-card.active span { color: white; }
-
-        /* --- PROFILE CARD --- */
-        .profile-card {
-            max-width: 500px; margin: 2rem auto; background: var(--bg-light);
-            padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow);
-        }
-        .profile-avatar {
-            width: 80px; height: 80px; border-radius: 50%;
-            background: var(--primary); color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2.5rem; font-family: var(--font-display);
-            margin: 0 auto 1rem;
-        }
-        .detail-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border-color);
-            flex-wrap: wrap;
-        }
+        .profile-card { max-width: 500px; margin: 2rem auto; background: var(--bg-light); padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow); }
+        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-family: var(--font-display); margin: 0 auto 1rem; }
+        .detail-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
         .detail-item:last-of-type { border-bottom: none; }
         .detail-item span:first-child { font-weight: 600; color: var(--text-dark); margin-right: 1rem; }
         .detail-item span:last-child { color: var(--text-gray); text-align: right; }
-
-
-        /* --- ADMIN PANEL --- */
         .admin-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; flex-wrap: wrap; }
         .admin-tab-btn { padding: 1rem 1.5rem; border: none; background: none; cursor: pointer; font-size: 1rem; font-weight: 600; color: var(--text-gray); position: relative; }
         .admin-tab-btn.active { color: var(--primary); }
         .admin-tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
-        .admin-tab-content { display: none; }
-        .admin-tab-content.active { display: block; }
+        .admin-tab-content { display: none; } .admin-tab-content.active { display: block; }
         .admin-card { background: var(--bg-light); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); max-width: 800px; margin: 0 auto; }
         .employee-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;}
         .employee-item { display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); }
-        .employee-info p { margin: 0; }
-        .employee-info .email { font-size: 0.875rem; color: var(--text-gray); }
+        .employee-info p { margin: 0; } .employee-info .email { font-size: 0.875rem; color: var(--text-gray); }
         .btn-secondary { background-color: var(--bg-off-white); color: var(--text-dark); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 600; cursor: pointer; transition: var(--transition); }
-        .btn-secondary:hover { background-color: var(--border-color); }
-        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-secondary:hover { background-color: var(--border-color); } .btn-danger { background-color: var(--danger); color: white; }
         .employee-filter-controls { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-        
-        /* === ESTILOS PARA LA LISTA DE PRODUCTOS EN ADMIN === */
         #adminProductList { display: flex; flex-direction: column; gap: 0.75rem; }
-        .admin-product-list-header, .admin-product-list-item {
-            display: grid;
-            grid-template-columns: 2.5fr 3fr 1fr 100px; /* Nombre, Desc, Precio, Acciones */
-            gap: 1rem;
-            align-items: center;
-            padding: 0.75rem 1rem;
-        }
-        .admin-product-list-header {
-            font-weight: 600; color: var(--text-gray); font-size: 0.875rem;
-            border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;
-            display: none; /* Oculto por defecto, visible en pantallas grandes */
-        }
-        .admin-product-list-item {
-            background-color: var(--bg-light); border: 1px solid var(--border-color);
-            border-radius: var(--border-radius); transition: var(--transition);
-        }
+        .admin-product-list-header, .admin-product-list-item { display: grid; grid-template-columns: 2.5fr 3fr 1fr 100px; gap: 1rem; align-items: center; padding: 0.75rem 1rem; }
+        .admin-product-list-header { font-weight: 600; color: var(--text-gray); font-size: 0.875rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; display: none; }
+        .admin-product-list-item { background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius: var(--border-radius); transition: var(--transition); }
         .admin-product-list-item:hover { border-color: var(--primary); box-shadow: var(--shadow); }
         .admin-product-name { font-weight: 600; }
         .admin-product-desc, .admin-product-price { color: var(--text-gray); font-size: 0.9rem; }
         .admin-product-desc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .admin-product-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
-        
-        /* === ESTILOS PARA PAGOS === */
         .payment-methods { margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; }
         #pagoMovilDetails { display: none; margin-top: 1rem; }
         #pagoMovilInfo { background: var(--bg-off-white); border: 1px dashed var(--border-color); border-radius: var(--border-radius); padding: 1rem; margin-top: 1rem; font-size: 0.875rem; }
-        #pagoMovilInfo p { margin: 0.25rem 0; }
-        #pagoMovilInfo strong { color: var(--text-dark); }
-        
-        /* === NUEVOS ESTILOS PARA ADMIN PAGOS === */
+        #pagoMovilInfo p { margin: 0.25rem 0; } #pagoMovilInfo strong { color: var(--text-dark); }
         #pagoMovilList { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
-        .payment-method-item {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 1rem;
-            align-items: center;
-            padding: 1rem;
-            background-color: var(--bg-off-white);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-        }
+        .payment-method-item { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; padding: 1rem; background-color: var(--bg-off-white); border: 1px solid var(--border-color); border-radius: var(--border-radius); }
         .payment-method-info p { margin: 0; line-height: 1.4; }
         .payment-method-info .bank { font-weight: 600; }
         .payment-method-info .details { font-size: 0.9rem; color: var(--text-gray); }
         .payment-method-actions { display: flex; gap: 0.5rem; }
-        
-        /* ESTILOS PARA FORMULARIO DE NUEVO USUARIO */
-        .form-row { display: flex; gap: 1rem; }
-        .form-row .form-group { flex: 1; }
-        #newUserSetupForm a {
-            color: var(--primary);
-            text-decoration: underline;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
+        .form-row { display: flex; gap: 1rem; } .form-row .form-group { flex: 1; }
+        #newUserSetupForm a { color: var(--primary); text-decoration: underline; font-weight: 600; cursor: pointer; }
+        .order-tracker { display: flex; justify-content: space-between; align-items: flex-start; position: relative; margin: 1.5rem 0 1rem; }
+        .order-tracker::before { content: ''; position: absolute; top: 12px; left: 10%; right: 10%; height: 4px; background-color: var(--border-color); z-index: 1; }
+        .tracker-progress { position: absolute; top: 12px; left: 10%; height: 4px; background-color: var(--primary); z-index: 2; transition: width 0.4s ease; }
+        .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 80px; z-index: 3; }
+        .tracker-step .icon { width: 28px; height: 28px; border-radius: 50%; background-color: var(--border-color); color: var(--text-gray); border: 4px solid var(--bg-light); display: flex; justify-content: center; align-items: center; font-size: 0.8rem; transition: var(--transition); }
+        .tracker-step .label { font-size: 0.75rem; font-weight: 500; color: var(--text-gray); margin-top: 0.5rem; }
+        .tracker-step.completed .icon, .tracker-step.active .icon { background-color: var(--primary); color: white; }
+        .tracker-step.active .label { color: var(--primary); font-weight: 700; }
         @media (min-width: 768px) { .admin-product-list-header { display: grid; } }
-
-        /* ... (El resto del CSS se mantiene similar) ... */
-        .order-card.status-pending { border-color: var(--warning); } .order-card.status-preparing { border-color: #3B82F6; } .order-card.status-ready { border-color: var(--success); } .order-card.status-paid { border-color: var(--accent); } .order-card.status-cancelled { border-color: var(--text-gray); }
+        .order-card.status-pending { border-color: var(--warning); } .order-card.status-preparing { border-color: #3B82F6; } .order-card.status-ready { border-color: var(--success); } .order-card.status-assigned { border-color: #8B5CF6; } .order-card.status-en_camino { border-color: var(--primary); } .order-card.status-delivered_pending_cashier { border-color: #D946EF; } .order-card.status-paid { border-color: var(--accent); } .order-card.status-cancelled { border-color: var(--text-gray); }
         .item-status { padding: 0.25rem 0.5rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; color: white; text-transform: capitalize; }
-        .status-pending { background-color: var(--warning); } .status-preparing { background-color: #3B82F6; } .status-ready { background-color: var(--success); } .status-paid { background-color: var(--accent); } .status-cancelled { background-color: var(--text-gray); }
+        .status-pending { background-color: var(--warning); } .status-preparing { background-color: #3B82F6; } .status-ready { background-color: var(--success); } .status-assigned { background-color: #8B5CF6; } .status-en_camino { background-color: var(--primary); } .status-delivered_pending_cashier { background-color: #D946EF; } .status-paid { background-color: var(--accent); } .status-cancelled { background-color: var(--text-gray); }
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; } .order-header h4 { font-size: 1.125rem; } .order-header span { font-size: 0.875rem; color: var(--text-gray); }
         .order-items { border-top: 1px solid var(--border-color); padding-top: 0.75rem; } .order-item { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.25rem 0; } .order-item span:first-child { color: var(--text-gray); } .order-actions { margin-top: 1rem; text-align: right; }
         .table-selection { margin-bottom: 2rem; } .tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; } .table-card i { font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--primary); transition: var(--transition); } .table-card.locked i { color: var(--text-gray); } .table-card span { font-weight: 600; }
@@ -519,7 +292,7 @@
             <!-- Contenido Pestaña Empleados -->
             <div id="admin-tab-employees" class="admin-tab-content">
                  <div class="admin-card">
-                    <h3>Gestionar Roles de Empleados</h3>
+                    <h3>Gestionar Roles y Estado de Empleados</h3>
                     <div class="employee-filter-controls" id="employeeFilterControls">
                         <button class="filter-btn active" data-filter="employees">Ver Empleados</button>
                         <button class="filter-btn" data-filter="customers">Ver Clientes</button>
@@ -564,7 +337,19 @@
 
         <section id="waiterSection" style="display: none;"><div class="table-selection" id="tableSelection"></div><h2 class="section-title" id="waiterMenuTitle" style="display:none;"></h2><div class="products-grid" id="waiterProductsContainer"></div></section>
         <section id="chefSection" style="display: none;"><h2 class="section-title">Panel de Cocina</h2><div class="order-filter-controls" id="chefFilterControls"></div><div class="order-list-container" id="kitchenOrdersContainer"></div></section>
-        <section id="cashierSection" style="display: none;"><h2 class="section-title">Panel de Caja</h2><div class="order-filter-controls" id="cashierFilterControls"></div><div class="order-list-container" id="cashierOrdersContainer"></div></section>
+        
+        <!-- === SECCIÓN DE CAJERO MEJORADA === -->
+        <section id="cashierSection" style="display: none;">
+            <h2 class="section-title">Panel de Caja</h2>
+            <div class="order-filter-controls" id="cashierFilterControls"></div>
+            <div class="order-list-container" id="cashierOrdersContainer"></div>
+        </section>
+
+        <!-- === NUEVA SECCIÓN DE DELIVERY === -->
+        <section id="deliverySection" style="display: none;">
+            <h2 class="section-title">Mis Entregas Asignadas</h2>
+            <div class="order-list-container" id="deliveryOrdersContainer"></div>
+        </section>
     </main>
 
     <!-- Modal del Carrito -->
@@ -714,10 +499,10 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
-        let currentUser = null, currentUserRole = 'customer', currentCategory = 'all';
+        let currentUser = null, currentUserRole = 'customer', currentCategory = 'all', currentTable = null;
         let products = [], allOrders = [], cart = [], cartByTable = {};
         let activeListeners = []; // Array to hold all active listeners
-        let chefFilter = 'pending', cashierFilter = 'ready', waiterFilter = 'active';
+        let chefFilter = 'pending', cashierOrderTypeFilter = 'mesa', waiterFilter = 'active';
         let paymentMethods = []; // Almacenar métodos de pago
 
         // --- DOM Elements ---
@@ -730,6 +515,7 @@
         const waiterOrdersContainer = document.getElementById('waiterOrdersContainer');
         const kitchenOrdersContainer = document.getElementById('kitchenOrdersContainer');
         const cashierOrdersContainer = document.getElementById('cashierOrdersContainer');
+        const deliveryOrdersContainer = document.getElementById('deliveryOrdersContainer');
         const notification = document.getElementById('notification');
         
         // New User Setup
@@ -768,13 +554,14 @@
 
         // --- Auth State ---
         auth.onAuthStateChanged(async user => {
-            cleanupListeners(); // Clean up any previous listeners
+            cleanupListeners();
             currentUser = user;
             if (user) {
                 const userDocRef = db.collection("customers").doc(user.uid);
                 const doc = await userDocRef.get();
 
-                if (doc.exists && doc.data().address) {
+                // Condition: User exists AND (they are not a customer OR they are a customer and have an address)
+                if (doc.exists && (doc.data().role !== 'customer' || doc.data().address)) {
                     authSection.style.display = 'none';
                     newUserSetupSection.style.display = 'none';
                     mainHeader.classList.add('visible');
@@ -783,6 +570,7 @@
                     loadInitialDataForRole();
                     loadProducts();
                 } else {
+                    // Show setup form if user is new or is a customer without an address
                     if (!doc.exists) {
                         await saveCustomerData(user, 'customer');
                     }
@@ -790,10 +578,7 @@
                     mainHeader.classList.remove('visible');
                     magicNav.classList.remove('visible');
                     authSection.style.display = 'none';
-                    
-                    // Reset the form before showing it
                     newUserSetupForm.reset();
-                    
                     newUserSetupSection.style.display = 'block';
                 }
             } else {
@@ -806,15 +591,22 @@
             }
         });
 
-        async function saveCustomerData(user, role = 'customer') {
+        async function saveCustomerData(user, role = 'customer', extraData = {}) {
             const displayName = user.displayName || "Nuevo Usuario";
-            const customerData = {
+            let customerData = {
                 uid: user.uid,
                 email: user.email,
                 displayName: displayName,
                 role: role,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                ...extraData
             };
+
+            if (role === 'delivery') {
+                customerData.deliveryStatus = 'disponible';
+                customerData.lastDeliveryTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+            }
+
             return db.collection("customers").doc(user.uid).set(customerData, { merge: true });
         }
 
@@ -856,8 +648,6 @@
             
             document.querySelectorAll('.magic-nav-item').forEach(item => {
                 let itemSection = item.dataset.section;
-                if (currentUserRole === 'waiter' && itemSection === 'menu') itemSection = 'waiter';
-                if (currentUserRole.includes('chef')) itemSection = 'chef';
                 item.classList.toggle('active', itemSection === sectionId);
             });
         }
@@ -868,6 +658,7 @@
                 waiter: [{i:'fa-concierge-bell', t:'Mesas', s:'waiter'}, {i:'fa-receipt', t:'Pedidos', s:'orders'}],
                 chef: [{i:'fa-hat-chef', t:'Cocina', s:'chef'}],
                 cashier: [{i:'fa-cash-register', t:'Caja', s:'cashier'}],
+                delivery: [{i:'fa-motorcycle', t:'Entregas', s:'delivery'}],
                 admin: [{i:'fa-cogs', t:'Admin', s:'admin'}]
             };
             const roleKey = currentUserRole.includes('chef') ? 'chef' : currentUserRole;
@@ -894,13 +685,14 @@
         function loadInitialDataForRole() {
             updateUIForRole();
             const roleToAction = {
+                customer: () => { showSection('menu'); listenForCustomerOrders(); renderProfile(); },
                 waiter: () => { showSection('waiter'); listenForTableLocks(); listenForWaiterOrders(); renderWaiterProducts(); },
                 chef: () => { showSection('chef'); listenForKitchenOrders(); },
                 cashier: () => { showSection('cashier'); listenForCashierOrders(); },
-                admin: () => { showSection('admin'); setupAdminPanel(); },
-                customer: () => { showSection('menu'); listenForWaiterOrders(); renderProfile(); }
+                delivery: () => { showSection('delivery'); listenForDeliveryOrders(); },
+                admin: () => { showSection('admin'); setupAdminPanel(); }
             };
-            const action = roleToAction[currentUserRole.includes('chef') ? 'chef' : currentUserRole] || roleToAction.customer;
+            const action = roleToAction[currentUserRole] || roleToAction.customer;
             action();
             setupFilterControls();
         }
@@ -938,7 +730,6 @@
             document.getElementById('paymentMethodForm').addEventListener('submit', handleSavePaymentMethod);
             document.getElementById('cancelEditPaymentBtn').addEventListener('click', () => openPaymentMethodForm()); // Resets form
             
-            // Cargar la vista por defecto
             loadAdminProducts();
         }
         
@@ -948,14 +739,14 @@
             listContainer.innerHTML = `<p>Cargando métodos de pago...</p>`;
             try {
                 const snapshot = await db.collection('config/pagoMovil/paymentMethods').orderBy('bank').get();
-                const methods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                paymentMethods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                if (methods.length === 0) {
+                if (paymentMethods.length === 0) {
                     listContainer.innerHTML = `<p class="empty-list-message">No hay métodos de Pago Móvil configurados.</p>`;
                     return;
                 }
 
-                listContainer.innerHTML = methods.map(m => `
+                listContainer.innerHTML = paymentMethods.map(m => `
                     <div class="payment-method-item" data-id="${m.id}">
                         <div class="payment-method-info">
                             <p class="bank">${m.bank}</p>
@@ -971,7 +762,7 @@
                 listContainer.querySelectorAll('.edit-payment-btn').forEach(btn => {
                     btn.addEventListener('click', e => {
                         const id = e.target.closest('.payment-method-item').dataset.id;
-                        const method = methods.find(m => m.id === id);
+                        const method = paymentMethods.find(m => m.id === id);
                         openPaymentMethodForm(method);
                     });
                 });
@@ -1197,7 +988,7 @@
             container.innerHTML = '';
             statusDiv.innerHTML = '<p>Cargando...</p>';
 
-            const employeeRoles = ['waiter', 'chef', 'cashier', 'admin'];
+            const employeeRoles = ['waiter', 'chef', 'cashier', 'admin', 'delivery'];
             let query;
             if (filter === 'employees') query = db.collection('customers').where('role', 'in', employeeRoles);
             else query = db.collection('customers').where('role', '==', 'customer');
@@ -1212,8 +1003,17 @@
                 }
                 
                 statusDiv.innerHTML = '';
-                container.innerHTML = users.map(user => `
-                    <div class="employee-item" data-id="${user.id}">
+                container.innerHTML = users.map(user => {
+                    const isDelivery = user.role === 'delivery';
+                    const deliveryStatusHTML = isDelivery ? `
+                        <select class="delivery-status-select">
+                            <option value="disponible" ${user.deliveryStatus === 'disponible' ? 'selected' : ''}>Disponible</option>
+                            <option value="en_entrega" ${user.deliveryStatus === 'en_entrega' ? 'selected' : ''}>En Entrega</option>
+                        </select>
+                    ` : '';
+
+                    return `
+                    <div class="employee-item" data-id="${user.id}" style="grid-template-columns: 1fr auto ${isDelivery ? 'auto' : ''} auto;">
                         <div class="employee-info">
                             <p><strong>${user.displayName || 'Sin Nombre'}</strong></p>
                             <p class="email">${user.email}</p>
@@ -1223,11 +1023,13 @@
                             <option value="waiter" ${user.role === 'waiter' ? 'selected' : ''}>Mesero</option>
                             <option value="chef" ${user.role.includes('chef') ? 'selected' : ''}>Cocinero</option>
                             <option value="cashier" ${user.role === 'cashier' ? 'selected' : ''}>Cajero</option>
+                            <option value="delivery" ${isDelivery ? 'selected' : ''}>Repartidor</option>
                             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
                         </select>
+                        ${deliveryStatusHTML}
                         <button class="btn-secondary save-role-btn">Guardar</button>
                     </div>
-                `).join('');
+                `}).join('');
 
                 container.querySelectorAll('.save-role-btn').forEach(btn => btn.addEventListener('click', handleRoleUpdate));
             } catch (error) {
@@ -1240,23 +1042,30 @@
             const item = e.target.closest('.employee-item');
             const userId = item.dataset.id;
             const newRole = item.querySelector('.role-select').value;
+            const deliveryStatusSelect = item.querySelector('.delivery-status-select');
             
             e.target.disabled = true;
             e.target.textContent = '...';
 
             try {
-                await db.collection('customers').doc(userId).update({ role: newRole });
+                let updateData = { role: newRole };
+                if (newRole === 'delivery') {
+                    updateData.deliveryStatus = deliveryStatusSelect ? deliveryStatusSelect.value : 'disponible';
+                    // Set timestamp if becoming available
+                    if (updateData.deliveryStatus === 'disponible') {
+                        updateData.lastDeliveryTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+                    }
+                } else {
+                    // Remove delivery-specific fields if role changes
+                    updateData.deliveryStatus = firebase.firestore.FieldValue.delete();
+                    updateData.lastDeliveryTimestamp = firebase.firestore.FieldValue.delete();
+                }
+
+                await db.collection('customers').doc(userId).update(updateData);
                 showNotification('Rol actualizado con éxito.');
                 
-                const activeFilter = document.querySelector('#employeeFilterControls .filter-btn.active').dataset.filter;
-                const employeeRoles = ['waiter', 'chef', 'cashier', 'admin'];
-                const isEmployee = employeeRoles.includes(newRole);
+                loadEmployees(document.querySelector('#employeeFilterControls .filter-btn.active').dataset.filter);
 
-                if ((activeFilter === 'employees' && !isEmployee) || (activeFilter === 'customers' && isEmployee)) {
-                    item.style.transition = 'opacity 0.3s ease';
-                    item.style.opacity = '0';
-                    setTimeout(() => item.remove(), 300);
-                }
             } catch (error) {
                 console.error("Error updating role: ", error);
                 showNotification('Error al actualizar el rol.', 'error');
@@ -1314,6 +1123,42 @@
         }
 
         // --- Order & Notification Functions ---
+        async function assignDeliveryOrder(orderId) {
+            const availableDriversQuery = db.collection('customers')
+                .where('role', '==', 'delivery')
+                .where('deliveryStatus', '==', 'disponible')
+                .orderBy('lastDeliveryTimestamp', 'asc')
+                .limit(1);
+
+            const snapshot = await availableDriversQuery.get();
+
+            if (snapshot.empty) {
+                showNotification("No hay repartidores disponibles. El pedido quedará en espera.", "warning");
+                return;
+            }
+
+            const driverDoc = snapshot.docs[0];
+            const driverId = driverDoc.id;
+
+            const orderRef = db.collection('orders').doc(orderId);
+            const driverRef = db.collection('customers').doc(driverId);
+
+            const batch = db.batch();
+            batch.update(orderRef, { status: 'assigned', driverId: driverId, driverName: driverDoc.data().displayName });
+            batch.update(driverRef, { deliveryStatus: 'en_entrega' });
+            
+            await batch.commit();
+            showNotification(`Pedido asignado a ${driverDoc.data().displayName}.`);
+        }
+
+        function listenForCustomerOrders() {
+            const query = db.collection("orders").where('userId', "==", currentUser.uid).orderBy('date', 'desc');
+            const unsubscribe = query.onSnapshot(snapshot => {
+                allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderFilteredOrders(waiterOrdersContainer, 'all'); // Re-using waiter container for customer
+            }, console.error);
+            activeListeners.push(unsubscribe);
+        }
         function listenForWaiterOrders() {
             const query = db.collection("orders").where('waiterId', "==", currentUser.uid);
             const unsubscribe = query.onSnapshot(snapshot => {
@@ -1334,7 +1179,7 @@
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added" && change.doc.data().status === 'pending') {
                         const order = change.doc.data();
-                        showNotification(`Nuevo pedido para la ${order.table ? `Mesa ${order.table}` : 'cliente'}`);
+                        showNotification(`Nuevo pedido para ${order.table ? `la Mesa ${order.table}` : 'delivery'}`);
                     }
                 });
                 allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -1346,49 +1191,150 @@
             const query = db.collection("orders");
             const unsubscribe = query.onSnapshot(snapshot => {
                 allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.date) - new Date(a.date));
-                renderFilteredOrders(cashierOrdersContainer, cashierFilter);
+                renderFilteredOrders(cashierOrdersContainer, cashierOrderTypeFilter);
             }, console.error);
             activeListeners.push(unsubscribe);
         }
+        function listenForDeliveryOrders() {
+            const query = db.collection("orders")
+                .where("driverId", "==", currentUser.uid)
+                .where("status", "in", ["assigned", "en_camino"]);
+
+            const unsubscribe = query.onSnapshot(snapshot => {
+                const deliveryOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderOrders(deliveryOrdersContainer, deliveryOrders);
+            }, console.error);
+            activeListeners.push(unsubscribe);
+        }
+
         function renderFilteredOrders(container, filter) {
             if (!container) return;
-            const statusMap = { active: ['pending', 'preparing', 'ready'], history: ['paid', 'cancelled'] };
-            const targetStatuses = statusMap[filter] || [filter];
-            const filtered = allOrders.filter(order => targetStatuses.includes(order.status));
+            let filtered = [];
+
+            if (currentUserRole === 'cashier') {
+                const targetStatuses = filter === 'mesa' ? ['ready'] : ['ready', 'assigned', 'en_camino', 'delivered_pending_cashier'];
+                filtered = allOrders.filter(order => order.type === filter && targetStatuses.includes(order.status));
+            } else { 
+                const statusMap = { all: ['pending', 'preparing', 'ready', 'assigned', 'en_camino', 'delivered_pending_cashier', 'paid', 'cancelled'], active: ['pending', 'preparing', 'ready'], history: ['paid', 'cancelled'] };
+                const targetStatuses = statusMap[filter] || [filter];
+                filtered = allOrders.filter(order => targetStatuses.includes(order.status));
+            }
             
-            container.innerHTML = filtered.length === 0 ? '<p class="empty-list-message">No hay pedidos.</p>' : filtered.map(createOrderCard).join('');
-            setupCardActions(container);
+            renderOrders(container, filtered);
         }
+
+        function renderOrders(container, orders) {
+             if (!container) return;
+             container.innerHTML = orders.length === 0 ? '<p class="empty-list-message">No hay pedidos.</p>' : orders.map(createOrderCard).join('');
+             setupCardActions(container);
+        }
+
         function createOrderCard(order) {
             let actions = '';
+            
+            if (currentUserRole === 'customer' && order.type === 'delivery') {
+                return createCustomerOrderTrackerCard(order);
+            }
+
+            // CHEF ACTIONS
             if (currentUserRole.includes('chef')) {
                 if (order.status === 'pending') actions = `<button class="btn-primary" data-action="prepare" data-id="${order.id}">Preparar</button>`;
-                if (order.status === 'preparing') actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="ready" data-id="${order.id}">Listo</button>`;
-            } else if (currentUserRole === 'cashier' && order.status === 'ready') {
-                actions = `<button class="btn-primary" data-action="pay" data-id="${order.id}">Marcar Pagado</button>`;
+                if (order.status === 'preparing') actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="ready" data-id="${order.id}" data-type="${order.type}">Listo</button>`;
+            } 
+            // DELIVERY ACTIONS
+            else if (currentUserRole === 'delivery') {
+                if (order.status === 'assigned') actions = `<button class="btn-primary" data-action="start_delivery" data-id="${order.id}">Iniciar Entrega</button>`;
+                if (order.status === 'en_camino') actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="complete_delivery" data-id="${order.id}">Entrega Completada</button>`;
+            }
+            // CASHIER ACTIONS
+            else if (currentUserRole === 'cashier') {
+                if (order.type === 'mesa' && order.status === 'ready') {
+                    actions = `<button class="btn-primary" data-action="pay" data-id="${order.id}">Marcar Pagado</button>`;
+                } else if (order.type === 'delivery' && order.status === 'delivered_pending_cashier') {
+                    actions = `<button class="btn-primary" style="background-color: var(--success);" data-action="pay" data-id="${order.id}">Confirmar Pago y Cerrar</button>`;
+                }
             }
             return `<div class="order-card status-${order.status}">
                         <div class="order-header">
-                            <div><h4>Pedido #${order.id.slice(-6)}</h4><span>${order.table ? `Mesa ${order.table}` : (order.userName || 'Cliente')}</span></div>
+                            <div><h4>Pedido #${order.id.slice(-6)}</h4><span>${order.table ? `Mesa ${order.table}` : (order.driverName ? `Repartidor: ${order.driverName}` : (order.userName || 'Cliente Delivery'))}</span></div>
                             <span class="item-status status-${order.status}">${getStatusText(order.status)}</span>
                         </div>
                         <div class="order-items">${(order.items || []).map(it => `<div class="order-item"><span>${it.quantity}x</span> <span>${it.name}</span></div>`).join('')}</div>
                         ${actions ? `<div class="order-actions">${actions}</div>` : ''}
                     </div>`;
         }
+
+        function createCustomerOrderTrackerCard(order) {
+            const stages = {
+                'pending': { step: 1, text: 'Recibido', icon: 'fa-receipt' },
+                'preparing': { step: 2, text: 'En Preparación', icon: 'fa-hat-chef' },
+                'ready': { step: 3, text: 'Listo para Enviar', icon: 'fa-box-open' },
+                'assigned': { step: 3, text: 'Listo para Enviar', icon: 'fa-box-open' },
+                'en_camino': { step: 4, text: 'En Camino', icon: 'fa-motorcycle' },
+                'delivered_pending_cashier': { step: 5, text: 'Entregado', icon: 'fa-check-double' },
+                'paid': { step: 5, text: 'Entregado', icon: 'fa-check-double' }
+            };
+
+            const currentStage = stages[order.status] || { step: 0, text: 'Desconocido', icon: 'fa-question' };
+            
+            const trackerSteps = [
+                { id: 1, text: 'Recibido', icon: 'fa-receipt' },
+                { id: 2, text: 'Preparando', icon: 'fa-hat-chef' },
+                { id: 3, text: 'Listo', icon: 'fa-box-open' },
+                { id: 4, text: 'En Camino', icon: 'fa-motorcycle' },
+                { id: 5, text: 'Entregado', icon: 'fa-check-double' }
+            ];
+
+            const progressPercentage = (currentStage.step - 1) / (trackerSteps.length - 1) * 100;
+
+            return `
+                <div class="order-card status-${order.status}">
+                    <div class="order-header">
+                        <div><h4>Pedido #${order.id.slice(-6)}</h4><span>${new Date(order.date).toLocaleDateString()}</span></div>
+                        <span class="item-status status-${order.status}">${getStatusText(order.status)}</span>
+                    </div>
+                    <div class="order-tracker">
+                        <div class="tracker-progress" style="width: ${progressPercentage}%;"></div>
+                        ${trackerSteps.map(step => `
+                            <div class="tracker-step ${currentStage.step >= step.id ? 'completed' : ''} ${currentStage.step === step.id ? 'active' : ''}">
+                                <div class="icon"><i class="fas ${step.icon}"></i></div>
+                                <div class="label">${step.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-items">${(order.items || []).map(it => `<div class="order-item"><span>${it.quantity}x</span> <span>${it.name}</span></div>`).join('')}</div>
+                </div>
+            `;
+        }
+
         function setupCardActions(container) {
             if (!container) return;
-            container.addEventListener('click', e => {
+            container.addEventListener('click', async e => {
                 const target = e.target.closest('button');
                 if (!target) return;
-                const { action, id } = target.dataset;
-                if(action === 'prepare') updateOrderStatus(id, 'preparing');
-                if(action === 'ready') updateOrderStatus(id, 'ready');
-                if(action === 'pay') updateOrderStatus(id, 'paid');
+                const { action, id, type } = target.dataset;
+
+                if (action === 'prepare') updateOrderStatus(id, 'preparing');
+                if (action === 'ready') {
+                    await updateOrderStatus(id, 'ready');
+                    if (type === 'delivery') {
+                        assignDeliveryOrder(id);
+                    }
+                }
+                if (action === 'start_delivery') updateOrderStatus(id, 'en_camino');
+                if (action === 'complete_delivery') {
+                    await updateOrderStatus(id, 'delivered_pending_cashier');
+                    // Make driver available again and put at the end of the queue
+                    db.collection('customers').doc(currentUser.uid).update({
+                        deliveryStatus: 'disponible',
+                        lastDeliveryTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                if (action === 'pay') updateOrderStatus(id, 'paid');
             });
         }
         function updateOrderStatus(orderId, status) {
-            db.collection("orders").doc(orderId).update({ status }).then(() => showNotification("Estado actualizado")).catch(err => showNotification('Error al actualizar', 'error'));
+            return db.collection("orders").doc(orderId).update({ status }).then(() => showNotification("Estado actualizado")).catch(err => showNotification('Error al actualizar', 'error'));
         }
 
         // --- Cart Functions ---
@@ -1425,8 +1371,6 @@
             
             // Cargar datos de Pago Móvil para el cliente
             if(!isWaiter) {
-                const snapshot = await db.collection('config/pagoMovil/paymentMethods').get();
-                paymentMethods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderPagoMovilOptions();
             }
         }
@@ -1492,7 +1436,7 @@
                 date: new Date().toISOString(), waiterId: currentUser.uid,
                 userName: `Mesa ${currentTable}`, items: activeCart,
                 total: activeCart.reduce((s, i) => s + (i.price * i.quantity), 0),
-                status: 'pending', table: currentTable,
+                status: 'pending', table: currentTable, type: 'mesa',
                 payment: { method: 'En mesa' }
             };
             try {
@@ -1533,7 +1477,7 @@
                 date: new Date().toISOString(), userId: currentUser.uid,
                 userName: currentUser.displayName, items: cart,
                 total: cart.reduce((s, i) => s + (i.price * i.quantity), 0),
-                status: 'pending',
+                status: 'pending', type: 'delivery',
                 payment: paymentData
             };
 
@@ -1649,7 +1593,7 @@
         }
         
         function getStatusText(status) {
-            const texts = { pending: 'Entrante', preparing: 'En preparación', ready: 'Listo', paid: 'Pagado', cancelled: 'Cancelado' };
+            const texts = { pending: 'Entrante', preparing: 'En preparación', ready: 'Listo para Asignar', assigned: 'Asignado', en_camino: 'En Camino', delivered_pending_cashier: 'Entregado', paid: 'Pagado', cancelled: 'Cancelado' };
             return texts[status] || status;
         }
         function showNotification(message, type = 'success') {
@@ -1664,8 +1608,8 @@
         function setupFilterControls() {
             const configs = [
                 { id: 'waiterFilterControls', container: waiterOrdersContainer, filterVar: 'waiterFilter', buttons: [{t:'Activos', s:'active'}, {t:'Historial', s:'history'}] },
-                { id: 'chefFilterControls', container: kitchenOrdersContainer, filterVar: 'chefFilter', buttons: [{t:'Entrantes', s:'pending'}, {t:'En Preparación', s:'preparing'}, {t:'Listos', s:'ready'}] },
-                { id: 'cashierFilterControls', container: cashierOrdersContainer, filterVar: 'cashierFilter', buttons: [{t:'Listos para Pagar', s:'ready'}, {t:'Pagados', s:'paid'}] },
+                { id: 'chefFilterControls', container: kitchenOrdersContainer, filterVar: 'chefFilter', buttons: [{t:'Entrantes', s:'pending'}, {t:'En Preparación', s:'preparing'}] },
+                { id: 'cashierFilterControls', container: cashierOrdersContainer, filterVar: 'cashierOrderTypeFilter', buttons: [{t:'Pedidos en Mesa', s:'mesa'}, {t:'Pedidos en Reparto', s:'delivery'}] },
             ];
             configs.forEach(config => {
                 const controls = document.getElementById(config.id);
@@ -1691,40 +1635,32 @@
             btn.disabled = true;
             btn.textContent = 'Guardando...';
 
-            const firstName = document.getElementById('userFirstName').value;
-            const lastName = document.getElementById('userLastName').value;
-            const address = document.getElementById('userAddress').value;
-            const phone = document.getElementById('userPhone').value;
-
             const userData = {
-                displayName: `${firstName} ${lastName}`,
-                firstName,
-                lastName,
-                address,
-                phone
+                displayName: `${document.getElementById('userFirstName').value} ${document.getElementById('userLastName').value}`,
+                firstName: document.getElementById('userFirstName').value,
+                lastName: document.getElementById('userLastName').value,
+                address: document.getElementById('userAddress').value,
+                phone: document.getElementById('userPhone').value
             };
 
             try {
-                await db.collection("customers").doc(currentUser.uid).set(userData, { merge: true });
+                await saveCustomerData(currentUser, 'customer', userData);
                 showNotification('¡Datos guardados con éxito!');
                 
-                // Manually hide the setup form and show the main app
                 newUserSetupSection.style.display = 'none';
                 mainHeader.classList.add('visible');
                 magicNav.classList.add('visible');
                 
-                // The user is a customer by default at this stage
                 currentUserRole = 'customer'; 
-                
-                // Load the main app content
                 loadInitialDataForRole();
                 loadProducts();
 
             } catch (error) {
                 console.error("Error saving user data:", error);
                 showNotification('Error al guardar tus datos.', 'error');
+            } finally {
                 btn.disabled = false;
-                btn.textContent = 'Guardar Datos';
+                btn.textContent = 'Crear Cuenta y Continuar';
             }
         }
 
@@ -1738,12 +1674,10 @@
                 termsModal.classList.add('visible');
             });
 
-            termsModal.querySelectorAll('.close-modal').forEach(btn => {
-                btn.addEventListener('click', () => termsModal.classList.remove('visible'));
-            });
-
-            profileModal.querySelectorAll('.close-modal').forEach(btn => {
-                btn.addEventListener('click', () => profileModal.classList.remove('visible'));
+            [termsModal, profileModal, productModal, cartModal].forEach(modal => {
+                modal.querySelectorAll('.close-modal').forEach(btn => {
+                    btn.addEventListener('click', () => modal.classList.remove('visible'));
+                });
             });
 
             authForm.addEventListener('submit', (e) => {
@@ -1766,16 +1700,18 @@
                     auth.sendPasswordResetEmail(email)
                         .then(() => {
                             showNotification("Correo de recuperación enviado. Revisa tu bandeja de entrada.");
-                            authSubmitBtn.disabled = false; // Re-enable button after success
-                            setAuthMode('login'); // Return to login view
+                            setAuthMode('login');
                         })
-                        .catch(handleAuthError);
+                        .catch(handleAuthError)
+                        .finally(() => {
+                           authSubmitBtn.disabled = false;
+                           authSubmitBtn.textContent = 'Enviar enlace de recuperación';
+                        });
                 }
             });
             function handleAuthError(error) {
                 showNotification(`Error: ${error.message}`, 'error');
                 authSubmitBtn.disabled = false;
-                // Restore button text based on the current mode
                 setAuthMode(authMode); 
             }
             signUpLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode('register'); });
@@ -1785,11 +1721,7 @@
             appleLoginBtn.addEventListener('click', () => auth.signInWithPopup(new firebase.auth.OAuthProvider('apple.com')).catch(handleAuthError));
 
             desktopCartBtn.addEventListener('click', openCartModal);
-            cartModal.querySelector('.close-modal')?.addEventListener('click', closeCartModal);
-            productModal.querySelector('.close-modal')?.addEventListener('click', () => productModal.classList.remove('visible'));
-            logoutBtn.addEventListener('click', () => {
-                auth.signOut();
-            });
+            logoutBtn.addEventListener('click', () => { auth.signOut(); });
             checkoutBtn.addEventListener('click', checkout);
             processOrderBtn.addEventListener('click', processWaiterOrder);
             menuToggle.addEventListener('click', openSidebarFunc);
