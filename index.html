@@ -414,7 +414,30 @@
                     <div id="pagoMovilDetails"></div>
                 </div>
             </div>
-            <div class="modal-footer"><button id="checkoutBtn" class="btn-primary">Finalizar Compra</button><button id="processOrderBtn" class="btn-primary" style="display:none;">Procesar Pedido</button></div>
+            <div class="modal-footer">
+                <!-- === INICIO DE LA IMPLEMENTACIÓN === -->
+            
+                <!-- Contenedor para el flujo de ubicación (solo para delivery) -->
+                <div id="locationFlowContainer" style="width: 100%; text-align: left; margin-bottom: 1rem; display: none;">
+                    <div class="instrucciones-ubicacion" style="background-color: #eef7ff; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #3B82F6; font-size: 0.9rem;">
+                        <strong>Paso 1:</strong> Para continuar, comparte tu ubicación por WhatsApp. El pedido no se procesará sin este paso.
+                    </div>
+                    
+                    <button id="btnCompartirUbicacion" style="background-color: #25D366; color: white; width: 100%; padding: 12px; border: none; border-radius: 0.75rem; font-weight: 600; cursor: pointer; margin-bottom: 10px;">
+                        <i class="fab fa-whatsapp"></i> Compartir ubicación ahora
+                    </button>
+            
+                    <div id="confirmacion-container" style="display: none; margin-top: 10px; padding: 10px; background-color: #e8f5e9; border-radius: 8px; border-left: 4px solid #10B981;">
+                        <input type="checkbox" id="confirmacionEnvio" style="width: auto; height: auto; vertical-align: middle;">
+                        <label for="confirmacionEnvio" style="font-weight: 600; vertical-align: middle; margin-left: 5px;">Paso 2: Ya envié mi ubicación.</label>
+                    </div>
+                </div>
+                <!-- === FIN DE LA IMPLEMENTACIÓN === -->
+            
+                <!-- Botones originales (con #checkoutBtn deshabilitado) -->
+                <button id="checkoutBtn" class="btn-primary" disabled>Finalizar Compra</button>
+                <button id="processOrderBtn" class="btn-primary" style="display:none;">Procesar Pedido</button>
+            </div>
         </div>
     </div>
     
@@ -1215,15 +1238,6 @@
             const count = activeCart ? activeCart.reduce((sum, item) => sum + item.quantity, 0) : 0;
             document.querySelectorAll('.cart-count').forEach(el => el.textContent = count);
         }
-        async function openCartModal() {
-            renderCart(); cartModal.classList.add('visible');
-            const isWaiter = currentUserRole === 'waiter';
-            checkoutBtn.style.display = isWaiter ? 'none' : 'block';
-            processOrderBtn.style.display = isWaiter ? 'block' : 'none';
-            document.querySelector('#deliveryTypeSelect').closest('.form-group').style.display = isWaiter ? 'none' : 'block';
-            cartPaymentSection.style.display = isWaiter ? 'none' : 'block';
-            if(!isWaiter) renderPagoMovilOptions();
-        }
         function closeCartModal() { cartModal.classList.remove('visible'); }
         function renderCart() {
             const container = document.getElementById('cartItemsContainer');
@@ -1532,6 +1546,87 @@
             overlay.addEventListener('click', closeSidebarFunc);
             paymentMethodSelect.addEventListener('change', (e) => { pagoMovilDetailsDiv.style.display = e.target.value === 'Pago Móvil' ? 'block' : 'none'; });
             deliveryTypeSelect.addEventListener('change', (e) => { cartPaymentSection.style.display = e.target.value === 'pickup' ? 'none' : 'block'; });
+            
+            // === INICIO: CÓDIGO PARA EL FLUJO DE UBICACIÓN POR WHATSAPP ===
+
+            // --- Elementos del DOM para el nuevo flujo ---
+            const locationFlowContainer = document.getElementById('locationFlowContainer');
+            const btnCompartirUbicacion = document.getElementById('btnCompartirUbicacion');
+            const confirmacionContainer = document.getElementById('confirmacion-container');
+            const checkboxConfirmacion = document.getElementById('confirmacionEnvio');
+
+            // --- Lógica del nuevo flujo ---
+
+            // 1. Mostrar u ocultar el flujo de ubicación según el tipo de entrega
+            deliveryTypeSelect.addEventListener('change', function() {
+                const isDelivery = this.value === 'delivery';
+                locationFlowContainer.style.display = isDelivery ? 'block' : 'none';
+                
+                // Si no es delivery, el botón de checkout se habilita. Si es delivery, se deshabilita hasta confirmar.
+                if (!isDelivery) {
+                    checkoutBtn.disabled = false;
+                } else {
+                    // Si se cambia a delivery, se resetea el estado
+                    checkboxConfirmacion.checked = false;
+                    checkoutBtn.disabled = true;
+                }
+            });
+
+            // 2. Al hacer clic en "Compartir ubicación"
+            btnCompartirUbicacion.addEventListener('click', function() {
+                // --- VALORES DE PRUEBA (Estos deberían venir de tu sistema) ---
+                // Este debería ser el número del negocio o del encargado de recibir las ubicaciones.
+                const telefonoNegocio = "584241288018"; 
+                
+                // Creamos un identificador para el mensaje. Puede ser el nombre del cliente.
+                const identificadorPedido = currentUser.displayName || 'Cliente'; 
+
+                const mensaje = `Hola Arcanos Lunch, te comparto mi ubicación para mi pedido a nombre de: ${identificadorPedido}. (Por favor, adjunta tu ubicación usando el icono del clip 📎 en WhatsApp).`;
+                const url = `https://wa.me/${telefonoNegocio}?text=${encodeURIComponent(mensaje)}`;
+                
+                // Abrir WhatsApp en una nueva pestaña
+                window.open(url, '_blank');
+                
+                // Mostrar la casilla de confirmación para el siguiente paso
+                confirmacionContainer.style.display = 'block';
+            });
+
+            // 3. Al marcar la casilla de confirmación "Ya envié mi ubicación"
+            checkboxConfirmacion.addEventListener('change', function() {
+                // Si la casilla está marcada Y el modo es delivery, habilitar el botón.
+                if (this.checked && deliveryTypeSelect.value === 'delivery') {
+                    checkoutBtn.disabled = false;
+                } else {
+                    checkoutBtn.disabled = true;
+                }
+            });
+
+            // 4. Modificamos la función que abre el carrito para resetear el estado
+            function openCartModal() {
+                renderCart();
+                cartModal.classList.add('visible');
+
+                // --- Lógica de reseteo para el flujo de ubicación ---
+                const isWaiter = currentUserRole === 'waiter';
+                checkoutBtn.style.display = isWaiter ? 'none' : 'block';
+                processOrderBtn.style.display = isWaiter ? 'block' : 'none';
+                
+                document.querySelector('#deliveryTypeSelect').closest('.form-group').style.display = isWaiter ? 'none' : 'block';
+                cartPaymentSection.style.display = isWaiter ? 'none' : 'block';
+
+                // Reseteamos el estado del flujo de ubicación cada vez que se abre el carrito
+                const isDelivery = deliveryTypeSelect.value === 'delivery';
+                locationFlowContainer.style.display = isDelivery && !isWaiter ? 'block' : 'none';
+                checkoutBtn.disabled = isDelivery && !isWaiter; // Deshabilitado si es delivery
+                checkboxConfirmacion.checked = false;
+                confirmacionContainer.style.display = 'none';
+                // --- Fin de la lógica de reseteo ---
+                
+                if (!isWaiter) {
+                    renderPagoMovilOptions();
+                }
+            }
+            // === FIN: CÓDIGO PARA EL FLUJO DE UBICACIÓN POR WHATSAPP ===
         });
     </script>
 </body>
